@@ -119,7 +119,7 @@ async def analyze_stream(request: AnalyzeRequest):
 
             # Boundary enforcement — reject addresses outside South Florida
             county_lower = county.lower() if county else ""
-            from plotlot.pipeline.lookup import VALID_COUNTIES, ACCEPTABLE_ACCURACY
+            from plotlot.pipeline.lookup import VALID_COUNTIES
             if county_lower not in VALID_COUNTIES:
                 yield _sse_event("error", {
                     "detail": (
@@ -491,7 +491,6 @@ async def _run_batch_ingestion(skip_existing: bool) -> None:
         logger.info("Batch ingestion: discovered %d municipalities", total)
 
         # Check which municipalities already have data
-        skipped_keys: list[str] = []
         if skip_existing:
             _batch_status["step"] = "checking existing data"
             session = await get_session()

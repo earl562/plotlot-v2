@@ -109,6 +109,16 @@ async def test_health(client):
 
 
 @pytest.mark.asyncio
+async def test_api_version_header(client):
+    """Every response includes X-API-Version header."""
+    with patch("plotlot.api.main.get_session") as mock_session:
+        session = AsyncMock()
+        mock_session.return_value = session
+        resp = await client.get("/health")
+    assert resp.headers.get("x-api-version") == "1.0"
+
+
+@pytest.mark.asyncio
 async def test_analyze_success(client):
     """Successful analysis returns full ZoningReport."""
     report = _mock_report()
