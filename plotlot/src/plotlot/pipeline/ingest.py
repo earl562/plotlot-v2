@@ -7,23 +7,37 @@ use retry with exponential backoff for resilience.
 
 import asyncio
 import logging
+from datetime import datetime, timezone
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plotlot.core.types import MUNICODE_CONFIGS
 from plotlot.ingestion.chunker import chunk_sections
-from plotlot.ingestion.embedder import EMBEDDING_DIM, embed_texts
+from plotlot.ingestion.embedder import EMBEDDING_DIM, MODEL_ID as EMBEDDING_MODEL_ID, embed_texts
 from plotlot.ingestion.scraper import MunicodeScraper
+from plotlot.observability.tracing import log_metrics, start_span
 from plotlot.storage.db import get_session, init_db
 from plotlot.storage.models import OrdinanceChunk
 
 logger = logging.getLogger(__name__)
 
 
+def _safe_log_metrics(metrics: dict) -> None:
+    """Log metrics to MLflow, swallowing any errors.
+
+    MLflow failures must never break the ingestion pipeline.
+    """
+    try:
+        log_metrics(metrics)
+    except Exception:
+        logger.debug("MLflow metric logging failed (non-fatal)", exc_info=True)
+
+
 # ---------------------------------------------------------------------------
 # Retry utility — replaces Prefect's task-level retry with working logic
 # ---------------------------------------------------------------------------
+
 
 async def retry_async(fn, *args, retries: int = 3, delay: float = 5.0, label: str = ""):
     """Retry an async function with exponential backoff.
@@ -41,7 +55,11 @@ async def retry_async(fn, *args, retries: int = 3, delay: float = 5.0, label: st
                 wait = delay * (2 ** (attempt - 1))
                 logger.warning(
                     "%s failed (attempt %d/%d): %s — retrying in %.0fs",
-                    label or fn.__name__, attempt, retries, e, wait,
+                    label or fn.__name__,
+                    attempt,
+                    retries,
+                    e,
+                    wait,
                 )
                 await asyncio.sleep(wait)
             else:
@@ -146,6 +164,7 @@ async def ingest_municipality(key: str) -> int:
     """Run the full ingestion pipeline for a single municipality.
 
     Network-bound steps (scrape, embed) use retry with exponential backoff.
+    Each stage logs metrics to MLflow for observability (non-fatal on failure).
 
     Returns:
         Number of chunks stored.
@@ -154,91 +173,145 @@ async def ingest_municipality(key: str) -> int:
 
     logger.info("=== Ingesting %s ===", config.municipality)
 
-    # Step 1: Scrape (with retry — Municode API can be flaky)
-    sections = await retry_async(
-        _scrape, config, retries=2, delay=30.0, label=f"scrape:{config.municipality}",
-    )
-    logger.info("Scraped %d sections", len(sections))
-    await asyncio.sleep(0)  # yield to event loop between stages
+    with start_span(name="ingest_municipality") as span:
+        if span:
+            span.set_inputs({"key": key, "municipality": config.municipality})
 
-    if not sections:
-        logger.warning("No sections found for %s — skipping", config.municipality)
-        return 0
+        # Step 1: Scrape (with retry — Municode API can be flaky)
+        sections = await retry_async(
+            _scrape,
+            config,
+            retries=2,
+            delay=30.0,
+            label=f"scrape:{config.municipality}",
+        )
+        logger.info("Scraped %d sections", len(sections))
+        _safe_log_metrics({"ingest.sections_scraped": len(sections)})
+        await asyncio.sleep(0)  # yield to event loop between stages
 
-    # Step 2: Chunk (CPU-bound BeautifulSoup — run in thread pool to free event loop)
-    chunks = await asyncio.to_thread(chunk_sections, sections)
-    logger.info("Created %d chunks from %d sections", len(chunks), len(sections))
-    await asyncio.sleep(0)  # yield to event loop between stages
+        if not sections:
+            logger.warning("No sections found for %s — skipping", config.municipality)
+            if span:
+                span.set_outputs({"chunks_stored": 0, "reason": "no_sections"})
+            return 0
 
-    if not chunks:
-        return 0
+        # Step 2: Chunk (CPU-bound BeautifulSoup — run in thread pool to free event loop)
+        chunks = await asyncio.to_thread(chunk_sections, sections)
+        logger.info("Created %d chunks from %d sections", len(chunks), len(sections))
+        _safe_log_metrics({"ingest.chunks_created": len(chunks)})
+        await asyncio.sleep(0)  # yield to event loop between stages
 
-    # Step 3: Embed (with retry — HF API can rate-limit)
-    texts = [c.text for c in chunks]
-    logger.info("Embedding %d chunks...", len(texts))
-    embeddings = await retry_async(
-        embed_texts, texts, retries=3, delay=10.0, label=f"embed:{config.municipality}",
-    )
-    logger.info("Embedded %d chunks (%dd each)", len(embeddings), EMBEDDING_DIM)
-    await asyncio.sleep(0)  # yield to event loop between stages
+        if not chunks:
+            if span:
+                span.set_outputs({"chunks_stored": 0, "reason": "no_chunks"})
+            return 0
 
-    # Step 3.5: Validate (deterministic)
-    chunks, embeddings = validate_chunks(chunks, embeddings)
-    await asyncio.sleep(0)  # yield to event loop between stages
-    if not chunks:
-        logger.warning("No valid chunks after validation — skipping store")
-        return 0
+        # Step 3: Embed (with retry — HF API can rate-limit)
+        texts = [c.text for c in chunks]
+        logger.info("Embedding %d chunks...", len(texts))
+        embeddings = await retry_async(
+            embed_texts,
+            texts,
+            retries=3,
+            delay=10.0,
+            label=f"embed:{config.municipality}",
+        )
+        logger.info("Embedded %d chunks (%dd each)", len(embeddings), EMBEDDING_DIM)
+        _safe_log_metrics({"ingest.chunks_embedded": len(embeddings)})
+        await asyncio.sleep(0)  # yield to event loop between stages
 
-    # Step 4: Store
-    await init_db()
-    session: AsyncSession = await get_session()
+        # Step 3.5: Validate (deterministic)
+        original_count = len(chunks)
+        chunks, embeddings = validate_chunks(chunks, embeddings)
+        _safe_log_metrics(
+            {
+                "ingest.chunks_valid": len(chunks),
+                "ingest.chunks_filtered": original_count - len(chunks),
+            }
+        )
+        await asyncio.sleep(0)  # yield to event loop between stages
+        if not chunks:
+            logger.warning("No valid chunks after validation — skipping store")
+            if span:
+                span.set_outputs({"chunks_stored": 0, "reason": "all_filtered"})
+            return 0
 
-    try:
-        stored = 0
-        for batch_start in range(0, len(chunks), COMMIT_BATCH_SIZE):
-            batch_chunks = chunks[batch_start:batch_start + COMMIT_BATCH_SIZE]
-            batch_embeddings = embeddings[batch_start:batch_start + COMMIT_BATCH_SIZE]
-            row_dicts = []
-            for chunk, emb in zip(batch_chunks, batch_embeddings):
-                row_dicts.append(
+        # Step 4: Store
+        await init_db()
+        session: AsyncSession = await get_session()
+
+        try:
+            stored = 0
+            for batch_start in range(0, len(chunks), COMMIT_BATCH_SIZE):
+                batch_chunks = chunks[batch_start : batch_start + COMMIT_BATCH_SIZE]
+                batch_embeddings = embeddings[batch_start : batch_start + COMMIT_BATCH_SIZE]
+                now = datetime.now(timezone.utc)
+                row_dicts = []
+                for chunk, emb in zip(batch_chunks, batch_embeddings):
+                    node_id = chunk.metadata.municode_node_id
+                    source_url = (
+                        f"https://library.municode.com/search?"
+                        f"clientId={config.client_id}&nodeId={node_id}"
+                    )
+                    row_dicts.append(
+                        {
+                            "municipality": chunk.metadata.municipality,
+                            "county": chunk.metadata.county,
+                            "chapter": chunk.metadata.chapter,
+                            "section": chunk.metadata.section,
+                            "section_title": chunk.metadata.section_title,
+                            "zone_codes": chunk.metadata.zone_codes,
+                            "chunk_text": chunk.text,
+                            "chunk_index": chunk.metadata.chunk_index,
+                            "embedding": emb,
+                            "municode_node_id": node_id,
+                            # Lineage fields (B2)
+                            "source_url": source_url,
+                            "scraped_at": now,
+                            "embedding_model": EMBEDDING_MODEL_ID,
+                            # State field (B6)
+                            "state": config.state,
+                        }
+                    )
+                stmt = pg_insert(OrdinanceChunk).values(row_dicts)
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=["municipality", "municode_node_id", "chunk_index"],
+                    set_={
+                        "chunk_text": stmt.excluded.chunk_text,
+                        "embedding": stmt.excluded.embedding,
+                        "section": stmt.excluded.section,
+                        "section_title": stmt.excluded.section_title,
+                        "zone_codes": stmt.excluded.zone_codes,
+                        "chapter": stmt.excluded.chapter,
+                        "county": stmt.excluded.county,
+                        # Lineage fields (B2) — update on re-ingestion
+                        "source_url": stmt.excluded.source_url,
+                        "scraped_at": stmt.excluded.scraped_at,
+                        "embedding_model": stmt.excluded.embedding_model,
+                        # State field (B6)
+                        "state": stmt.excluded.state,
+                    },
+                )
+                await session.execute(stmt)
+                await session.commit()
+                stored += len(row_dicts)
+                await asyncio.sleep(0)  # yield between DB batches
+            logger.info("Stored %d chunks for %s (upsert)", stored, config.municipality)
+            _safe_log_metrics({"ingest.chunks_stored": stored})
+            if span:
+                span.set_outputs(
                     {
-                        "municipality": chunk.metadata.municipality,
-                        "county": chunk.metadata.county,
-                        "chapter": chunk.metadata.chapter,
-                        "section": chunk.metadata.section,
-                        "section_title": chunk.metadata.section_title,
-                        "zone_codes": chunk.metadata.zone_codes,
-                        "chunk_text": chunk.text,
-                        "chunk_index": chunk.metadata.chunk_index,
-                        "embedding": emb,
-                        "municode_node_id": chunk.metadata.municode_node_id,
+                        "chunks_stored": stored,
+                        "municipality": config.municipality,
                     }
                 )
-            stmt = pg_insert(OrdinanceChunk).values(row_dicts)
-            stmt = stmt.on_conflict_do_update(
-                index_elements=["municipality", "municode_node_id", "chunk_index"],
-                set_={
-                    "chunk_text": stmt.excluded.chunk_text,
-                    "embedding": stmt.excluded.embedding,
-                    "section": stmt.excluded.section,
-                    "section_title": stmt.excluded.section_title,
-                    "zone_codes": stmt.excluded.zone_codes,
-                    "chapter": stmt.excluded.chapter,
-                    "county": stmt.excluded.county,
-                },
-            )
-            await session.execute(stmt)
-            await session.commit()
-            stored += len(row_dicts)
-            await asyncio.sleep(0)  # yield between DB batches
-        logger.info("Stored %d chunks for %s (upsert)", stored, config.municipality)
-        return stored
+            return stored
 
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
 
 async def ingest_all() -> dict[str, int]:
@@ -261,4 +334,13 @@ async def ingest_all() -> dict[str, int]:
 
     total = sum(results.values())
     logger.info("Ingestion complete: %d total chunks across %d municipalities", total, len(results))
+
+    _safe_log_metrics(
+        {
+            "ingest.total_chunks": total,
+            "ingest.municipalities_processed": len(results),
+            "ingest.municipalities_failed": sum(1 for v in results.values() if v == 0),
+        }
+    )
+
     return results

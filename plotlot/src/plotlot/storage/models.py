@@ -35,6 +35,15 @@ class OrdinanceChunk(Base):
     embedding = Column(Vector(1024))
     municode_node_id = Column(String(200))
     search_vector = Column(TSVECTOR)
+
+    # Lineage fields (B2) — provenance tracking for each chunk
+    source_url = Column(String, nullable=True)  # Municode URL where this was scraped
+    scraped_at = Column(DateTime(timezone=True), nullable=True)  # When it was scraped
+    embedding_model = Column(String, nullable=True)  # e.g. "nvidia/nv-embedqa-e5-v5"
+
+    # State/region field (B6) — supports multi-state expansion (FL, NC, etc.)
+    state = Column(String(2), nullable=True, default="FL")  # Two-letter state code
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True),

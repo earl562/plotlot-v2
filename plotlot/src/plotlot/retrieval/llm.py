@@ -18,12 +18,12 @@ from dataclasses import dataclass, field
 
 import httpx
 
+from plotlot.config import settings
+from plotlot.core.types import SearchResult, Setbacks, ZoningReport
+from plotlot.observability.tracing import log_metrics, start_span, trace
+
 # Granular timeouts: fail fast on connect, generous on read (LLM generation)
 LLM_TIMEOUT = httpx.Timeout(connect=10.0, read=60.0, write=10.0, pool=5.0)
-
-from plotlot.config import settings
-from plotlot.observability.tracing import log_metrics, start_span, trace
-from plotlot.core.types import SearchResult, Setbacks, ZoningReport
 
 logger = logging.getLogger(__name__)
 

@@ -81,6 +81,15 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down")
 
 
+class APIVersionMiddleware(BaseHTTPMiddleware):
+    """Add API version header to all responses."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["x-api-version"] = "1.0"
+        return response
+
+
 class CorrelationIDMiddleware(BaseHTTPMiddleware):
     """Set correlation ID from X-Request-ID header or generate a new one."""
 
@@ -133,12 +142,14 @@ app = FastAPI(
 
 # Middleware stack (outermost → innermost):
 # 1. CORS — must be outermost to handle preflight requests
-# 2. Correlation ID — tag every request for tracing
-# 3. Auth — resolve user from JWT (attaches to request.state.user)
-# 4. Rate limit — enforce per-IP/per-user limits on expensive endpoints
+# 2. API Version — stamp every response with X-API-Version header
+# 3. Correlation ID — tag every request for tracing
+# 4. Auth — resolve user from JWT (attaches to request.state.user)
+# 5. Rate limit — enforce per-IP/per-user limits on expensive endpoints
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(AuthMiddleware)
 app.add_middleware(CorrelationIDMiddleware)
+app.add_middleware(APIVersionMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

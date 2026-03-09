@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 # Municode API types
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class MunicodeConfig:
     """Municode API identifiers for a municipality's zoning code."""
@@ -22,6 +23,7 @@ class MunicodeConfig:
     product_id: int
     job_id: int
     zoning_node_id: str
+    state: str = "FL"  # Two-letter state code (FL, NC, etc.)
 
 
 @dataclass
@@ -53,6 +55,7 @@ class TocNode:
 # Chunk types
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ChunkMetadata:
     """Metadata attached to each text chunk for filtering and retrieval."""
@@ -78,6 +81,7 @@ class TextChunk:
 # ---------------------------------------------------------------------------
 # Search types
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class SearchResult:
@@ -155,6 +159,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14045,
         job_id=489001,
         zoning_node_id="APXAZOORDS",
+        state="NC",
     ),
     "huntersville": MunicodeConfig(
         municipality="Huntersville",
@@ -163,6 +168,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14072,
         job_id=488501,
         zoning_node_id="PTIICOOR_ART9ZO",
+        state="NC",
     ),
     "cornelius": MunicodeConfig(
         municipality="Cornelius",
@@ -171,6 +177,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14029,
         job_id=487201,
         zoning_node_id="PTIICOOR_CH18LADERE",
+        state="NC",
     ),
     "davidson": MunicodeConfig(
         municipality="Davidson",
@@ -179,6 +186,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14030,
         job_id=487301,
         zoning_node_id="PTIICOOR_CH10PLZO",
+        state="NC",
     ),
     "matthews": MunicodeConfig(
         municipality="Matthews",
@@ -187,6 +195,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14091,
         job_id=487401,
         zoning_node_id="APXALAMUZO",
+        state="NC",
     ),
     "mint_hill": MunicodeConfig(
         municipality="Mint Hill",
@@ -195,6 +204,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14096,
         job_id=487501,
         zoning_node_id="PTIICOOR_CH14ZO",
+        state="NC",
     ),
     "pineville": MunicodeConfig(
         municipality="Pineville",
@@ -203,6 +213,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14116,
         job_id=487601,
         zoning_node_id="APXALAMUZO",
+        state="NC",
     ),
     "concord": MunicodeConfig(
         municipality="Concord",
@@ -211,6 +222,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14027,
         job_id=487701,
         zoning_node_id="PTIICOOR_CH22ZO",
+        state="NC",
     ),
     "kannapolis": MunicodeConfig(
         municipality="Kannapolis",
@@ -219,6 +231,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14083,
         job_id=487801,
         zoning_node_id="APXALAMUZO",
+        state="NC",
     ),
     "mooresville": MunicodeConfig(
         municipality="Mooresville",
@@ -227,6 +240,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14100,
         job_id=487901,
         zoning_node_id="PTIICOOR_CH20ZO",
+        state="NC",
     ),
     "monroe": MunicodeConfig(
         municipality="Monroe",
@@ -235,6 +249,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14098,
         job_id=488001,
         zoning_node_id="APXALAMUZO",
+        state="NC",
     ),
     "waxhaw": MunicodeConfig(
         municipality="Waxhaw",
@@ -243,6 +258,7 @@ _NC_FALLBACK_CONFIGS: dict[str, MunicodeConfig] = {
         product_id=14154,
         job_id=488101,
         zoning_node_id="PTIICOOR_CH18ZO",
+        state="NC",
     ),
 }
 
@@ -252,6 +268,7 @@ NC_MUNICODE_CONFIGS = _NC_FALLBACK_CONFIGS
 # ---------------------------------------------------------------------------
 # Property record from county Property Appraiser
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class PropertyRecord:
@@ -271,16 +288,16 @@ class PropertyRecord:
     owner: str = ""
 
     # Zoning (from spatial zoning layer)
-    zoning_code: str = ""       # e.g., "R-1", "RS-4", "BU-2"
+    zoning_code: str = ""  # e.g., "R-1", "RS-4", "BU-2"
     zoning_description: str = ""
 
     # Land use (from property record)
-    land_use_code: str = ""     # e.g., "0100", "0101"
+    land_use_code: str = ""  # e.g., "0100", "0101"
     land_use_description: str = ""
 
     # Lot
     lot_size_sqft: float = 0.0
-    lot_dimensions: str = ""    # e.g., "75 x 100" from legal description
+    lot_dimensions: str = ""  # e.g., "75 x 100" from legal description
 
     # Building
     bedrooms: int = 0
@@ -307,32 +324,33 @@ class PropertyRecord:
 # Numeric zoning parameters (extracted by LLM for calculation)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class NumericZoningParams:
     """Numeric values extracted by LLM from ordinance text. None = not found."""
 
-    max_density_units_per_acre: float | None = None    # e.g., 6.0
-    min_lot_area_per_unit_sqft: float | None = None    # e.g., 7500.0
-    far: float | None = None                           # e.g., 0.50
-    max_lot_coverage_pct: float | None = None          # e.g., 40.0
-    max_height_ft: float | None = None                 # e.g., 35.0
-    max_stories: int | None = None                     # e.g., 2
+    max_density_units_per_acre: float | None = None  # e.g., 6.0
+    min_lot_area_per_unit_sqft: float | None = None  # e.g., 7500.0
+    far: float | None = None  # e.g., 0.50
+    max_lot_coverage_pct: float | None = None  # e.g., 40.0
+    max_height_ft: float | None = None  # e.g., 35.0
+    max_stories: int | None = None  # e.g., 2
     setback_front_ft: float | None = None
     setback_side_ft: float | None = None
     setback_rear_ft: float | None = None
-    min_unit_size_sqft: float | None = None            # e.g., 750.0
-    min_lot_width_ft: float | None = None              # e.g., 75.0
-    parking_spaces_per_unit: float | None = None       # e.g., 2.0
+    min_unit_size_sqft: float | None = None  # e.g., 750.0
+    min_lot_width_ft: float | None = None  # e.g., 75.0
+    parking_spaces_per_unit: float | None = None  # e.g., 2.0
 
 
 @dataclass
 class ConstraintResult:
     """One constraint's contribution to the max-units calculation."""
 
-    name: str               # "density", "min_lot_area", "floor_area_ratio", "buildable_envelope"
-    max_units: int           # floor() of calculated max
-    raw_value: float         # unrounded
-    formula: str             # human-readable, e.g., "7500 sqft / 7500 sqft/unit = 1.0"
+    name: str  # "density", "min_lot_area", "floor_area_ratio", "buildable_envelope"
+    max_units: int  # floor() of calculated max
+    raw_value: float  # unrounded
+    formula: str  # human-readable, e.g., "7500 sqft / 7500 sqft/unit = 1.0"
     is_governing: bool = False
 
 
@@ -354,6 +372,7 @@ class DensityAnalysis:
 # ---------------------------------------------------------------------------
 # Zoning analysis output
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class Setbacks:

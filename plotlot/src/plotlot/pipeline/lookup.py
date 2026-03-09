@@ -175,7 +175,6 @@ async def lookup_address(address: str) -> ZoningReport | None:
         # Geocoding accuracy check — reject low-confidence matches
         # Geocodio returns numeric `accuracy` (0-1) AND string `accuracy_type`
         accuracy_score = geo.get("accuracy")
-        accuracy_type = str(geo.get("accuracy_type", "")).lower()
         if isinstance(accuracy_score, (int, float)) and accuracy_score < 0.8:
             set_tag("status", "rejected")
             set_tag("failure_reason", "low_accuracy_geocode")
@@ -619,6 +618,23 @@ def _analysis_system_prompt() -> str:
     return get_active_prompt("analysis")
 
 
+def _coerce_list(val) -> list[str]:
+    """Coerce a value to list[str] — handles LLM returning JSON-encoded strings."""
+    if isinstance(val, list):
+        return val
+    if isinstance(val, str):
+        val = val.strip()
+        if val.startswith("["):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return [str(x) for x in parsed]
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return [val] if val else []
+    return []
+
+
 def _build_report(
     args: dict, address: str, geo: dict, prop_record, sources: list[str]
 ) -> ZoningReport:
@@ -635,9 +651,9 @@ def _build_report(
         lng=geo.get("lng"),
         zoning_district=args.get("zoning_district", ""),
         zoning_description=args.get("zoning_description", ""),
-        allowed_uses=args.get("allowed_uses", []),
-        conditional_uses=args.get("conditional_uses", []),
-        prohibited_uses=args.get("prohibited_uses", []),
+        allowed_uses=_coerce_list(args.get("allowed_uses", [])),
+        conditional_uses=_coerce_list(args.get("conditional_uses", [])),
+        prohibited_uses=_coerce_list(args.get("prohibited_uses", [])),
         setbacks=Setbacks(
             front=args.get("setbacks_front", ""),
             side=args.get("setbacks_side", ""),
