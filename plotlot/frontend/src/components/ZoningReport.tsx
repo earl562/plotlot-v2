@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ZoningReportData } from "@/lib/api";
 import DensityBreakdown from "./DensityBreakdown";
 import EnvelopeViewerWrapper from "./EnvelopeViewerWrapper";
 import FloorPlanViewer from "./FloorPlanViewer";
 import PropertyCard from "./PropertyCard";
 import SatelliteMap from "./SatelliteMap";
+import SetbackDiagram from "./SetbackDiagram";
+import PropertyIntelligence from "./PropertyIntelligence";
 
 interface ZoningReportProps {
   report: ZoningReportData;
@@ -25,12 +29,50 @@ function ConfidenceBadge({ level }: { level: string }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function CollapsibleSection({ title, defaultOpen = true, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-500">{title}</h3>
-      {children}
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center gap-1.5 text-left"
+      >
+        <svg
+          className={`h-3.5 w-3.5 shrink-0 text-stone-400 transition-transform duration-200 ${open ? "rotate-90" : ""}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+        </svg>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-500">{title}</h3>
+      </button>
+      {open && <div className="animate-fade-in">{children}</div>}
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard API may be blocked */ }
+  };
+  if (copied) {
+    return <span className="text-[10px] font-medium text-emerald-600 animate-fade-in">Copied!</span>;
+  }
+  return (
+    <button
+      onClick={handleCopy}
+      className="inline-flex h-5 w-5 items-center justify-center rounded text-stone-300 transition-colors hover:text-stone-500"
+      title="Copy"
+    >
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    </button>
   );
 }
 
@@ -49,7 +91,6 @@ function UsesList({ title, uses, color }: { title: string; uses: string[] | stri
   if (Array.isArray(uses)) {
     list = uses;
   } else if (typeof uses === "string") {
-    // Handle JSON-stringified arrays from backend (e.g. "[\"single-family\"]")
     try {
       const parsed = JSON.parse(uses);
       list = Array.isArray(parsed) ? parsed : [uses];
@@ -79,16 +120,24 @@ function UsesList({ title, uses, color }: { title: string; uses: string[] | stri
   );
 }
 
-/** Parse a numeric feet value from a string like "25 ft" or "25" → 25 */
 function parseNumericFt(value: string | undefined | null): number {
   if (!value) return 0;
   const match = value.match(/[\d.]+/);
   return match ? parseFloat(match[0]) : 0;
 }
 
+const mdComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 last:mb-0">{children}</p>,
+  strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-semibold text-stone-800">{children}</strong>,
+  ul: ({ children }: { children?: React.ReactNode }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
+  ol: ({ children }: { children?: React.ReactNode }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
+  li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+};
+
 export default function ZoningReport({ report }: ZoningReportProps) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   const handleDownloadPDF = useCallback(async () => {
     if (pdfLoading) return;
@@ -115,12 +164,37 @@ export default function ZoningReport({ report }: ZoningReportProps) {
     }
   }, [report, pdfLoading]);
 
+  const maxUnits = report.density_analysis?.max_units ?? 1;
+
+  // Setback values
+  const setbackFront = report.numeric_params?.setback_front_ft || parseNumericFt(report.setbacks?.front);
+  const setbackSide = report.numeric_params?.setback_side_ft || parseNumericFt(report.setbacks?.side);
+  const setbackRear = report.numeric_params?.setback_rear_ft || parseNumericFt(report.setbacks?.rear);
+  const lotWidth = report.density_analysis?.lot_width_ft || report.numeric_params?.min_lot_width_ft || 0;
+  const lotDepth = report.density_analysis?.lot_depth_ft || 0;
+
+  // Summary collapsibility
+  const summaryWords = report.summary ? report.summary.split(/\s+/).length : 0;
+  const isLongSummary = summaryWords > 150;
+  const displaySummary = isLongSummary && !summaryExpanded
+    ? report.summary.split(/\s+/).slice(0, 150).join(" ") + "..."
+    : report.summary;
+
+  const confidenceBorder = report.confidence === "low"
+    ? "border-l-4 border-l-red-400"
+    : report.confidence === "medium"
+      ? "border-l-4 border-l-amber-400"
+      : "";
+
   return (
     <div className="w-full space-y-4 rounded-xl border-l-4 border-l-amber-400 border border-stone-200 bg-white p-4 shadow-sm sm:space-y-6 sm:p-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-bold text-stone-800 sm:text-xl">{report.formatted_address}</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="truncate text-lg font-bold text-stone-800 sm:text-xl">{report.formatted_address}</h2>
+            <CopyButton text={report.formatted_address} />
+          </div>
           <p className="mt-1 text-xs text-stone-500 sm:text-sm">
             {report.municipality}, {report.county} County
           </p>
@@ -153,26 +227,83 @@ export default function ZoningReport({ report }: ZoningReportProps) {
         <SatelliteMap lat={report.lat} lng={report.lng} address={report.formatted_address} />
       )}
 
-      {/* Zoning district — prominent standalone line */}
-      <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
+      {/* Zoning district — with copy */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <span className="text-2xl font-black text-amber-700 sm:text-3xl">{report.zoning_district}</span>
+        <CopyButton text={report.zoning_district} />
         <span className="text-xs text-stone-500 sm:text-sm">{report.zoning_description}</span>
       </div>
 
-      {/* Summary */}
+      {/* Summary — markdown rendered, collapsible if long */}
       {report.summary && (
-        <div className="rounded-lg bg-[#faf8f5] p-4 text-sm leading-relaxed text-stone-600">
-          {report.summary}
+        <div className={`rounded-lg ${confidenceBorder} bg-[#faf8f5] p-4`}>
+          {report.confidence !== "high" && (
+            <div className="mb-2 flex items-center gap-1.5">
+              <svg className={`h-4 w-4 ${report.confidence === "low" ? "text-red-500" : "text-amber-500"}`} viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                {report.confidence} confidence
+              </span>
+            </div>
+          )}
+          <div className="text-sm leading-relaxed text-stone-600">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+              {displaySummary}
+            </ReactMarkdown>
+          </div>
+          {isLongSummary && (
+            <button
+              onClick={() => setSummaryExpanded(!summaryExpanded)}
+              className="mt-2 text-xs font-medium text-amber-700 transition-colors hover:text-amber-600"
+            >
+              {summaryExpanded ? "Show less" : "Show full analysis"}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Density Analysis — hero section */}
+      {/* Max Allowable Units — hero, always visible */}
       {report.density_analysis && (
         <DensityBreakdown analysis={report.density_analysis} />
       )}
 
-      {/* Dimensional Standards */}
-      <Section title="Dimensional Standards">
+      {/* Financial Summary */}
+      {report.numeric_params?.property_type && report.density_analysis && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-500">Financial Summary</h3>
+          <div className="rounded-lg bg-[#faf8f5] p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-sm font-semibold text-stone-700">
+                {report.numeric_params.property_type === "land" && "Land / Development Site"}
+                {report.numeric_params.property_type === "single_family" && "Single-Family Residential"}
+                {report.numeric_params.property_type === "multifamily" && "Multifamily (2-4 Units)"}
+                {report.numeric_params.property_type === "commercial_mf" && "Commercial Multifamily (5+ Units)"}
+              </span>
+              <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-500 uppercase">
+                {report.numeric_params.property_type}
+              </span>
+            </div>
+            <div className="text-xs text-stone-500 leading-relaxed">
+              {report.numeric_params.property_type === "land" && (
+                <p>Development potential: {report.density_analysis.max_units} units on {report.property_record?.lot_size_sqft?.toLocaleString() || "N/A"} sqft.</p>
+              )}
+              {report.numeric_params.property_type === "single_family" && (
+                <p>Single-family lot. Provide purchase price and ARV for ROI analysis.</p>
+              )}
+              {report.numeric_params.property_type === "multifamily" && (
+                <p>Small multifamily ({report.density_analysis.max_units} units max). Provide rent/unit for NOI and cap rate.</p>
+              )}
+              {report.numeric_params.property_type === "commercial_mf" && (
+                <p>Commercial multifamily ({report.density_analysis.max_units} units max). Valued via income approach (NOI / Cap Rate).</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dimensional Standards — collapsible, default open */}
+      <CollapsibleSection title="Dimensional Standards" defaultOpen={true}>
         <div className="space-y-0.5">
           <DataRow label="Max Height" value={report.max_height} />
           <DataRow label="Max Density" value={report.max_density} />
@@ -181,11 +312,20 @@ export default function ZoningReport({ report }: ZoningReportProps) {
           <DataRow label="Min Lot Size" value={report.min_lot_size} />
           <DataRow label="Parking" value={report.parking_requirements} />
         </div>
-      </Section>
+      </CollapsibleSection>
 
-      {/* Setbacks */}
+      {/* Setbacks — collapsible, default open, with 2D diagram */}
       {report.setbacks && [report.setbacks.front, report.setbacks.side, report.setbacks.rear].some((v) => v && v !== "null") && (
-        <Section title="Setbacks">
+        <CollapsibleSection title="Setbacks" defaultOpen={true}>
+          {lotWidth > 0 && lotDepth > 0 && (setbackFront > 0 || setbackSide > 0 || setbackRear > 0) && (
+            <SetbackDiagram
+              lotWidth={lotWidth}
+              lotDepth={lotDepth}
+              setbackFront={setbackFront}
+              setbackSide={setbackSide}
+              setbackRear={setbackRear}
+            />
+          )}
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: "Front", value: report.setbacks.front },
@@ -194,35 +334,22 @@ export default function ZoningReport({ report }: ZoningReportProps) {
             ].map((s) => {
               const display = s.value && s.value !== "null" ? s.value : "N/A";
               return (
-              <div key={s.label} className="rounded-lg bg-stone-50 p-2 text-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] sm:p-3">
-                <div className="text-[10px] text-stone-500 sm:text-xs">{s.label}</div>
-                <div className="mt-0.5 text-base font-semibold text-stone-800 sm:mt-1 sm:text-lg">{display}</div>
-              </div>
+                <div key={s.label} className="rounded-lg bg-stone-50 p-2 text-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] sm:p-3">
+                  <div className="text-[10px] text-stone-500 sm:text-xs">{s.label}</div>
+                  <div className="mt-0.5 text-base font-semibold text-stone-800 sm:mt-1 sm:text-lg">{display}</div>
+                </div>
               );
             })}
           </div>
-        </Section>
+        </CollapsibleSection>
       )}
 
-      {/* 3D Buildable Envelope Viewer */}
-      {(() => {
-        const lotWidth = report.density_analysis?.lot_width_ft
-          || report.numeric_params?.min_lot_width_ft
-          || 0;
-        const lotDepth = report.density_analysis?.lot_depth_ft || 0;
-
-        // Prefer numeric params, fall back to parsing string setbacks
-        const setbackFront = report.numeric_params?.setback_front_ft
-          || parseNumericFt(report.setbacks?.front);
-        const setbackSide = report.numeric_params?.setback_side_ft
-          || parseNumericFt(report.setbacks?.side);
-        const setbackRear = report.numeric_params?.setback_rear_ft
-          || parseNumericFt(report.setbacks?.rear);
+      {/* 3D Buildable Envelope — multi-unit only */}
+      {maxUnits >= 2 && (() => {
         const maxHeight = report.numeric_params?.max_height_ft || 35;
-
         if (lotWidth > 0 && lotDepth > 0) {
           return (
-            <Section title="3D Buildable Envelope">
+            <CollapsibleSection title="3D Buildable Envelope" defaultOpen={true}>
               <EnvelopeViewerWrapper
                 lotWidthFt={lotWidth}
                 lotDepthFt={lotDepth}
@@ -232,51 +359,100 @@ export default function ZoningReport({ report }: ZoningReportProps) {
                 maxHeightFt={maxHeight}
                 buildableAreaSqft={report.density_analysis?.buildable_area_sqft ?? undefined}
               />
-            </Section>
+            </CollapsibleSection>
           );
         }
         return null;
       })()}
 
-      {/* Floor Plan */}
-      {(() => {
+      {/* Floor Plan — multi-unit only */}
+      {maxUnits >= 2 && (() => {
         const da = report.density_analysis;
         const np = report.numeric_params;
         if (!da?.buildable_area_sqft || !da?.lot_width_ft || !da?.lot_depth_ft) return null;
-
-        const setbackFront = np?.setback_front_ft || parseNumericFt(report.setbacks?.front);
-        const setbackSide = np?.setback_side_ft || parseNumericFt(report.setbacks?.side);
-        const setbackRear = np?.setback_rear_ft || parseNumericFt(report.setbacks?.rear);
         const buildW = Math.max(0, (da.lot_width_ft || 0) - 2 * setbackSide);
         const buildD = Math.max(0, (da.lot_depth_ft || 0) - setbackFront - setbackRear);
         const maxHeight = np?.max_height_ft || 35;
-
         if (buildW <= 0 || buildD <= 0) return null;
-
         return (
-          <Section title="Floor Plan">
+          <CollapsibleSection title="Floor Plan" defaultOpen={false}>
             <FloorPlanViewer
               buildableWidthFt={buildW}
               buildableDepthFt={buildD}
               maxHeightFt={maxHeight}
               maxUnits={da.max_units || 1}
             />
-          </Section>
+          </CollapsibleSection>
         );
       })()}
 
-      {/* Uses */}
-      <Section title="Permitted Uses">
+      {/* Development Summary — single-unit lots */}
+      {maxUnits < 2 && (() => {
+        const buildW = lotWidth > 0 ? Math.max(0, lotWidth - 2 * setbackSide) : 0;
+        const buildD = lotDepth > 0 ? Math.max(0, lotDepth - setbackFront - setbackRear) : 0;
+        const footprint = buildW > 0 && buildD > 0 ? buildW * buildD : 0;
+        const maxHeight = report.numeric_params?.max_height_ft || 35;
+        const maxStories = report.numeric_params?.max_stories || null;
+        const lotCoverage = report.numeric_params?.max_lot_coverage_pct || null;
+        const lotSize = report.density_analysis?.lot_size_sqft || report.property_record?.lot_size_sqft || 0;
+        const buildingArea = report.property_record?.building_area_sqft || 0;
+        const coverageUsed = lotSize > 0 && buildingArea > 0 ? ((buildingArea / lotSize) * 100).toFixed(1) : null;
+
+        return (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-500">Development Summary</h3>
+            <div className="rounded-lg bg-amber-50/50 border border-amber-200 p-4 space-y-3">
+              <p className="text-sm font-medium text-stone-700">This lot permits one single-family dwelling.</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {footprint > 0 && (
+                  <div className="rounded-lg bg-white p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-stone-500">Buildable Footprint</div>
+                    <div className="mt-0.5 text-sm font-semibold text-stone-800">{Math.round(footprint).toLocaleString()} sqft</div>
+                  </div>
+                )}
+                <div className="rounded-lg bg-white p-2.5">
+                  <div className="text-[10px] uppercase tracking-wider text-stone-500">Max Height</div>
+                  <div className="mt-0.5 text-sm font-semibold text-stone-800">
+                    {maxHeight} ft{maxStories ? ` / ${maxStories} stories` : ""}
+                  </div>
+                </div>
+                {lotCoverage && (
+                  <div className="rounded-lg bg-white p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-stone-500">Max Lot Coverage</div>
+                    <div className="mt-0.5 text-sm font-semibold text-stone-800">{lotCoverage}%</div>
+                  </div>
+                )}
+                {coverageUsed && (
+                  <div className="rounded-lg bg-white p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-stone-500">Current Coverage</div>
+                    <div className="mt-0.5 text-sm font-semibold text-stone-800">{coverageUsed}%</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Property Intelligence — collapsible, default collapsed */}
+      <CollapsibleSection title="Property Intelligence" defaultOpen={false}>
+        <PropertyIntelligence report={report} />
+      </CollapsibleSection>
+
+      {/* Permitted Uses — collapsible, default collapsed */}
+      <CollapsibleSection title="Permitted Uses" defaultOpen={false}>
         <div className="space-y-3">
           <UsesList title="Allowed" uses={report.allowed_uses} color="green" />
           <UsesList title="Conditional" uses={report.conditional_uses} color="yellow" />
           <UsesList title="Prohibited" uses={report.prohibited_uses} color="red" />
         </div>
-      </Section>
+      </CollapsibleSection>
 
-      {/* Property Record */}
+      {/* Property Record — collapsible, default collapsed */}
       {report.property_record && (
-        <PropertyCard record={report.property_record} />
+        <CollapsibleSection title="Property Record" defaultOpen={false}>
+          <PropertyCard record={report.property_record} />
+        </CollapsibleSection>
       )}
 
       {/* Sources — collapsible */}
@@ -306,6 +482,27 @@ export default function ZoningReport({ report }: ZoningReportProps) {
           )}
         </div>
       )}
+
+      {/* Action bar */}
+      <div className="border-t border-stone-200 pt-4 flex items-center justify-end gap-3">
+        <button
+          onClick={handleDownloadPDF}
+          disabled={pdfLoading}
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 disabled:opacity-50"
+        >
+          {pdfLoading ? (
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+          )}
+          Download PDF
+        </button>
+      </div>
     </div>
   );
 }
