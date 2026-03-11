@@ -12,10 +12,11 @@ const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "";
 
 export default function SatelliteMap({ lat, lng, address }: SatelliteMapProps) {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const googleMapsUrl = `https://www.google.com/maps/@${lat},${lng},18z/data=!3m1!1e3`;
 
-  // If Google Maps Static API key is configured, show satellite image
+  // If Google Maps Static API key is configured, try satellite image
   if (MAPS_KEY && !imgError) {
     const staticUrl =
       `https://maps.googleapis.com/maps/api/staticmap` +
@@ -29,19 +30,24 @@ export default function SatelliteMap({ lat, lng, address }: SatelliteMapProps) {
         href={googleMapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group block overflow-hidden rounded-lg"
+        className="group relative block overflow-hidden rounded-lg"
       >
+        {/* Loading skeleton */}
+        {!imgLoaded && (
+          <div className="h-[140px] w-full animate-pulse rounded-lg bg-stone-200 sm:h-[180px]" />
+        )}
         <img
           src={staticUrl}
           alt={`Satellite view of ${address}`}
-          className="h-[140px] w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-[180px]"
+          className={`h-[140px] w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-[180px] ${imgLoaded ? "" : "absolute inset-0 opacity-0"}`}
+          onLoad={() => setImgLoaded(true)}
           onError={() => setImgError(true)}
         />
       </a>
     );
   }
 
-  // Fallback: styled link that opens Google Maps satellite view
+  // Fallback: styled card with map pin, coordinates, and satellite view link
   return (
     <a
       href={googleMapsUrl}
@@ -57,10 +63,10 @@ export default function SatelliteMap({ lat, lng, address }: SatelliteMapProps) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium text-stone-700 group-hover:text-amber-800">
-          View on Google Maps
+          Open satellite view
         </div>
         <div className="truncate text-xs text-stone-500">
-          {lat.toFixed(6)}, {lng.toFixed(6)} &middot; Satellite view
+          {lat.toFixed(6)}, {lng.toFixed(6)}
         </div>
       </div>
       <svg className="h-4 w-4 shrink-0 text-stone-400 transition-transform group-hover:translate-x-0.5 group-hover:text-amber-600" viewBox="0 0 20 20" fill="currentColor">

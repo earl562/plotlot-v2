@@ -2,14 +2,24 @@
 
 import { PipelineStatus } from "@/lib/api";
 
-const STEP_ORDER = ["geocoding", "property", "search", "analysis", "calculation"];
+const STEP_ORDER = ["connecting", "geocoding", "property", "search", "analysis", "calculation"];
 
 const STEP_LABELS: Record<string, string> = {
+  connecting: "Connecting",
   geocoding: "Geocoding",
   property: "Property Record",
   search: "Zoning Search",
   analysis: "AI Analysis",
-  calculation: "Density Calc",
+  calculation: "Max Units Calc",
+};
+
+const STEP_DESCRIPTIONS: Record<string, string> = {
+  connecting: "Establishing connection to PlotLot server...",
+  geocoding: "Looking up coordinates and municipality...",
+  property: "Fetching lot size and property data from county records...",
+  search: "Searching zoning ordinances in municipal code...",
+  analysis: "AI analyzing zoning regulations and extracting standards...",
+  calculation: "Computing max allowable units from zoning constraints...",
 };
 
 interface AnalysisStreamProps {
@@ -25,8 +35,19 @@ export default function AnalysisStream({ steps, error }: AnalysisStreamProps) {
     stepMap.set(s.step, s);
   }
 
+  const completedCount = STEP_ORDER.filter((k) => stepMap.get(k)?.complete).length;
+  const activeIdx = STEP_ORDER.findIndex((k) => { const s = stepMap.get(k); return s && !s.complete; });
+
   return (
     <div className="py-2">
+      {/* Step counter + time estimate */}
+      <div className="mb-3 flex items-center gap-3">
+        <span className="text-xs font-medium text-stone-500">
+          Step {Math.min(completedCount + 1, STEP_ORDER.length)} of {STEP_ORDER.length}
+        </span>
+        <span className="text-xs text-stone-400">Usually takes 20–40 seconds</span>
+      </div>
+
       <div className="relative space-y-0">
         {STEP_ORDER.map((stepKey, idx) => {
           const step = stepMap.get(stepKey);
@@ -67,8 +88,10 @@ export default function AnalysisStream({ steps, error }: AnalysisStreamProps) {
                 >
                   {STEP_LABELS[stepKey] || stepKey}
                 </span>
-                {step?.message && isActive && (
-                  <span className="ml-2 text-xs text-stone-400">{step.message}</span>
+                {isActive && (
+                  <p className="mt-0.5 text-xs text-stone-400">
+                    {step?.message || STEP_DESCRIPTIONS[stepKey]}
+                  </p>
                 )}
               </div>
             </div>

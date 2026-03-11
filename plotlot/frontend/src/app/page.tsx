@@ -34,6 +34,8 @@ interface DisplayMessage {
   report?: ZoningReportData;
   saveStatus?: "idle" | "saving" | "saved" | "error";
   toolActivity?: ToolActivity[];
+  errorType?: "timeout" | "bad_address" | "generic";
+  retryAddress?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +123,10 @@ export default function Home() {
       const progressId = addMessage({
         role: "system",
         content: "",
-        pipelineSteps: [],
+        pipelineSteps: [{
+          step: "connecting",
+          message: "Connecting to server...",
+        }],
       });
 
       try {
@@ -133,7 +138,14 @@ export default function Home() {
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== progressId) return m;
-                const steps = m.pipelineSteps || [];
+                let steps = m.pipelineSteps || [];
+                // Mark "connecting" as complete when first real step arrives
+                const connectingIdx = steps.findIndex((s) => s.step === "connecting" && !s.complete);
+                if (connectingIdx >= 0 && status.step !== "connecting") {
+                  steps = steps.map((s) =>
+                    s.step === "connecting" ? { ...s, complete: true, message: "Connected" } : s,
+                  );
+                }
                 const existing = steps.findIndex((s) => s.step === status.step);
                 if (existing >= 0) {
                   const updated = [...steps];
@@ -150,11 +162,22 @@ export default function Home() {
             updateMessage(progressId, { report, pipelineSteps: undefined });
           },
           (error) => {
+            // Error recovery UX — provide actionable buttons based on error type
+            const isTimeout = error.toLowerCase().includes("timeout") || error.toLowerCase().includes("timed out");
+            const isBadAddress = error.toLowerCase().includes("geocod") || error.toLowerCase().includes("outside coverage") || error.toLowerCase().includes("could not");
+            let errorContent = `I couldn't analyze that address: ${error}`;
+            if (isTimeout) {
+              errorContent += "\n\nThe server took too long to respond. This can happen during the first request. Click **Retry** to try again.";
+            } else if (isBadAddress) {
+              errorContent += "\n\nPlease check the address and try a different one.";
+            }
             updateMessage(progressId, {
               role: "assistant",
-              content: `I couldn't analyze that address: ${error}`,
+              content: errorContent,
               pipelineSteps: undefined,
-            });
+              errorType: isTimeout ? "timeout" : isBadAddress ? "bad_address" : "generic",
+              retryAddress: address,
+            } as Partial<DisplayMessage>);
           },
         );
 
@@ -381,9 +404,32 @@ export default function Home() {
     );
   }
 
+  const handleNewAnalysis = useCallback(() => {
+    setMessages([]);
+    setCurrentReport(null);
+    setSessionId(null);
+    setInput("");
+    setIsProcessing(false);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
+
   // ─── Conversation State ───────────────────────────────────────────────
   return (
     <div className="relative flex h-[calc(100vh-3rem)] flex-col">
+      {/* New Analysis button — overlays nav area */}
+      <div className="sticky top-0 z-50 flex justify-end px-4 pointer-events-none" style={{ marginTop: "-3rem", height: "3rem" }}>
+        <div className="flex items-center pointer-events-auto">
+          <button
+            onClick={handleNewAnalysis}
+            className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
+            </svg>
+            New analysis
+          </button>
+        </div>
+      </div>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto pb-52">
         <div className="mx-auto max-w-3xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-4 sm:py-6">
@@ -401,7 +447,7 @@ export default function Home() {
 
               {/* Embedded report */}
               {msg.report && (
-                <div className="space-y-3">
+                <div className="space-y-3 animate-fade-up">
                   <ZoningReport report={msg.report} />
                   {msg.report.confidence_warning && (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
@@ -520,6 +566,34 @@ export default function Home() {
                             <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse-dot" />
                             <span className="text-xs">Thinking...</span>
                           </span>
+                        )}
+                        {/* Error recovery buttons */}
+                        {msg.errorType && !msg.isStreaming && (
+                          <div className="mt-3 flex gap-2">
+                            {msg.errorType === "timeout" && msg.retryAddress && (
+                              <button
+                                onClick={() => {
+                                  setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                                  runAnalysis(msg.retryAddress!);
+                                }}
+                                disabled={isProcessing}
+                                className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-40"
+                              >
+                                Retry
+                              </button>
+                            )}
+                            {msg.errorType === "bad_address" && (
+                              <button
+                                onClick={() => {
+                                  setInput("");
+                                  inputRef.current?.focus();
+                                }}
+                                className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:bg-stone-50"
+                              >
+                                Try another address
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
