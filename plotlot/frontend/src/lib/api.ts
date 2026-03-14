@@ -186,6 +186,7 @@ function extractErrorMessage(err: { detail?: unknown }, status: number): string 
 /**
  * Stream zoning analysis with real-time pipeline progress.
  * Uses Server-Sent Events for step-by-step updates.
+ * Auto-retries once on network failure (not on backend error events).
  */
 export async function streamAnalysis(
   options: AnalysisOptions,
@@ -193,80 +194,92 @@ export async function streamAnalysis(
   onResult: (report: ZoningReportData) => void,
   onError: (error: string) => void,
   onThinking?: (event: ThinkingEvent) => void,
+  onRetry?: (attempt: number) => void,
 ): Promise<void> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120_000);
+  const maxRetries = 1;
 
-  try {
-    const response = await fetch(`${API_BASE}/api/v1/analyze/stream`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        address: options.address,
-        deal_type: options.dealType || "land_deal",
-        skip_steps: options.skipSteps || [],
-      }),
-      signal: controller.signal,
-    });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120_000);
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ detail: "Request failed" }));
-      onError(extractErrorMessage(err, response.status));
-      return;
-    }
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/analyze/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: options.address,
+          deal_type: options.dealType || "land_deal",
+          skip_steps: options.skipSteps || [],
+        }),
+        signal: controller.signal,
+      });
 
-    const reader = response.body?.getReader();
-    if (!reader) {
-      onError("No response stream available");
-      return;
-    }
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Request failed" }));
+        onError(extractErrorMessage(err, response.status));
+        return;
+      }
 
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let eventType = "";
-    let eventData = "";
+      const reader = response.body?.getReader();
+      if (!reader) {
+        onError("No response stream available");
+        return;
+      }
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let eventType = "";
+      let eventData = "";
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          eventType = line.slice(7).trim();
-        } else if (line.startsWith("data: ")) {
-          eventData = line.slice(6).trim();
-        } else if (line === "" && eventType && eventData) {
-          try {
-            const parsed = JSON.parse(eventData);
-            if (eventType === "status") {
-              onStatus(parsed as PipelineStatus);
-            } else if (eventType === "result") {
-              onResult(parsed as ZoningReportData);
-            } else if (eventType === "thinking") {
-              onThinking?.(parsed as ThinkingEvent);
-            } else if (eventType === "error") {
-              onError(parsed.detail || "Unknown error");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            eventType = line.slice(7).trim();
+          } else if (line.startsWith("data: ")) {
+            eventData = line.slice(6).trim();
+          } else if (line === "" && eventType && eventData) {
+            try {
+              const parsed = JSON.parse(eventData);
+              if (eventType === "status") {
+                onStatus(parsed as PipelineStatus);
+              } else if (eventType === "result") {
+                onResult(parsed as ZoningReportData);
+              } else if (eventType === "thinking") {
+                onThinking?.(parsed as ThinkingEvent);
+              } else if (eventType === "error") {
+                onError(parsed.detail || "Unknown error");
+              }
+            } catch {
+              // Skip malformed events
             }
-          } catch {
-            // Skip malformed events
+            eventType = "";
+            eventData = "";
           }
-          eventType = "";
-          eventData = "";
         }
       }
+      return; // Success — exit retry loop
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        onError("Request timed out after 2 minutes. The server may be starting up \u2014 try again.");
+        return;
+      }
+      // Network error — retry if we have attempts left
+      if (attempt < maxRetries) {
+        onRetry?.(attempt + 1);
+        await new Promise((r) => setTimeout(r, 2000));
+        continue;
+      }
+      onError("Connection failed. The server may be starting up \u2014 try again in a moment.");
+    } finally {
+      clearTimeout(timeoutId);
     }
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
-      onError("Request timed out after 2 minutes. The server may be starting up \u2014 try again.");
-      return;
-    }
-    throw err;
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
 

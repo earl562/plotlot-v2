@@ -15,6 +15,7 @@ import type { AppMode } from "@/components/ModeToggle";
 import CapabilityChips from "@/components/CapabilityChips";
 import ToolCards from "@/components/ToolCards";
 import DocumentCanvas from "@/components/DocumentCanvas";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import InputBar from "@/components/InputBar";
 import {
   PipelineStatus,
@@ -533,11 +534,13 @@ export default function Home() {
               {/* Embedded report — TabbedReport for lookup mode, ZoningReport for agent */}
               {msg.report && (
                 <div className="space-y-3 animate-fade-up">
-                  {selectedDealType ? (
-                    <TabbedReport report={msg.report} dealType={selectedDealType} />
-                  ) : (
-                    <ZoningReport report={msg.report} />
-                  )}
+                  <ErrorBoundary>
+                    {selectedDealType ? (
+                      <TabbedReport report={msg.report} dealType={selectedDealType} />
+                    ) : (
+                      <ZoningReport report={msg.report} />
+                    )}
+                  </ErrorBoundary>
                   {msg.report.confidence_warning && (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
                       <div className="flex items-start gap-3">
