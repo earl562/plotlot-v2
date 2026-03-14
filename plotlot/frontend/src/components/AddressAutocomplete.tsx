@@ -90,8 +90,22 @@ export default function AddressAutocomplete({
 
       setIsSearching(true);
 
-      // Try Google Places first
+      // Try Google Places first (with 2s timeout — callback may never fire if API not activated)
       if (serviceRef.current && sessionTokenRef.current) {
+        let responded = false;
+        const timeout = setTimeout(() => {
+          if (!responded) {
+            responded = true;
+            // Google didn't respond — fallback to Geocodio
+            fetchGeocodioSuggestions(query).then((results) => {
+              setSuggestions(results);
+              setShowDropdown(results.length > 0);
+              setSelectedIndex(-1);
+              setIsSearching(false);
+            });
+          }
+        }, 2000);
+
         serviceRef.current.getPlacePredictions(
           {
             input: query,
@@ -100,6 +114,9 @@ export default function AddressAutocomplete({
             sessionToken: sessionTokenRef.current,
           },
           (predictions, status) => {
+            if (responded) return; // Timeout already fired
+            responded = true;
+            clearTimeout(timeout);
             setIsSearching(false);
             if (
               status === google.maps.places.PlacesServiceStatus.OK &&
@@ -117,7 +134,7 @@ export default function AddressAutocomplete({
               setSelectedIndex(-1);
               return;
             }
-            // Google failed — fall through to Geocodio
+            // Google returned error status — fall through to Geocodio
             fetchGeocodioSuggestions(query).then((results) => {
               setSuggestions(results);
               setShowDropdown(results.length > 0);
