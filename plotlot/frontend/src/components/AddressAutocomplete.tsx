@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -14,11 +14,32 @@ interface AddressAutocompleteProps {
 }
 
 interface Suggestion {
-  address: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
+  placeId: string;
+  mainText: string;
+  secondaryText: string;
+  fullText: string;
+}
+
+/** Load Google Maps script once, return a promise that resolves when ready. */
+let _loadPromise: Promise<void> | null = null;
+function loadGoogleMaps(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.google?.maps?.places) return Promise.resolve();
+  if (_loadPromise) return _loadPromise;
+
+  _loadPromise = new Promise((resolve, reject) => {
+    if (!MAPS_KEY) {
+      reject(new Error("NEXT_PUBLIC_GOOGLE_MAPS_KEY not set"));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=places`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google Maps"));
+    document.head.appendChild(script);
+  });
+  return _loadPromise;
 }
 
 export default function AddressAutocomplete({
@@ -33,8 +54,24 @@ export default function AddressAutocomplete({
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
+  const [mapsReady, setMapsReady] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+
+  // Load Google Maps on mount
+  useEffect(() => {
+    loadGoogleMaps()
+      .then(() => {
+        serviceRef.current = new google.maps.places.AutocompleteService();
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+        setMapsReady(true);
+      })
+      .catch(() => {
+        // Google Maps unavailable — autocomplete will be disabled
+      });
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -47,44 +84,63 @@ export default function AddressAutocomplete({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const fetchSuggestions = useCallback(async (query: string) => {
-    if (query.length < 3) {
-      setSuggestions([]);
-      setShowDropdown(false);
-      return;
-    }
+  const fetchSuggestions = useCallback(
+    (query: string) => {
+      if (query.length < 3 || !serviceRef.current || !mapsReady) {
+        setSuggestions([]);
+        setShowDropdown(false);
+        return;
+      }
 
-    setIsSearching(true);
-    try {
-      const resp = await fetch(`${API_URL}/api/v1/autocomplete?q=${encodeURIComponent(query)}`);
-      if (!resp.ok) throw new Error("API error");
-      const data = await resp.json();
-      const results: Suggestion[] = data.suggestions || [];
-      setSuggestions(results);
-      setShowDropdown(results.length > 0);
-      setSelectedIndex(-1);
-    } catch {
-      setSuggestions([]);
-      setShowDropdown(false);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+      setIsSearching(true);
+      serviceRef.current.getPlacePredictions(
+        {
+          input: query,
+          types: ["address"],
+          componentRestrictions: { country: "us" },
+          sessionToken: sessionTokenRef.current!,
+        },
+        (predictions, status) => {
+          setIsSearching(false);
+          if (
+            status !== google.maps.places.PlacesServiceStatus.OK ||
+            !predictions
+          ) {
+            setSuggestions([]);
+            setShowDropdown(false);
+            return;
+          }
+
+          const results: Suggestion[] = predictions.map((p) => ({
+            placeId: p.place_id,
+            mainText: p.structured_formatting.main_text,
+            secondaryText: p.structured_formatting.secondary_text,
+            fullText: p.description,
+          }));
+          setSuggestions(results);
+          setShowDropdown(results.length > 0);
+          setSelectedIndex(-1);
+        },
+      );
+    },
+    [mapsReady],
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     onChange(val);
 
-    // Debounce API calls (300ms)
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchSuggestions(val), 300);
+    debounceRef.current = setTimeout(() => fetchSuggestions(val), 200);
   };
 
   const handleSelect = (suggestion: Suggestion) => {
-    onChange(suggestion.address);
+    onChange(suggestion.fullText);
     setSuggestions([]);
     setShowDropdown(false);
-    onSelect(suggestion.address);
+    // Reset session token after selection (Google billing optimization)
+    sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+    onSelect(suggestion.fullText);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -92,10 +148,14 @@ export default function AddressAutocomplete({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+      setSelectedIndex((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : 0,
+      );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+      setSelectedIndex((prev) =>
+        prev > 0 ? prev - 1 : suggestions.length - 1,
+      );
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       e.preventDefault();
       handleSelect(suggestions[selectedIndex]);
@@ -123,9 +183,24 @@ export default function AddressAutocomplete({
       {isSearching && !showDropdown && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg">
           <div className="flex items-center gap-2 px-3 py-3 text-xs text-stone-500">
-            <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <svg
+              className="h-3.5 w-3.5 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             Searching addresses...
           </div>
@@ -135,7 +210,7 @@ export default function AddressAutocomplete({
         <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg">
           {suggestions.map((s, index) => (
             <button
-              key={s.address}
+              key={s.placeId}
               onClick={() => handleSelect(s)}
               className={`flex w-full items-center gap-3 px-3 py-3 text-left text-sm transition-colors ${
                 index === selectedIndex
@@ -154,13 +229,21 @@ export default function AddressAutocomplete({
                 <circle cx="12" cy="10" r="3" />
               </svg>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{s.street}</div>
+                <div className="truncate font-medium">{s.mainText}</div>
                 <div className="truncate text-xs text-stone-500">
-                  {s.city}{s.state ? `, ${s.state}` : ""}{s.zip ? ` ${s.zip}` : ""}
+                  {s.secondaryText}
                 </div>
               </div>
             </button>
           ))}
+          {/* Google attribution (required by TOS) */}
+          <div className="flex justify-end border-t border-[var(--border)] px-3 py-1.5">
+            <img
+              src="https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3_hdpi.png"
+              alt="Powered by Google"
+              className="h-4 dark:invert"
+            />
+          </div>
         </div>
       )}
     </div>
