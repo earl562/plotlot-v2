@@ -28,7 +28,11 @@ function formatCurrency(value: number | null | undefined): string {
 
 function formatDate(raw: string): string {
   if (/^\d{8}$/.test(raw)) {
-    const d = new Date(`${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`);
+    const firstFour = parseInt(raw.slice(0, 4), 10);
+    const isoStr = firstFour > 1900 && firstFour < 2100
+      ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}` // YYYYMMDD
+      : `${raw.slice(4, 8)}-${raw.slice(0, 2)}-${raw.slice(2, 4)}`; // MMDDYYYY
+    const d = new Date(isoStr);
     if (!isNaN(d.getTime())) return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   }
   const d = new Date(raw);
@@ -180,7 +184,20 @@ function StreetViewTab({ report }: { report: ZoningReportData }) {
 
   const googleMapsUrl = `https://www.google.com/maps/@${report.lat},${report.lng},3a,75y,0h,90t/data=!3m1!1e1`;
 
-  if (!MAPS_KEY || imgError) {
+  if (!MAPS_KEY) {
+    return (
+      <div className="flex h-full min-h-[220px] items-center justify-center rounded-b-xl bg-[var(--bg-surface-raised)] lg:rounded-bl-none lg:rounded-r-xl">
+        <div className="text-center">
+          <svg className="mx-auto h-8 w-8 text-[var(--text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">Street view unavailable</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (imgError) {
     return (
       <a
         href={googleMapsUrl}
@@ -237,6 +254,7 @@ function ParcelMapTab({ report, onFloodZone }: { report: ZoningReportData; onFlo
         parcelGeometry={report.property_record?.parcel_geometry}
         lotDimensions={report.property_record?.lot_dimensions}
         lotSizeSqft={report.property_record?.lot_size_sqft}
+        zoningLayerUrl={report.property_record?.zoning_layer_url}
         onFloodZone={onFloodZone}
       />
     </div>

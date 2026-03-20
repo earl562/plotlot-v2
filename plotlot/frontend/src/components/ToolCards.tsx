@@ -1,5 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
+
 interface ToolCardDef {
   id: string;
   label: string;
@@ -62,6 +65,7 @@ interface ToolCardsProps {
   onSendPrompt: (prompt: string) => void;
   disabled?: boolean;
   hasReport?: boolean;
+  county?: string;
 }
 
 export default function ToolCards({
@@ -70,14 +74,19 @@ export default function ToolCards({
   onSendPrompt,
   disabled = false,
   hasReport = false,
+  county,
 }: ToolCardsProps) {
   const handleClick = (card: ToolCardDef) => {
     if (card.action === "analyze") {
       onAnalyze();
     } else if (card.action === "generate_doc" && card.docType) {
       onGenerateDoc(card.docType);
-    } else if (card.action === "send_prompt" && card.prompt) {
-      onSendPrompt(card.prompt);
+    } else if (card.action === "send_prompt") {
+      let prompt = card.prompt ?? "";
+      if (card.id === "search_comps") {
+        prompt = `Find comparable sales near this property within a 3-mile radius${county ? ` in ${county}` : " in your area"}`;
+      }
+      onSendPrompt(prompt);
     }
   };
 
@@ -87,11 +96,14 @@ export default function ToolCards({
         const isDisabled = disabled || (card.requiresReport && !hasReport);
 
         return (
-          <button
+          <motion.button
             key={card.id}
             onClick={() => handleClick(card)}
             disabled={isDisabled}
-            className="group flex flex-col items-start gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left transition-all hover:border-amber-300 hover:bg-amber-50/30 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:border-[var(--border)] disabled:hover:bg-[var(--bg-surface)] dark:hover:bg-amber-950/20 sm:p-3.5"
+            whileHover={!isDisabled ? { y: -2 } : {}}
+            whileTap={!isDisabled ? { scale: 0.97 } : {}}
+            transition={spring}
+            className="group flex flex-col items-start gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/30 disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:bg-[var(--bg-surface)] dark:hover:bg-amber-950/20 sm:p-3.5"
           >
             <svg
               className="h-4 w-4 text-amber-600 transition-colors group-hover:text-amber-500 group-disabled:text-[var(--text-muted)]"
@@ -115,7 +127,7 @@ export default function ToolCards({
                 Analyze a property first
               </span>
             )}
-          </button>
+          </motion.button>
         );
       })}
     </div>

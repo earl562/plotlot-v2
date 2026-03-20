@@ -4,10 +4,13 @@ import { useState, useCallback } from "react";
 import { ZoningReportData } from "@/lib/api";
 import DensityBreakdown from "./DensityBreakdown";
 import BuildingRenderViewer from "./BuildingRenderViewer";
+import DocumentGenerator from "./DocumentGenerator";
 import FloorPlanViewer from "./FloorPlanViewer";
 import ParcelViewer from "./ParcelViewer";
 import SetbackDiagram from "./SetbackDiagram";
 import PropertyIntelligence from "./PropertyIntelligence";
+import DevelopmentConceptCard from "./DevelopmentConceptCard";
+import PropertyFlyoverVideo from "./PropertyFlyoverVideo";
 import { useToast } from "./Toast";
 
 interface ZoningReportProps {
@@ -124,10 +127,12 @@ function parseNumericFt(value: string | undefined | null): number {
 export default function ZoningReport({ report }: ZoningReportProps) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const handleDownloadPDF = useCallback(async () => {
     if (pdfLoading) return;
     setPdfLoading(true);
+    setPdfError(null);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const resp = await fetch(`${API_URL}/api/v1/geometry/report/pdf`, {
@@ -145,6 +150,8 @@ export default function ZoningReport({ report }: ZoningReportProps) {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("PDF download failed:", err);
+      setPdfError("PDF generation failed. Please try again.");
+      setTimeout(() => setPdfError(null), 5000);
     } finally {
       setPdfLoading(false);
     }
@@ -187,6 +194,9 @@ export default function ZoningReport({ report }: ZoningReportProps) {
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           <ConfidenceBadge level={report.confidence} />
+          {pdfError && (
+            <p className="text-right text-[10px] text-red-500">{pdfError}</p>
+          )}
           <button
             onClick={handleDownloadPDF}
             disabled={pdfLoading}
@@ -248,6 +258,20 @@ export default function ZoningReport({ report }: ZoningReportProps) {
           />
         );
       })()}
+
+      {/* Development Concept — AI render of the completed build-out */}
+      {report.numeric_params?.property_type &&
+        report.density_analysis?.max_units != null &&
+        report.density_analysis.max_units > 0 && (
+          <DevelopmentConceptCard
+            address={report.formatted_address}
+            municipality={report.municipality}
+            zoningDistrict={report.zoning_district}
+            propertyType={report.numeric_params.property_type}
+            maxUnits={report.density_analysis.max_units}
+            lotSqft={report.density_analysis.lot_size_sqft || report.property_record?.lot_size_sqft || 0}
+          />
+        )}
 
       {/* Property Type */}
       {report.numeric_params?.property_type && report.density_analysis && (
@@ -364,6 +388,16 @@ export default function ZoningReport({ report }: ZoningReportProps) {
         return null;
       })()}
 
+      {/* Aerial Flyover Video — Veo 3 generated, on demand */}
+      {report.property_record && (
+        <PropertyFlyoverVideo
+          address={report.formatted_address}
+          lat={report.property_record.lat}
+          lng={report.property_record.lng}
+          municipality={report.municipality}
+        />
+      )}
+
       {/* Property Intelligence — collapsible, default collapsed */}
       <CollapsibleSection title="Property Intelligence" defaultOpen={false}>
         <PropertyIntelligence report={report} />
@@ -376,6 +410,151 @@ export default function ZoningReport({ report }: ZoningReportProps) {
           <UsesList title="Conditional" uses={report.conditional_uses} color="yellow" />
           <UsesList title="Prohibited" uses={report.prohibited_uses} color="red" />
         </div>
+      </CollapsibleSection>
+
+      {/* Comparable Sales */}
+      {report.comp_analysis && report.comp_analysis.comparables && report.comp_analysis.comparables.length > 0 && (
+        <CollapsibleSection title="Comparable Sales" defaultOpen={true}>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Median $/Acre</div>
+                <div className="text-lg font-bold text-[var(--text-primary)]">
+                  ${report.comp_analysis.median_price_per_acre.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Est. Land Value</div>
+                <div className="text-lg font-bold text-[var(--text-primary)]">
+                  ${report.comp_analysis.estimated_land_value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Confidence</div>
+                <div className="text-lg font-bold text-[var(--text-primary)]">
+                  {(report.comp_analysis.confidence * 100).toFixed(0)}%
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+              <table className="min-w-full text-xs">
+                <thead className="bg-[var(--bg-surface-raised)]">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-[var(--text-secondary)]">Address</th>
+                    <th className="px-3 py-2 text-right font-semibold text-[var(--text-secondary)]">Price</th>
+                    <th className="px-3 py-2 text-right font-semibold text-[var(--text-secondary)]">$/Acre</th>
+                    <th className="px-3 py-2 text-right font-semibold text-[var(--text-secondary)]">Dist.</th>
+                    <th className="px-3 py-2 text-left font-semibold text-[var(--text-secondary)]">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.comp_analysis.comparables.map((comp, i) => (
+                    <tr key={i} className="border-t border-[var(--border)]">
+                      <td className="px-3 py-2 text-[var(--text-secondary)]">{comp.address || "N/A"}</td>
+                      <td className="px-3 py-2 text-right font-medium text-[var(--text-primary)]">
+                        ${comp.sale_price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </td>
+                      <td className="px-3 py-2 text-right text-[var(--text-secondary)]">
+                        ${comp.price_per_acre.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </td>
+                      <td className="px-3 py-2 text-right text-[var(--text-muted)]">
+                        {comp.distance_miles.toFixed(1)} mi
+                      </td>
+                      <td className="px-3 py-2 text-[var(--text-muted)]">{comp.sale_date || "N/A"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Land Pro Forma */}
+      {report.pro_forma && report.pro_forma.max_land_price > 0 && (
+        <CollapsibleSection title="Land Pro Forma" defaultOpen={true}>
+          <div className="space-y-3">
+            {/* Waterfall visualization */}
+            <div className="space-y-2">
+              {[
+                { label: "Gross Dev. Value", value: report.pro_forma.gross_development_value, color: "bg-emerald-500" },
+                { label: "Hard Costs", value: -report.pro_forma.hard_costs, color: "bg-red-400" },
+                { label: "Soft Costs", value: -report.pro_forma.soft_costs, color: "bg-orange-400" },
+                { label: "Builder Margin", value: -report.pro_forma.builder_margin, color: "bg-amber-400" },
+              ].map((item) => {
+                const maxVal = report.pro_forma!.gross_development_value;
+                const width = Math.abs(item.value) / maxVal * 100;
+                return (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <div className="w-28 text-xs text-[var(--text-muted)] text-right shrink-0">{item.label}</div>
+                    <div className="flex-1">
+                      <div className={`h-6 rounded ${item.color}`} style={{ width: `${Math.max(width, 2)}%` }} />
+                    </div>
+                    <div className="w-24 text-xs font-medium text-[var(--text-secondary)] text-right shrink-0">
+                      {item.value < 0 ? "-" : ""}${Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="flex items-center gap-3 border-t border-[var(--border)] pt-2">
+                <div className="w-28 text-xs font-bold text-[var(--text-primary)] text-right shrink-0">Max Offer</div>
+                <div className="flex-1">
+                  <div
+                    className="h-6 rounded bg-[var(--text-primary)]"
+                    style={{ width: `${(report.pro_forma.max_land_price / report.pro_forma.gross_development_value) * 100}%` }}
+                  />
+                </div>
+                <div className="w-24 text-sm font-bold text-[var(--text-primary)] text-right shrink-0">
+                  ${report.pro_forma.max_land_price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+              </div>
+            </div>
+
+            {/* Key metrics */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Cost/Door</div>
+                <div className="text-sm font-bold text-[var(--text-primary)]">
+                  ${report.pro_forma.cost_per_door.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Construction $/SF</div>
+                <div className="text-sm font-bold text-[var(--text-primary)]">
+                  ${report.pro_forma.construction_cost_psf}
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">Units</div>
+                <div className="text-sm font-bold text-[var(--text-primary)]">
+                  {report.pro_forma.max_units}
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--bg-surface-raised)] p-3">
+                <div className="text-xs text-[var(--text-muted)]">$/Door (Offer)</div>
+                <div className="text-sm font-bold text-[var(--text-primary)]">
+                  ${report.pro_forma.max_units > 0
+                    ? (report.pro_forma.max_land_price / report.pro_forma.max_units).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                    : "N/A"}
+                </div>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {report.pro_forma.notes && report.pro_forma.notes.length > 0 && (
+              <div className="text-xs text-[var(--text-muted)] space-y-1">
+                {report.pro_forma.notes.map((note, i) => (
+                  <p key={i}>{note}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Document Generation */}
+      <CollapsibleSection title="Generate Documents" defaultOpen={false}>
+        <DocumentGenerator report={report} />
       </CollapsibleSection>
 
       {/* Sources — collapsible */}

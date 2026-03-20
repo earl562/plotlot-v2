@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, FormEvent, useId } from "react";
+import { motion } from "framer-motion";
+import { staggerContainer, staggerItem, fadeUp, springGentle } from "@/lib/motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ZoningReport from "@/components/ZoningReport";
@@ -27,6 +29,11 @@ import {
   streamChat,
   saveAnalysis,
 } from "@/lib/api";
+import {
+  createSession as createLocalSession,
+  getSession as getLocalSession,
+  updateSession as updateLocalSession,
+} from "@/lib/sessions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,10 +113,16 @@ export default function Home() {
   const [awaitingApproval, setAwaitingApproval] = useState(false);
   const [docCanvasOpen, setDocCanvasOpen] = useState(false);
   const [contextualSuggestions, setContextualSuggestions] = useState<string[]>([]);
+  const [localSessionId, setLocalSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const idPrefix = useId();
   const msgCounterRef = useRef(0);
+  const localSessionIdRef = useRef<string | null>(null);
+  const messagesRef = useRef<DisplayMessage[]>([]);
+  const currentReportRef = useRef<ZoningReportData | null>(null);
+  const modeRef = useRef<AppMode>("lookup");
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,6 +133,127 @@ export default function Home() {
   useEffect(() => {
     inputRef.current?.focus();
   }, [isWelcome]);
+
+  // Keep refs in sync with state
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { currentReportRef.current = currentReport; }, [currentReport]);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => { localSessionIdRef.current = localSessionId; }, [localSessionId]);
+
+  // Fix 3: Mode switch — clear lookup-mode state
+  useEffect(() => {
+    setPendingAddress(null);
+    setSelectedDealType(null);
+    setAwaitingApproval(false);
+    setContextualSuggestions([]);
+  }, [mode]);
+
+  // Persist backend sessionId
+  useEffect(() => {
+    if (sessionId) localStorage.setItem("plotlot_backend_session", sessionId);
+  }, [sessionId]);
+
+  // Persist localSessionId
+  useEffect(() => {
+    if (localSessionId) localStorage.setItem("plotlot_last_session", localSessionId);
+  }, [localSessionId]);
+
+  // Mount: restore last session from localStorage
+  useEffect(() => {
+    const backendId = localStorage.getItem("plotlot_backend_session");
+    if (backendId) setSessionId(backendId);
+
+    const lastId = localStorage.getItem("plotlot_last_session");
+    if (!lastId) return;
+    const session = getLocalSession(lastId);
+    if (!session || session.messages.length === 0) return;
+
+    const restored: DisplayMessage[] = session.messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content }));
+    if (restored.length === 0) return;
+
+    if (session.report && restored.length > 0) {
+      restored.splice(1, 0, {
+        id: `${idPrefix}-mount-report`,
+        role: "system",
+        content: "",
+        report: session.report,
+      });
+      setCurrentReport(session.report);
+    }
+    setMessages(restored);
+    setLocalSessionId(lastId);
+    localSessionIdRef.current = lastId;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save messages to local session after processing completes
+  useEffect(() => {
+    if (isProcessing) {
+      hasProcessedRef.current = true;
+      return;
+    }
+    if (!hasProcessedRef.current) return;
+    hasProcessedRef.current = false;
+
+    const msgs = messagesRef.current;
+    const report = currentReportRef.current;
+    const currentMode = modeRef.current;
+    const sid = localSessionIdRef.current;
+
+    const saveable = msgs
+      .filter((m) => (m.role === "user" || m.role === "assistant") && m.content && !m.isStreaming)
+      .map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content, timestamp: new Date().toISOString() }));
+    if (saveable.length === 0) return;
+
+    const title = saveable[0]?.content?.slice(0, 60) || "New conversation";
+    if (sid) {
+      updateLocalSession(sid, { messages: saveable, ...(report ? { report } : {}) });
+    } else {
+      const newSession = createLocalSession(currentMode);
+      updateLocalSession(newSession.id, { title, messages: saveable, ...(report ? { report } : {}) });
+      setLocalSessionId(newSession.id);
+      localSessionIdRef.current = newSession.id;
+    }
+    window.dispatchEvent(new CustomEvent("plotlot:sessions-changed"));
+  }, [isProcessing]);
+
+  // Listen for session selection from sidebar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent<{ id: string }>).detail?.id;
+      if (!id) return;
+      const session = getLocalSession(id);
+      if (!session) return;
+
+      const restored: DisplayMessage[] = session.messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content }));
+
+      if (session.report && restored.length > 0) {
+        restored.splice(1, 0, {
+          id: `${idPrefix}-sel-report`,
+          role: "system",
+          content: "",
+          report: session.report,
+        });
+        setCurrentReport(session.report);
+      } else {
+        setCurrentReport(null);
+      }
+      setMessages(restored);
+      setLocalSessionId(id);
+      localSessionIdRef.current = id;
+      setInput("");
+      setPendingAddress(null);
+      setSelectedDealType(null);
+      setAwaitingApproval(false);
+      setIsProcessing(false);
+    };
+    window.addEventListener("plotlot:session-selected", handler);
+    return () => window.removeEventListener("plotlot:session-selected", handler);
+  }, [idPrefix]);
 
   const addMessage = useCallback((msg: Omit<DisplayMessage, "id">) => {
     const newMsg = { ...msg, id: `${idPrefix}-${msgCounterRef.current++}` };
@@ -318,6 +452,7 @@ export default function Home() {
           sessionId,
           (newSessionId) => {
             setSessionId(newSessionId);
+            window.dispatchEvent(new CustomEvent("plotlot:sessions-changed"));
           },
           (toolEvent: ToolUseEvent) => {
             setMessages((prev) =>
@@ -411,11 +546,16 @@ export default function Home() {
     setMessages([]);
     setCurrentReport(null);
     setSessionId(null);
+    setLocalSessionId(null);
+    localSessionIdRef.current = null;
+    hasProcessedRef.current = false;
     setPendingAddress(null);
     setSelectedDealType(null);
     setAwaitingApproval(false);
     setInput("");
     setIsProcessing(false);
+    localStorage.removeItem("plotlot_backend_session");
+    localStorage.removeItem("plotlot_last_session");
     setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
 
@@ -426,23 +566,36 @@ export default function Home() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center px-4 pt-[15vh] sm:px-6">
         {/* Greeting */}
-        <div className="mb-10 text-center animate-fade-up sm:mb-14">
-          <div className="mb-4 flex items-center justify-center gap-2 animate-fade-up delay-1">
+        <motion.div
+          className="mb-10 text-center sm:mb-14"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={staggerItem} className="mb-4 flex items-center justify-center gap-2">
             <svg className="h-4 w-4 text-amber-500/70" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 2L12.5 7.5L18 10L12.5 12.5L10 18L7.5 12.5L2 10L7.5 7.5L10 2Z" clipRule="evenodd" />
             </svg>
             <span className="text-sm tracking-wide text-[var(--text-muted)]">Hi there</span>
-          </div>
-          <h1 className="font-display text-4xl leading-tight text-[var(--text-primary)] animate-fade-up delay-2 sm:text-6xl sm:leading-[1.1]">
+          </motion.div>
+          <motion.h1
+            variants={staggerItem}
+            className="font-display text-4xl leading-tight text-[var(--text-primary)] sm:text-6xl sm:leading-[1.1]"
+          >
             Analyze any property<br className="hidden sm:block" /> in the US
-          </h1>
-          <p className="mt-4 text-sm text-[var(--text-muted)] animate-fade-up delay-3 sm:text-base">
+          </motion.h1>
+          <motion.p variants={staggerItem} className="mt-4 text-sm text-[var(--text-muted)] sm:text-base">
             Zoning, density, comps, pro forma, and development potential — in seconds
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Input bar — z-30 so autocomplete dropdown (z-50 inside) paints above chips below */}
-        <form onSubmit={handleSubmit} className="relative z-30 mb-6 w-full max-w-xl animate-fade-up delay-3 sm:mb-8">
+        <motion.form
+          onSubmit={handleSubmit}
+          {...fadeUp}
+          transition={{ ...springGentle, delay: 0.25 }}
+          className="relative z-30 mb-6 w-full max-w-xl sm:mb-8"
+        >
           <div
             className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-3.5"
             style={{ boxShadow: "var(--shadow-elevated)" }}
@@ -474,10 +627,14 @@ export default function Home() {
               )}
             </button>
           </div>
-        </form>
+        </motion.form>
 
         {/* Capability chips / Tool cards — z-0 so autocomplete dropdown from form above paints on top */}
-        <div className="relative z-0 min-h-[72px] w-full max-w-xl animate-fade-up delay-4">
+        <motion.div
+          {...fadeUp}
+          transition={{ ...springGentle, delay: 0.35 }}
+          className="relative z-0 min-h-[72px] w-full max-w-xl"
+        >
           {mode === "lookup" ? (
             <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
           ) : (
@@ -487,14 +644,19 @@ export default function Home() {
               onSendPrompt={sendMessage}
               disabled={isProcessing}
               hasReport={!!currentReport}
+              county={currentReport?.county}
             />
           )}
-        </div>
+        </motion.div>
 
         {/* Footer */}
-        <p className="mt-16 text-center text-xs text-[var(--text-muted)] animate-fade-in delay-4">
+        <motion.p
+          {...fadeUp}
+          transition={{ ...springGentle, delay: 0.45 }}
+          className="mt-16 text-center text-xs text-[var(--text-muted)]"
+        >
           PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
-        </p>
+        </motion.p>
       </div>
     );
   }
