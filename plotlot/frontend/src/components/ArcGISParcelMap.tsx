@@ -17,6 +17,7 @@ interface ArcGISParcelMapProps {
   parcelGeometry?: number[][] | null;
   lotDimensions?: string;
   lotSizeSqft?: number;
+  zoningLayerUrl?: string;
   onFloodZone?: (zone: string, sfha: boolean) => void;
 }
 
@@ -100,6 +101,7 @@ export default function ArcGISParcelMap({
   county,
   parcelGeometry,
   lotDimensions,
+  zoningLayerUrl,
   onFloodZone,
 }: ArcGISParcelMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -153,20 +155,22 @@ export default function ArcGISParcelMap({
 
     mapInstanceRef.current = map;
 
-    // Base tile layer
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 22,
+    // Base tile layer — ESRI World Imagery (satellite)
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
     }).addTo(map);
 
     // --- Zoning ArcGIS layer (created but NOT added — default OFF) ---
+    // Use hardcoded county config if available, otherwise fall back to dynamic URL
     const countyConfig = COUNTY_MAP_SERVERS[county];
-    if (countyConfig) {
+    const zoningUrl = countyConfig?.url || zoningLayerUrl;
+    if (zoningUrl) {
       import("esri-leaflet")
         .then((esri) => {
           const arcgisLayer = esri.dynamicMapLayer({
-            url: countyConfig.url,
+            url: zoningUrl,
             opacity: 0.6,
-            layers: countyConfig.layers,
+            layers: countyConfig?.layers,
             f: "image",
           });
           zoningLayerRef.current = arcgisLayer;
@@ -260,7 +264,7 @@ export default function ArcGISParcelMap({
       dimensionLayerRef.current = null;
       floodLayerRef.current = null;
     };
-  }, [lat, lng, county, parcelGeometry]);
+  }, [lat, lng, county, parcelGeometry, zoningLayerUrl]);
 
   // --- Layer toggle effect (boundaries, dimensions, zoning) ---
   useEffect(() => {
@@ -361,10 +365,22 @@ export default function ArcGISParcelMap({
       {/* Map */}
       <div ref={mapRef} className="flex-1" style={{ minHeight: "220px" }} />
 
+      {/* Missing geometry notice */}
+      {(!parcelGeometry || parcelGeometry.length < 3) && (
+        <div className="absolute left-3 top-14 z-[1000] max-w-[200px] rounded-lg border border-amber-300 bg-amber-50/95 px-2.5 py-2 text-[11px] text-amber-700 shadow-sm backdrop-blur-sm dark:border-amber-800 dark:bg-amber-950/90 dark:text-amber-400">
+          <div className="flex items-start gap-1.5">
+            <svg className="mt-0.5 h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+            </svg>
+            <span>Parcel boundary unavailable — showing approximate location</span>
+          </div>
+        </div>
+      )}
+
       {/* Legend */}
       <div className="absolute bottom-0 left-0 right-0 z-[1000] flex items-center gap-2 bg-[var(--bg-surface)]/90 px-3 py-1.5 text-xs text-[var(--text-muted)] backdrop-blur-sm">
         <div className="h-2.5 w-2.5 rounded-sm border border-emerald-600 bg-emerald-500/20" />
-        <span>Parcel boundary</span>
+        <span>{parcelGeometry && parcelGeometry.length >= 3 ? "Parcel boundary" : "Approx. location"}</span>
         {lotDimensions && (
           <>
             <span className="text-[var(--text-secondary)]">&middot;</span>

@@ -182,7 +182,7 @@ function StreetViewTab({ report }: { report: ZoningReportData }) {
     `&fov=90&heading=0&pitch=5` +
     `&key=${MAPS_KEY}`;
 
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(report.formatted_address)}`;
+  const googleMapsUrl = `https://www.google.com/maps/@${report.lat},${report.lng},3a,75y,0h,90t/data=!3m1!1e1`;
 
   if (!MAPS_KEY) {
     return (
@@ -237,7 +237,7 @@ function StreetViewTab({ report }: { report: ZoningReportData }) {
           rel="noopener noreferrer"
           className="text-xs font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
         >
-          Open in Maps
+          Open full view
         </a>
       </div>
     </div>
