@@ -1,16 +1,14 @@
-"""LLM client — three-provider fallback chain.
+"""LLM client backed by the official OpenAI Python SDK.
 
 Supports three modes:
   1. Agentic tool-use: call_llm() returns tool_calls for the agent loop
   2. Direct analysis: analyze_zoning() for non-agentic one-shot analysis
   3. Streaming chat: call_llm_stream() yields tokens for conversational UI
 
-Provider chain (Stripe "contain, verify, restrict" pattern):
-  1. Claude Sonnet 4.6 (primary — best tool use, Anthropic Max plan)
-  2. Google Gemini 2.5 Flash (secondary — fast, OpenAI-compatible endpoint)
-  3. NVIDIA NIM (tertiary — existing Llama/Kimi chain)
-
-Per-provider circuit breakers prevent wasting retries on failing providers.
+Auth:
+  - OPENAI_API_KEY for direct API-key auth
+  - OPENAI_ACCESS_TOKEN for OAuth-backed bearer tokens supplied by the caller
+  - OPENAI_BASE_URL for gateway / proxy deployments
 """
 
 import asyncio
@@ -18,39 +16,24 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Any, cast
 
-import httpx
+from openai import APIConnectionError, APITimeoutError, AsyncOpenAI, RateLimitError
 
 from plotlot.config import settings
 from plotlot.core.types import SearchResult, Setbacks, ZoningReport
 from plotlot.observability.tracing import log_metrics, start_span, trace
 
-# Granular timeouts: fail fast on connect, generous on read (LLM generation)
-LLM_TIMEOUT = httpx.Timeout(connect=10.0, read=60.0, write=10.0, pool=5.0)
-
 logger = logging.getLogger(__name__)
-
-# Provider configs
-NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
-NVIDIA_MODELS = [
-    "meta/llama-3.3-70b-instruct",  # Fast, reliable tool use
-    "moonshotai/kimi-k2.5",  # Strong reasoning, sometimes slow
-]
-NVIDIA_MODEL = NVIDIA_MODELS[0]  # Default primary
-
-GEMINI_CHAT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-GEMINI_MODELS = ["gemini-2.5-flash"]
-
-CLAUDE_MODEL = "claude-sonnet-4-6"
 
 MAX_RETRIES = 2
 BASE_DELAY = 1.0
+DEFAULT_OPENAI_MODEL = "gpt-4.1"
+OPENAI_TIMEOUT_SECONDS = 60.0
 
 
 # ---------------------------------------------------------------------------
-# Circuit Breaker — Stripe "contain, verify, restrict" pattern
-# Prevents wasting retries on a provider that's already failing.
-# States: CLOSED (normal) → OPEN (failing) → HALF_OPEN (testing recovery)
+# Circuit Breaker — contain failures without thrashing the upstream gateway.
 # ---------------------------------------------------------------------------
 
 
@@ -72,21 +55,18 @@ class CircuitBreaker:
         return self._state
 
     def allow_request(self) -> bool:
-        """Check if a request should be allowed through."""
         current = self.state
         if current == "closed":
             return True
         if current == "half_open":
-            return True  # Allow one test request
-        return False  # open — skip this provider
+            return True
+        return False
 
     def record_success(self) -> None:
-        """Record a successful call — reset to closed."""
         self._failure_count = 0
         self._state = "closed"
 
     def record_failure(self) -> None:
-        """Record a failed call — may trip to open."""
         self._failure_count += 1
         self._last_failure_time = time.monotonic()
         if self._failure_count >= self.failure_threshold:
@@ -98,26 +78,17 @@ class CircuitBreaker:
             )
 
 
-# Per-provider circuit breakers (module-level singletons)
-_breakers: dict[str, CircuitBreaker] = {
-    "Claude": CircuitBreaker(),
-    "Gemini/gemini-2.5-flash": CircuitBreaker(),
-    "NVIDIA/llama-3.3-70b-instruct": CircuitBreaker(),
-    "NVIDIA/kimi-k2.5": CircuitBreaker(),
-}
+# Module-level singletons so the health/debug endpoint can inspect state.
+_breakers: dict[str, CircuitBreaker] = {}
 
 
 # ---------------------------------------------------------------------------
-# Tool format conversion — Claude ↔ OpenAI
+# Tool format conversions preserved for compatibility with existing tests.
 # ---------------------------------------------------------------------------
 
 
 def _convert_tools_to_anthropic(tools: list[dict]) -> list[dict]:
-    """Convert OpenAI-format tool definitions to Anthropic tool format.
-
-    OpenAI: {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}
-    Anthropic: {"name": ..., "description": ..., "input_schema": ...}
-    """
+    """Convert OpenAI-format tool definitions to Anthropic tool format."""
     anthropic_tools = []
     for tool in tools:
         fn = tool.get("function", {})
@@ -132,11 +103,7 @@ def _convert_tools_to_anthropic(tools: list[dict]) -> list[dict]:
 
 
 def _convert_tool_calls_from_anthropic(content_blocks: list) -> list[dict]:
-    """Convert Claude's tool_use content blocks to OpenAI-format tool_calls.
-
-    Claude: {"type": "tool_use", "id": ..., "name": ..., "input": {...}}
-    OpenAI: {"id": ..., "type": "function", "function": {"name": ..., "arguments": "..."}}
-    """
+    """Convert Claude-style tool_use blocks to OpenAI-style tool_calls."""
     tool_calls = []
     for block in content_blocks:
         if isinstance(block, dict) and block.get("type") == "tool_use":
@@ -167,11 +134,7 @@ def _convert_tool_calls_from_anthropic(content_blocks: list) -> list[dict]:
 
 
 def _convert_messages_for_anthropic(messages: list[dict]) -> tuple[str, list[dict]]:
-    """Convert OpenAI-format messages to Anthropic format.
-
-    Returns (system_prompt, messages) — Claude requires system as a separate param.
-    Also converts tool result messages to Anthropic format.
-    """
+    """Convert OpenAI-format messages to Anthropic-style messages."""
     system_prompt = ""
     anthropic_messages = []
 
@@ -183,7 +146,6 @@ def _convert_messages_for_anthropic(messages: list[dict]) -> tuple[str, list[dic
             continue
 
         if role == "tool":
-            # Anthropic uses role="user" with tool_result content blocks
             anthropic_messages.append(
                 {
                     "role": "user",
@@ -204,7 +166,6 @@ def _convert_messages_for_anthropic(messages: list[dict]) -> tuple[str, list[dic
             if text_content:
                 content_parts.append({"type": "text", "text": text_content})
 
-            # Convert tool_calls to tool_use blocks
             for tc in msg.get("tool_calls", []):
                 fn = tc.get("function", {})
                 args_str = fn.get("arguments", "{}")
@@ -227,328 +188,165 @@ def _convert_messages_for_anthropic(messages: list[dict]) -> tuple[str, list[dic
                 anthropic_messages.append({"role": "assistant", "content": ""})
             continue
 
-        # user messages
-        anthropic_messages.append(
-            {
-                "role": "user",
-                "content": msg.get("content", ""),
-            }
-        )
+        anthropic_messages.append({"role": "user", "content": msg.get("content", "")})
 
     return system_prompt, anthropic_messages
 
 
 # ---------------------------------------------------------------------------
-# Claude provider (primary)
+# OpenAI client helpers
 # ---------------------------------------------------------------------------
 
 
-async def _call_claude(
-    messages: list[dict],
-    tools: list[dict] | None = None,
-) -> dict | None:
-    """Call Claude Sonnet 4.6 via the Anthropic SDK.
+def _get_openai_token() -> str:
+    """Return the bearer token the OpenAI SDK should use."""
+    return settings.openai_access_token or settings.openai_api_key
 
-    Returns same interface as _call_provider_raw:
-        {"content": str, "tool_calls": list} or None on failure.
-    """
-    if not settings.anthropic_api_key:
-        return None
 
-    breaker = _breakers.get("Claude")
-    if breaker and not breaker.allow_request():
-        logger.info("Circuit breaker OPEN for Claude — skipping")
-        return None
+def _get_openai_model() -> str:
+    return settings.openai_model or DEFAULT_OPENAI_MODEL
 
-    with start_span(name="llm_provider_claude", span_type="CHAT_MODEL") as span:
-        span.set_inputs(
+
+def _get_openai_client() -> AsyncOpenAI:
+    kwargs: dict = {
+        "api_key": _get_openai_token(),
+        "timeout": OPENAI_TIMEOUT_SECONDS,
+    }
+    if settings.openai_base_url:
+        kwargs["base_url"] = settings.openai_base_url
+    return AsyncOpenAI(**kwargs)
+
+
+def _get_breaker(provider_name: str) -> CircuitBreaker:
+    breaker = _breakers.get(provider_name)
+    if breaker is None:
+        breaker = CircuitBreaker()
+        _breakers[provider_name] = breaker
+    return breaker
+
+
+def _message_to_tool_calls(message) -> list[dict]:
+    tool_calls = []
+    for call in message.tool_calls or []:
+        tool_calls.append(
             {
-                "provider": "Claude",
-                "model": CLAUDE_MODEL,
-                "message_count": len(messages),
+                "id": call.id,
+                "type": "function",
+                "function": {
+                    "name": call.function.name,
+                    "arguments": call.function.arguments,
+                },
             }
         )
+    return tool_calls
 
-        try:
-            import anthropic
 
-            client = anthropic.AsyncAnthropic(
-                api_key=settings.anthropic_api_key,
-                timeout=60.0,
-            )
-
-            system_prompt, anthropic_messages = _convert_messages_for_anthropic(messages)
-
-            kwargs: dict = {
-                "model": CLAUDE_MODEL,
-                "max_tokens": 4000,
-                "messages": anthropic_messages,
+def _log_usage(provider_slug: str, usage) -> tuple[int, int]:
+    prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
+    completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+    if prompt_tokens or completion_tokens:
+        log_metrics(
+            {
+                f"{provider_slug}_prompt_tokens": float(prompt_tokens),
+                f"{provider_slug}_completion_tokens": float(completion_tokens),
+                f"{provider_slug}_total_tokens": float(prompt_tokens + completion_tokens),
             }
-            if system_prompt:
-                kwargs["system"] = system_prompt
-            if tools:
-                kwargs["tools"] = _convert_tools_to_anthropic(tools)
-                kwargs["tool_choice"] = {"type": "auto"}
-
-            response = await client.messages.create(**kwargs)
-
-            # Extract text content
-            text_content = ""
-            for block in response.content:
-                if hasattr(block, "type") and block.type == "text":
-                    text_content = block.text
-
-            # Extract tool calls
-            tool_calls = _convert_tool_calls_from_anthropic(response.content)
-
-            # Log token usage
-            usage = response.usage
-            prompt_tokens = usage.input_tokens if usage else 0
-            completion_tokens = usage.output_tokens if usage else 0
-
-            span.set_outputs(
-                {
-                    "has_content": bool(text_content),
-                    "has_tool_calls": bool(tool_calls),
-                    "prompt_tokens": prompt_tokens,
-                    "completion_tokens": completion_tokens,
-                }
-            )
-            if prompt_tokens or completion_tokens:
-                log_metrics(
-                    {
-                        "claude_prompt_tokens": float(prompt_tokens),
-                        "claude_completion_tokens": float(completion_tokens),
-                        "claude_total_tokens": float(prompt_tokens + completion_tokens),
-                    }
-                )
-
-            if breaker:
-                breaker.record_success()
-
-            logger.info(
-                "Claude response: text=%d chars, tool_calls=%d",
-                len(text_content),
-                len(tool_calls),
-            )
-
-            return {
-                "content": text_content,
-                "tool_calls": tool_calls,
-            }
-
-        except Exception as e:
-            logger.error("Claude failed: %s: %s", type(e).__name__, e)
-            if breaker:
-                breaker.record_failure()
-            span.set_outputs({"error": f"{type(e).__name__}: {e}"})
-            return None
-
-
-async def _stream_claude(messages: list[dict]):
-    """Stream tokens from Claude for conversational chat."""
-    if not settings.anthropic_api_key:
-        raise RuntimeError("No Anthropic API key")
-
-    breaker = _breakers.get("Claude")
-    if breaker and not breaker.allow_request():
-        raise RuntimeError("Claude circuit breaker OPEN")
-
-    try:
-        import anthropic
-
-        client = anthropic.AsyncAnthropic(
-            api_key=settings.anthropic_api_key,
-            timeout=60.0,
         )
-
-        system_prompt, anthropic_messages = _convert_messages_for_anthropic(messages)
-
-        kwargs: dict = {
-            "model": CLAUDE_MODEL,
-            "max_tokens": 2000,
-            "messages": anthropic_messages,
-        }
-        if system_prompt:
-            kwargs["system"] = system_prompt
-
-        async with client.messages.stream(**kwargs) as stream:
-            async for text in stream.text_stream:
-                yield text
-
-        if breaker:
-            breaker.record_success()
-
-    except Exception as e:
-        logger.warning("Claude streaming failed: %s", e)
-        if breaker:
-            breaker.record_failure()
-        raise
+    return prompt_tokens, completion_tokens
 
 
 # ---------------------------------------------------------------------------
-# Core provider call (shared by Gemini and NVIDIA — OpenAI-compatible)
+# Core provider calls
 # ---------------------------------------------------------------------------
 
 
-async def _call_provider_raw(
-    client: httpx.AsyncClient,
-    url: str,
-    headers: dict,
-    payload: dict,
+async def _call_openai(
+    messages: list[dict],
+    *,
+    tools: list[dict] | None = None,
+    response_format: dict | None = None,
+    max_completion_tokens: int = 4000,
+    temperature: float = 0.1,
     provider_name: str,
 ) -> dict | None:
-    """Call a provider and return the raw message dict (content + tool_calls).
+    """Call Chat Completions via the official OpenAI SDK."""
+    if not _get_openai_token():
+        return None
 
-    Integrates circuit breaker (skip providers that are failing) and
-    token usage extraction (log to MLflow for cost tracking).
-    """
-    # Auto-create breakers for new provider/model combos
-    if provider_name not in _breakers:
-        _breakers[provider_name] = CircuitBreaker()
-    breaker = _breakers[provider_name]
+    breaker = _get_breaker(provider_name)
     if not breaker.allow_request():
         logger.info("Circuit breaker OPEN for %s — skipping", provider_name)
         return None
 
-    with start_span(
-        name=f"llm_provider_{provider_name.lower()}",
-        span_type="CHAT_MODEL",
-    ) as span:
+    with start_span(name=f"llm_provider_{provider_name.lower()}", span_type="CHAT_MODEL") as span:
+        model = _get_openai_model()
         span.set_inputs(
             {
                 "provider": provider_name,
-                "model": payload.get("model", ""),
-                "message_count": len(payload.get("messages", [])),
+                "model": model,
+                "message_count": len(messages),
             }
         )
         retries_used = 0
 
         for attempt in range(MAX_RETRIES):
             try:
-                resp = await client.post(url, json=payload, headers=headers)
-                resp.raise_for_status()
-                data = resp.json()
-                message = data["choices"][0]["message"]
+                client = _get_openai_client()
+                kwargs: dict = {
+                    "model": cast(Any, model),
+                    "messages": cast(Any, messages),
+                    "temperature": temperature,
+                    "max_completion_tokens": max_completion_tokens,
+                    "reasoning_effort": cast(Any, settings.openai_reasoning_effort),
+                    "parallel_tool_calls": False,
+                }
+                if tools:
+                    kwargs["tools"] = tools
+                    kwargs["tool_choice"] = "auto"
+                if response_format:
+                    kwargs["response_format"] = response_format
 
-                # --- Kimi K2.5 fix: content may be null with reasoning in separate field ---
-                if not message.get("content"):
-                    # Check reasoning_content (Kimi K2.5) or reasoning (other models)
-                    reasoning = message.get("reasoning_content") or message.get("reasoning")
-                    if reasoning:
-                        message["content"] = reasoning
-                        logger.info(
-                            "%s: used reasoning_content field (content was null)",
-                            provider_name,
-                        )
-
-                logger.info("LLM response from %s (model=%s)", provider_name, payload.get("model"))
-
-                # Extract token usage for cost tracking
-                usage = data.get("usage", {})
-                prompt_tokens = usage.get("prompt_tokens", 0)
-                completion_tokens = usage.get("completion_tokens", 0)
+                response = await client.chat.completions.create(**kwargs)
+                message = response.choices[0].message
+                tool_calls = _message_to_tool_calls(message)
+                prompt_tokens, completion_tokens = _log_usage("openai", response.usage)
 
                 span.set_outputs(
                     {
-                        "has_content": bool(message.get("content")),
-                        "has_tool_calls": bool(message.get("tool_calls")),
+                        "has_content": bool(message.content),
+                        "has_tool_calls": bool(tool_calls),
                         "retries": retries_used,
                         "prompt_tokens": prompt_tokens,
                         "completion_tokens": completion_tokens,
                     }
                 )
-                if prompt_tokens or completion_tokens:
-                    log_metrics(
-                        {
-                            f"{provider_name.lower()}_prompt_tokens": float(prompt_tokens),
-                            f"{provider_name.lower()}_completion_tokens": float(completion_tokens),
-                            f"{provider_name.lower()}_total_tokens": float(
-                                prompt_tokens + completion_tokens
-                            ),
-                        }
-                    )
 
-                if breaker:
-                    breaker.record_success()
-                return message  # type: ignore[no-any-return]
-
-            except httpx.HTTPStatusError as e:
-                retries_used += 1
-                if e.response.status_code == 429 or e.response.status_code >= 500:
-                    delay = BASE_DELAY * (2**attempt)
-                    logger.warning(
-                        "%s %d (attempt %d/%d), retrying in %.1fs",
-                        provider_name,
-                        e.response.status_code,
-                        attempt + 1,
-                        MAX_RETRIES,
-                        delay,
-                    )
-                    await asyncio.sleep(delay)
-                else:
-                    logger.error(
-                        "%s error %d: %s",
-                        provider_name,
-                        e.response.status_code,
-                        e.response.text[:200] if hasattr(e.response, "text") else str(e),
-                    )
-                    if breaker:
-                        breaker.record_failure()
-                    span.set_outputs(
-                        {"error": f"http_{e.response.status_code}", "retries": retries_used}
-                    )
-                    return None
-            except (KeyError, IndexError) as e:
-                logger.error("Unexpected %s response structure: %s", provider_name, e)
-                if breaker:
-                    breaker.record_failure()
-                span.set_outputs({"error": f"parse_error: {e}", "retries": retries_used})
-                return None
-            except httpx.TimeoutException:
+                breaker.record_success()
+                return {
+                    "content": message.content or "",
+                    "tool_calls": tool_calls,
+                }
+            except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
                 retries_used += 1
                 delay = BASE_DELAY * (2**attempt)
                 logger.warning(
-                    "%s timeout (attempt %d/%d), retrying in %.1fs",
+                    "%s transient error %s (attempt %d/%d), retrying in %.1fs",
                     provider_name,
+                    type(exc).__name__,
                     attempt + 1,
                     MAX_RETRIES,
                     delay,
                 )
                 await asyncio.sleep(delay)
-
-        # Final attempt
-        try:
-            resp = await client.post(url, json=payload, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-            message = data["choices"][0]["message"]
-
-            # Kimi fix on final attempt too
-            if not message.get("content"):
-                reasoning = message.get("reasoning_content") or message.get("reasoning")
-                if reasoning:
-                    message["content"] = reasoning
-
-            usage = data.get("usage", {})
-            span.set_outputs(
-                {
-                    "has_content": bool(message.get("content")),
-                    "has_tool_calls": bool(message.get("tool_calls")),
-                    "retries": retries_used,
-                    "prompt_tokens": usage.get("prompt_tokens", 0),
-                    "completion_tokens": usage.get("completion_tokens", 0),
-                }
-            )
-            if breaker:
-                breaker.record_success()
-            return message  # type: ignore[no-any-return]
-        except Exception as e:
-            logger.error("%s failed after all retries: %s", provider_name, e)
-            if breaker:
+            except Exception as exc:
+                logger.error("%s failed: %s: %s", provider_name, type(exc).__name__, exc)
                 breaker.record_failure()
-            span.set_outputs({"error": str(e), "retries": retries_used})
-            return None
+                span.set_outputs({"error": f"{type(exc).__name__}: {exc}", "retries": retries_used})
+                return None
+
+        breaker.record_failure()
+        span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -561,174 +359,56 @@ async def call_llm(
     messages: list[dict],
     tools: list[dict] | None = None,
 ) -> dict | None:
-    """Call the LLM with tool definitions and return the response.
-
-    Three-provider fallback chain: Claude → Gemini → NVIDIA NIM.
-    Each provider has its own circuit breaker.
-
-    Returns:
-        Dict with 'content' (str) and 'tool_calls' (list), or None on failure.
-    """
-    # Clean messages for API — remove None content, ensure proper format
+    """Call the LLM with tool definitions and return the response."""
     clean_messages = _clean_messages_for_api(messages)
-
-    # --- Provider 1: Claude Sonnet 4.6 (primary) ---
-    result = await _call_claude(clean_messages, tools=tools)
-    if result:
-        return result
-    logger.warning("Claude failed, trying Gemini")
-
-    # --- Provider 2: Gemini (secondary — OpenAI-compatible) ---
-    payload: dict = {
-        "messages": clean_messages,
-        "temperature": 0.1,
-        "max_tokens": 4000,
-    }
-    if tools:
-        payload["tools"] = tools
-        payload["tool_choice"] = "auto"
-
-    async with httpx.AsyncClient(timeout=LLM_TIMEOUT) as client:
-        if settings.google_api_key:
-            gemini_headers = {
-                "Authorization": f"Bearer {settings.google_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in GEMINI_MODELS:
-                gemini_payload = {**payload, "model": model}
-                message = await _call_provider_raw(
-                    client,
-                    GEMINI_CHAT_URL,
-                    gemini_headers,
-                    gemini_payload,
-                    f"Gemini/{model}",
-                )
-                if message:
-                    return {
-                        "content": message.get("content") or "",
-                        "tool_calls": message.get("tool_calls") or [],
-                    }
-                logger.warning("Gemini %s failed, trying next", model)
-        logger.warning("Gemini failed, trying NVIDIA NIM")
-
-        # --- Provider 3: NVIDIA NIM (tertiary) ---
-        if settings.nvidia_api_key:
-            nvidia_headers = {
-                "Authorization": f"Bearer {settings.nvidia_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in NVIDIA_MODELS:
-                nvidia_payload = {**payload, "model": model}
-                message = await _call_provider_raw(
-                    client,
-                    NVIDIA_CHAT_URL,
-                    nvidia_headers,
-                    nvidia_payload,
-                    f"NVIDIA/{model.split('/')[-1]}",
-                )
-                if message:
-                    return {
-                        "content": message.get("content") or "",
-                        "tool_calls": message.get("tool_calls") or [],
-                    }
-                logger.warning("NVIDIA %s failed, trying next model", model)
-
-    logger.error("All LLM providers failed (Claude → Gemini → NVIDIA)")
-    return None
+    return await _call_openai(
+        clean_messages,
+        tools=tools,
+        max_completion_tokens=4000,
+        temperature=0.1,
+        provider_name=f"OpenAI/{_get_openai_model()}",
+    )
 
 
 async def call_llm_stream(messages: list[dict]):
-    """Stream LLM response tokens for conversational chat.
+    """Stream LLM response tokens for conversational chat."""
+    if not _get_openai_token():
+        logger.error("OpenAI streaming requested with no configured credentials")
+        return
 
-    Yields string chunks as they arrive from the provider.
-    Three-provider fallback: Claude → Gemini → NVIDIA NIM.
-    """
     clean_messages = _clean_messages_for_api(messages)
+    provider_name = f"OpenAI/{_get_openai_model()}"
+    breaker = _get_breaker(provider_name)
+    if not breaker.allow_request():
+        logger.error("Circuit breaker OPEN for %s — skipping stream", provider_name)
+        return
 
-    # --- Provider 1: Claude streaming ---
-    if settings.anthropic_api_key:
-        try:
-            async for chunk in _stream_claude(clean_messages):
-                yield chunk
-            return
-        except Exception as e:
-            logger.warning("Claude streaming failed: %s, trying Gemini", e)
-
-    # --- Provider 2: Gemini streaming ---
-    payload = {
-        "messages": clean_messages,
-        "temperature": 0.3,
-        "max_tokens": 2000,
-        "stream": True,
-    }
-
-    async with httpx.AsyncClient(timeout=LLM_TIMEOUT) as client:
-        if settings.google_api_key:
-            headers = {
-                "Authorization": f"Bearer {settings.google_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in GEMINI_MODELS:
-                try:
-                    async for chunk in _stream_provider(
-                        client,
-                        GEMINI_CHAT_URL,
-                        headers,
-                        {**payload, "model": model},
-                        f"Gemini/{model}",
-                    ):
-                        yield chunk
-                    return
-                except Exception as e:
-                    logger.warning("Gemini %s streaming failed: %s, trying next", model, e)
-
-        # --- Provider 3: NVIDIA NIM streaming ---
-        if settings.nvidia_api_key:
-            headers = {
-                "Authorization": f"Bearer {settings.nvidia_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in NVIDIA_MODELS:
-                try:
-                    async for chunk in _stream_provider(
-                        client,
-                        NVIDIA_CHAT_URL,
-                        headers,
-                        {**payload, "model": model},
-                        f"NVIDIA/{model.split('/')[-1]}",
-                    ):
-                        yield chunk
-                    return
-                except Exception as e:
-                    logger.warning("NVIDIA %s streaming failed: %s, trying next", model, e)
-
-    logger.error("All LLM providers failed for streaming")
-
-
-async def _stream_provider(
-    client: httpx.AsyncClient,
-    url: str,
-    headers: dict,
-    payload: dict,
-    provider_name: str,
-):
-    """Stream tokens from an OpenAI-compatible provider."""
-    async with client.stream("POST", url, json=payload, headers=headers) as resp:
-        resp.raise_for_status()
-        async for line in resp.aiter_lines():
-            if not line.startswith("data: "):
-                continue
-            data = line[6:].strip()
-            if data == "[DONE]":
-                return
-            try:
-                chunk = json.loads(data)
-                delta = chunk["choices"][0].get("delta", {})
-                content = delta.get("content")
-                if content:
-                    yield content
-            except (json.JSONDecodeError, KeyError, IndexError):
-                continue
+    try:
+        client = _get_openai_client()
+        stream = await client.chat.completions.create(
+            model=cast(Any, _get_openai_model()),
+            messages=cast(Any, clean_messages),
+            temperature=0.3,
+            max_completion_tokens=2000,
+            reasoning_effort=cast(Any, settings.openai_reasoning_effort),
+            stream=True,
+        )
+        async for chunk in stream:
+            for choice in chunk.choices:
+                delta = choice.delta.content
+                if not delta:
+                    continue
+                if isinstance(delta, str):
+                    yield delta
+                    continue
+                for part in delta:
+                    text = getattr(part, "text", None)
+                    if text:
+                        yield text
+        breaker.record_success()
+    except Exception as exc:
+        breaker.record_failure()
+        logger.error("OpenAI streaming failed: %s: %s", type(exc).__name__, exc)
 
 
 def _clean_messages_for_api(messages: list[dict]) -> list[dict]:
@@ -737,18 +417,15 @@ def _clean_messages_for_api(messages: list[dict]) -> list[dict]:
     for msg in messages:
         clean = {"role": msg["role"]}
 
-        # Handle content
         content = msg.get("content")
         if content is not None:
             clean["content"] = content
         elif msg["role"] == "assistant":
             clean["content"] = ""
 
-        # Handle tool_calls on assistant messages
         if msg.get("tool_calls"):
             clean["tool_calls"] = msg["tool_calls"]
 
-        # Handle tool results
         if msg["role"] == "tool":
             clean["tool_call_id"] = msg.get("tool_call_id", "")
             if "content" not in clean:
@@ -835,10 +512,7 @@ async def analyze_zoning(
     county: str,
     results: list[SearchResult],
 ) -> dict:
-    """One-shot zoning analysis (non-agentic).
-
-    Three-provider fallback: Claude → Gemini → NVIDIA NIM.
-    """
+    """One-shot zoning analysis (non-agentic)."""
     if not results:
         logger.warning("No search results to analyze")
         return {}
@@ -848,64 +522,22 @@ async def analyze_zoning(
         {"role": "user", "content": _build_user_prompt(address, municipality, county, results)},
     ]
 
-    # --- Provider 1: Claude ---
-    result = await _call_claude(messages)
-    if result and result.get("content"):
-        try:
-            return _parse_llm_content(result["content"])
-        except json.JSONDecodeError as e:
-            logger.error("Failed to parse Claude response: %s", e)
+    result = await _call_openai(
+        messages,
+        response_format={"type": "json_object"},
+        max_completion_tokens=2000,
+        temperature=0.1,
+        provider_name=f"OpenAI/{_get_openai_model()}",
+    )
+    if not result or not result.get("content"):
+        logger.error("OpenAI failed for analyze_zoning")
+        return {}
 
-    # --- Provider 2: Gemini, Provider 3: NVIDIA ---
-    payload_base: dict = {
-        "messages": messages,
-        "temperature": 0.1,
-        "max_tokens": 2000,
-    }
-
-    async with httpx.AsyncClient(timeout=LLM_TIMEOUT) as client:
-        # Gemini
-        if settings.google_api_key:
-            gemini_headers = {
-                "Authorization": f"Bearer {settings.google_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in GEMINI_MODELS:
-                message = await _call_provider_raw(
-                    client,
-                    GEMINI_CHAT_URL,
-                    gemini_headers,
-                    {**payload_base, "model": model},
-                    f"Gemini/{model}",
-                )
-                if message and message.get("content"):
-                    try:
-                        return _parse_llm_content(message["content"])
-                    except json.JSONDecodeError as e:
-                        logger.error("Failed to parse Gemini %s response: %s", model, e)
-
-        # NVIDIA NIM
-        if settings.nvidia_api_key:
-            nvidia_headers = {
-                "Authorization": f"Bearer {settings.nvidia_api_key}",
-                "Content-Type": "application/json",
-            }
-            for model in NVIDIA_MODELS:
-                message = await _call_provider_raw(
-                    client,
-                    NVIDIA_CHAT_URL,
-                    nvidia_headers,
-                    {**payload_base, "model": model},
-                    f"NVIDIA/{model.split('/')[-1]}",
-                )
-                if message and message.get("content"):
-                    try:
-                        return _parse_llm_content(message["content"])
-                    except json.JSONDecodeError as e:
-                        logger.error("Failed to parse NVIDIA %s response: %s", model, e)
-
-    logger.error("All LLM providers failed for analyze_zoning")
-    return {}
+    try:
+        return _parse_llm_content(result["content"])
+    except json.JSONDecodeError as exc:
+        logger.error("Failed to parse OpenAI response: %s", exc)
+        return {}
 
 
 def llm_response_to_report(

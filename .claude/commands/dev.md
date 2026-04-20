@@ -1,3 +1,7 @@
+---
+model: haiku
+allowed-tools: Bash, Read
+---
 Start local development servers for PlotLot.
 
 ## Steps

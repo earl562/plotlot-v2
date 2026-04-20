@@ -1,4 +1,4 @@
-"""Tests for LLM client — three-provider fallback chain."""
+"""Tests for the OpenAI SDK-backed LLM client."""
 
 import json
 
@@ -143,35 +143,36 @@ class TestAnalyzeZoning:
         assert result == {}
 
     @pytest.mark.asyncio
-    async def test_claude_primary_success(self):
-        """Test that Claude is tried first when API key is present."""
-        import anthropic as _anthropic
-
+    async def test_openai_primary_success(self):
         mock_response = MagicMock()
-        mock_response.content = [
+        mock_response.choices = [
             MagicMock(
-                type="text",
-                text=json.dumps(
-                    {
-                        "zoning_district": "RS-4",
-                        "summary": "Residential district",
-                        "confidence": "high",
-                    }
+                message=MagicMock(
+                    content=json.dumps(
+                        {
+                            "zoning_district": "RS-4",
+                            "summary": "Residential district",
+                            "confidence": "high",
+                        }
+                    ),
+                    tool_calls=[],
                 ),
             )
         ]
-        mock_response.usage = MagicMock(input_tokens=100, output_tokens=50)
+        mock_response.usage = MagicMock(prompt_tokens=100, completion_tokens=50)
 
-        mock_client = AsyncMock()
-        mock_client.messages.create = AsyncMock(return_value=mock_response)
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         with (
             patch("plotlot.retrieval.llm.settings") as mock_settings,
-            patch.object(_anthropic, "AsyncAnthropic", return_value=mock_client),
+            patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client),
         ):
-            mock_settings.anthropic_api_key = "test_key"
-            mock_settings.google_api_key = ""
-            mock_settings.nvidia_api_key = ""
+            mock_settings.openai_api_key = "test_key"
+            mock_settings.openai_access_token = ""
+            mock_settings.openai_base_url = "https://api.openai.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
 
             result = await analyze_zoning(
                 "123 Main St",
@@ -185,9 +186,8 @@ class TestAnalyzeZoning:
     @pytest.mark.asyncio
     async def test_no_api_keys(self):
         with patch("plotlot.retrieval.llm.settings") as mock_settings:
-            mock_settings.anthropic_api_key = ""
-            mock_settings.google_api_key = ""
-            mock_settings.nvidia_api_key = ""
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = ""
 
             result = await analyze_zoning(
                 "123 Main St",
@@ -199,42 +199,36 @@ class TestAnalyzeZoning:
         assert result == {}
 
     @pytest.mark.asyncio
-    async def test_nvidia_fallback_with_kimi_reasoning_fix(self):
-        """Test that Kimi's reasoning_content field is used when content is null."""
-        llm_response = {
-            "choices": [
-                {
-                    "message": {
-                        "content": None,
-                        "reasoning_content": json.dumps(
-                            {
-                                "zoning_district": "RS-4",
-                                "summary": "From reasoning",
-                                "confidence": "medium",
-                            }
-                        ),
-                    }
-                }
-            ],
-            "usage": {"prompt_tokens": 50, "completion_tokens": 30},
-        }
+    async def test_oauth_access_token_is_accepted(self):
+        mock_response = MagicMock()
+        mock_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content=json.dumps(
+                        {
+                            "zoning_district": "RS-4",
+                            "summary": "From oauth",
+                            "confidence": "medium",
+                        }
+                    ),
+                    tool_calls=[],
+                ),
+            )
+        ]
+        mock_response.usage = MagicMock(prompt_tokens=50, completion_tokens=30)
 
-        mock_resp = MagicMock()
-        mock_resp.json.return_value = llm_response
-        mock_resp.raise_for_status = MagicMock()
-
-        mock_client = AsyncMock()
-        mock_client.post.return_value = mock_resp
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         with (
-            patch("plotlot.retrieval.llm.httpx.AsyncClient", return_value=mock_client),
+            patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client),
             patch("plotlot.retrieval.llm.settings") as mock_settings,
         ):
-            mock_settings.anthropic_api_key = ""
-            mock_settings.google_api_key = ""
-            mock_settings.nvidia_api_key = "test_nvidia_key"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = "oauth-access-token"
+            mock_settings.openai_base_url = "https://gateway.example.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
 
             result = await analyze_zoning(
                 "123 Main St",

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
@@ -8,13 +10,14 @@ export default defineConfig({
   workers: 1,
   reporter: [["html", { open: "never" }], ["list"]],
   timeout: 120_000,
+  globalSetup: require.resolve("./tests/global-setup"),
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: BASE_URL,
     trace: "retain-on-failure",
-    screenshot: "on",
+    screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
-  outputDir: "./tests/screenshots",
+  outputDir: "./test-results",
   projects: [
     {
       name: "chromium",
@@ -24,9 +27,10 @@ export default defineConfig({
   webServer: [
     {
       command: "npm run dev",
-      url: "http://localhost:3000",
+      url: BASE_URL,
       reuseExistingServer: true,
       timeout: 30_000,
+      env: { PLAYWRIGHT_TESTING: "1" },
     },
   ],
 });

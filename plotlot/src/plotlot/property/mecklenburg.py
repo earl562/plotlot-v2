@@ -33,6 +33,7 @@ class MecklenburgProvider(PropertyProvider):
         *,
         lat: float | None = None,
         lng: float | None = None,
+        state: str = "",
     ) -> PropertyRecord | None:
         """Look up property record from Mecklenburg County GIS.
 
@@ -79,7 +80,7 @@ class MecklenburgProvider(PropertyProvider):
         # Clean address for query — take street address before first comma
         clean_addr = address.split(",")[0].strip().upper()
 
-        params = {
+        params: dict[str, str | int] = {
             "where": f"UPPER(SITE_ADDR) LIKE '%{clean_addr}%'",
             "outFields": "*",
             "returnGeometry": "false",

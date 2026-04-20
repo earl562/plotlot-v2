@@ -197,7 +197,11 @@ export default function AddressAutocomplete({
   };
 
   return (
-    <div ref={wrapperRef} className="relative z-50 flex-1">
+    <div
+      ref={wrapperRef}
+      className="relative z-50 flex-1"
+      data-testid="lookup-autocomplete"
+    >
       <input
         ref={inputRef}
         type="text"
@@ -210,10 +214,14 @@ export default function AddressAutocomplete({
         className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-stone-400 outline-none"
         autoComplete="off"
         aria-label={placeholder || "Enter an address"}
+        data-testid="lookup-input"
       />
       {/* Loading indicator */}
       {isSearching && !showDropdown && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg">
+        <div
+          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg"
+          data-testid="lookup-suggestions-loading"
+        >
           <div className="flex items-center gap-2 px-3 py-3 text-xs text-stone-500">
             <svg
               className="h-3.5 w-3.5 animate-spin"
@@ -239,11 +247,15 @@ export default function AddressAutocomplete({
         </div>
       )}
       {showDropdown && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg">
+        <div
+          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg"
+          data-testid="lookup-suggestions"
+        >
           {suggestions.map((s, index) => (
             <button
               key={s.id}
               onClick={() => handleSelect(s)}
+              data-testid={`lookup-suggestion-${index}`}
               className={`flex w-full items-center gap-3 px-3 py-3 text-left text-sm transition-colors ${
                 index === selectedIndex
                   ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
@@ -269,7 +281,7 @@ export default function AddressAutocomplete({
             </button>
           ))}
           {/* Google attribution (required by TOS when using Places API) */}
-          {serviceRef.current && (
+          {places && (
             <div className="flex justify-end border-t border-[var(--border)] px-3 py-1.5">
               <span className="text-[9px] text-stone-400">Powered by Google</span>
             </div>

@@ -6,7 +6,7 @@ import ModeToggle from "@/components/ModeToggle";
 import type { AppMode } from "@/components/ModeToggle";
 import AnalysisStream from "@/components/AnalysisStream";
 import ZoningReport from "@/components/ZoningReport";
-import { PipelineStatus, ZoningReportData, streamAnalysis, saveAnalysis } from "@/lib/api";
+import { AnalysisError, PipelineStatus, ZoningReportData, streamAnalysis, saveAnalysis } from "@/lib/api";
 
 interface QuickLookupProps {
   onSwitchToChat?: (report: ZoningReportData) => void;
@@ -19,12 +19,14 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
   const [isProcessing, setIsProcessing] = useState(false);
   const [steps, setSteps] = useState<PipelineStatus[]>([]);
   const [report, setReport] = useState<ZoningReportData | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AnalysisError | null>(null);
+  const [lastAddress, setLastAddress] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const runAnalysis = useCallback(async (address: string) => {
     setIsProcessing(true);
+    setLastAddress(address);
     setSteps([{ step: "connecting", message: "Connecting..." }]);
     setReport(null);
     setError(null);
@@ -54,13 +56,16 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
           setReport(result);
           setSteps([]);
         },
-        (err) => {
+        (err: AnalysisError) => {
           setError(err);
           setSteps([]);
         },
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
+      setError({
+        detail: err instanceof Error ? err.message : "Connection failed",
+        errorType: "network_error",
+      });
       setSteps([]);
     } finally {
       setIsProcessing(false);
@@ -88,6 +93,7 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
     setSteps([]);
     setError(null);
     setInput("");
+    setLastAddress(null);
     setSaveStatus("idle");
     setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
@@ -150,13 +156,24 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
       {error && steps.length === 0 && (
         <div className="mx-auto max-w-xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <p className="font-medium">Analysis failed</p>
-          <p className="mt-1">{error}</p>
-          <button
-            onClick={handleReset}
-            className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
-          >
-            Try another address
-          </button>
+          <p className="mt-1">{error.detail}</p>
+          <div className="mt-3 flex gap-2">
+            {(error.errorType === "timeout" || error.errorType === "backend_unavailable" || error.errorType === "network_error") && lastAddress && (
+              <button
+                onClick={() => runAnalysis(lastAddress)}
+                disabled={isProcessing}
+                className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-40"
+              >
+                Retry
+              </button>
+            )}
+            <button
+              onClick={handleReset}
+              className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+            >
+              Try another address
+            </button>
+          </div>
         </div>
       )}
 

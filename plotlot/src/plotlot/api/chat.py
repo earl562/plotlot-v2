@@ -153,6 +153,15 @@ _sessions = SessionStore()
 AGENT_SYSTEM_PROMPT = get_active_prompt("chat_agent")
 
 
+def _llm_unavailable_detail() -> str:
+    if not (settings.openai_access_token or settings.openai_api_key):
+        return (
+            "Chat is temporarily unavailable because no LLM credentials are configured. "
+            "Set OPENAI_API_KEY or OPENAI_ACCESS_TOKEN to enable agent responses."
+        )
+    return "Chat is temporarily unavailable because the LLM returned an empty response."
+
+
 def _build_report_context(report) -> str:
     """Summarize the ZoningReport for the agent's context."""
     if not report:
@@ -1450,7 +1459,7 @@ async def chat(request: ChatRequest):
                 response = await call_llm(messages, tools=turn_tools)
 
                 if not response:
-                    yield _sse_event("error", {"detail": "LLM returned empty response"})
+                    yield _sse_event("error", {"detail": _llm_unavailable_detail()})
                     return
 
                 # Track token usage from response (estimated from content length)

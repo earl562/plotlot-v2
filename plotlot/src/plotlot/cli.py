@@ -5,14 +5,15 @@ import logging
 import sys
 
 from plotlot.config import settings
-from plotlot.observability.tracing import enable_async_logging, set_experiment, set_tracking_uri
+from plotlot.observability.tracing import configure_mlflow
 
 
 def _init_mlflow() -> None:
     """Initialize MLflow tracking for the current process."""
-    set_tracking_uri(settings.mlflow_tracking_uri)
-    set_experiment(settings.mlflow_experiment_name)
-    enable_async_logging()
+    if not configure_mlflow(settings.mlflow_tracking_uri, settings.mlflow_experiment_name):
+        logging.getLogger(__name__).warning(
+            "MLflow tracing unavailable — continuing without tracing"
+        )
 
 
 def main() -> None:
@@ -211,27 +212,56 @@ def ingest_main() -> None:
 
     from plotlot.core.types import MUNICODE_CONFIGS
 
-    if len(sys.argv) < 2 or sys.argv[1] == "--help":
-        print("Usage: plotlot-ingest [--all | --discover | <municipality_key>]")
+    args = sys.argv[1:]
+    if not args or args[0] == "--help":
+        print("Usage: plotlot-ingest [--all | --discover | --state XX | --resume ID | <key>]")
         print(f"  Fallback keys: {', '.join(MUNICODE_CONFIGS)}")
-        print("  --all:      Ingest all discovered municipalities (~73)")
-        print("  --discover: Run discovery and print all found municipalities")
-        print("  <key>:      Ingest a single municipality by key")
-        sys.exit(0 if sys.argv[1:] == ["--help"] else 1)
+        print("  --all              Ingest all discovered municipalities (FL, NC, TX, GA, SC)")
+        print("  --state FL         Ingest only one state (FL, NC, TX, GA, SC)")
+        print("  --resume BATCH_ID  Resume a previously interrupted batch")
+        print("  --discover         Run discovery across all 5 states and print results")
+        print("  <key>              Ingest a single municipality by key")
+        sys.exit(0 if "--help" in args else 1)
 
-    if sys.argv[1] == "--discover":
+    if args[0] == "--discover":
         _run_discover()
-    elif sys.argv[1] == "--all":
+    elif args[0] in ("--all", "--state", "--resume"):
         from plotlot.pipeline.ingest import ingest_all
 
-        results = asyncio.run(ingest_all())
+        state_filter = None
+        resume_batch = None
+
+        # Parse flags
+        i = 0
+        while i < len(args):
+            if args[i] == "--state" and i + 1 < len(args):
+                state_filter = args[i + 1]
+                i += 2
+            elif args[i] == "--resume" and i + 1 < len(args):
+                resume_batch = args[i + 1]
+                i += 2
+            else:
+                i += 1
+
+        results = asyncio.run(ingest_all(state_filter=state_filter, resume_batch=resume_batch))
+
+        # Summary grouped by state
+        by_state: dict[str, list[tuple[str, int]]] = {}
+        for key, count in sorted(results.items()):
+            # Infer state from key (configs not available here, just show flat)
+            by_state.setdefault("all", []).append((key, count))
+
         print("\nIngestion results:")
         for key, count in sorted(results.items()):
-            print(f"  {key}: {count} chunks")
+            status = f"{count} chunks" if count > 0 else "FAILED"
+            print(f"  {key:<35} {status}")
+
         total = sum(results.values())
-        print(f"\nTotal: {total} chunks across {len(results)} municipalities")
+        succeeded = sum(1 for v in results.values() if v > 0)
+        failed = sum(1 for v in results.values() if v == 0)
+        print(f"\nTotal: {total} chunks | {succeeded} succeeded | {failed} failed")
     else:
-        key = sys.argv[1]
+        key = args[0]
         from plotlot.pipeline.ingest import ingest_municipality
 
         count = asyncio.run(ingest_municipality(key))
@@ -239,30 +269,36 @@ def ingest_main() -> None:
 
 
 def _run_discover() -> None:
-    """Run municipality discovery and print results."""
-    from plotlot.ingestion.discovery import discover_all
+    """Run municipality discovery across all supported states."""
+    from plotlot.ingestion.discovery import get_all_municode_configs
 
-    print("Discovering municipalities on Municode...")
-    print("(This queries the Municode Library API — takes ~30-60s)\n")
+    print("Discovering municipalities on Municode (FL, NC, TX, GA, SC)...")
+    print("(This queries the Municode Library API — takes ~60-120s)\n")
 
-    configs = asyncio.run(discover_all())
+    configs = asyncio.run(get_all_municode_configs(force_refresh=True))
 
     if not configs:
         print("Discovery returned 0 results. The Library API may be down.")
         return
 
-    by_county: dict[str, list[tuple[str, str]]] = {}
+    by_state: dict[str, dict[str, list[tuple[str, str]]]] = {}
     for key, config in sorted(configs.items()):
+        state = config.state
         county = config.county
-        by_county.setdefault(county, []).append((key, config.municipality))
+        by_state.setdefault(state, {}).setdefault(county, []).append((key, config.municipality))
 
-    for county in sorted(by_county):
-        munis = by_county[county]
-        print(f"\n{county.upper()} ({len(munis)} municipalities):")
-        for key, name in munis:
-            print(f"  {key:<35} {name}")
+    for state in sorted(by_state):
+        state_total = sum(len(munis) for munis in by_state[state].values())
+        print(f"\n{'=' * 60}")
+        print(f"  {state} — {state_total} municipalities")
+        print(f"{'=' * 60}")
+        for county in sorted(by_state[state]):
+            munis = by_state[state][county]
+            print(f"\n  {county.upper()} ({len(munis)}):")
+            for key, name in munis:
+                print(f"    {key:<35} {name}")
 
-    print(f"\nTotal: {len(configs)} municipalities with zoning data on Municode")
+    print(f"\nTotal: {len(configs)} municipalities across {len(by_state)} states")
     print("\nTo ingest all: plotlot-ingest --all")
 
 

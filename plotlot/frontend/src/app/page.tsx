@@ -20,7 +20,10 @@ import DocumentCanvas from "@/components/DocumentCanvas";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputBar from "@/components/InputBar";
 import {
+  AnalysisError,
   PipelineStatus,
+  fetchRuntimeHealth,
+  RuntimeHealthData,
   ZoningReportData,
   ChatMessageData,
   ToolUseEvent,
@@ -55,7 +58,7 @@ interface DisplayMessage {
   report?: ZoningReportData;
   saveStatus?: "idle" | "saving" | "saved" | "error";
   toolActivity?: ToolActivity[];
-  errorType?: "timeout" | "bad_address" | "generic";
+  errorType?: "timeout" | "bad_address" | "backend_unavailable" | "generic";
   retryAddress?: string;
 }
 
@@ -115,6 +118,7 @@ export default function Home() {
   const [contextualSuggestions, setContextualSuggestions] = useState<string[]>([]);
   const [inputError, setInputError] = useState<string | null>(null);
   const [localSessionId, setLocalSessionId] = useState<string | null>(null);
+  const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const idPrefix = useId();
@@ -134,6 +138,36 @@ export default function Home() {
   useEffect(() => {
     inputRef.current?.focus();
   }, [isWelcome]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadHealth = async () => {
+      try {
+        const health = await fetchRuntimeHealth();
+        if (!cancelled) setRuntimeHealth(health);
+      } catch {
+        if (!cancelled) {
+          setRuntimeHealth({
+            status: "degraded",
+            checks: { backend: "unreachable" },
+            runtime: {
+              startup_mode: "degraded",
+              startup_warnings: ["backend_unreachable"],
+            },
+          });
+        }
+      }
+    };
+
+    void loadHealth();
+    const interval = window.setInterval(() => void loadHealth(), 30_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   // Keep refs in sync with state
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -317,11 +351,25 @@ export default function Home() {
             setCurrentReport(report);
             updateMessage(progressId, { report, pipelineSteps: undefined });
           },
-          (error) => {
+          (error: AnalysisError) => {
             // Error recovery UX — provide actionable buttons based on error type
-            const isTimeout = error.toLowerCase().includes("timeout") || error.toLowerCase().includes("timed out");
-            const isBadAddress = error.toLowerCase().includes("geocod") || error.toLowerCase().includes("outside coverage") || error.toLowerCase().includes("could not");
-            let errorContent = `I couldn't analyze that address: ${error}`;
+            const loweredError = error.detail.toLowerCase();
+            const isTimeout = error.errorType === "timeout";
+            const isBadAddress =
+              error.errorType === "bad_address" ||
+              error.errorType === "geocoding_failed" ||
+              error.errorType === "low_accuracy" ||
+              loweredError.includes("geocod") ||
+              loweredError.includes("outside coverage") ||
+              loweredError.includes("could not");
+            const isBackendUnavailable =
+              error.errorType === "backend_unavailable" ||
+              loweredError.includes("backend is offline") ||
+              loweredError.includes("temporarily unavailable");
+
+            let errorContent = isBackendUnavailable
+              ? "PlotLot's analysis backend is temporarily offline. Please try again shortly."
+              : `I couldn't analyze that address: ${error.detail}`;
             if (isTimeout) {
               errorContent += "\n\nThe server took too long to respond. This can happen during the first request. Click **Retry** to try again.";
             } else if (isBadAddress) {
@@ -331,7 +379,7 @@ export default function Home() {
               role: "assistant",
               content: errorContent,
               pipelineSteps: undefined,
-              errorType: isTimeout ? "timeout" : isBadAddress ? "bad_address" : "generic",
+              errorType: isTimeout ? "timeout" : isBadAddress ? "bad_address" : isBackendUnavailable ? "backend_unavailable" : "generic",
               retryAddress: address,
             } as Partial<DisplayMessage>);
           },
@@ -508,6 +556,8 @@ export default function Home() {
   };
 
   const hasReport = messages.some((m) => m.report);
+  const isBackendDegraded = runtimeHealth?.status === "degraded";
+  const capabilityDetails = runtimeHealth?.capability_details;
 
   // Handle deal type selection in lookup mode — show pipeline approval
   const handleDealTypeSelect = useCallback(
@@ -563,29 +613,82 @@ export default function Home() {
   // ─── Welcome State (both modes) ────────────────────────────────────
   if (isWelcome) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center px-4 pt-[15vh] sm:px-6">
-        {/* Greeting */}
+      <main className="w-full max-w-full overflow-x-hidden px-4 py-8 sm:px-6 lg:px-10">
+        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-6xl flex-col justify-center py-12 md:py-20">
         <motion.div
-          className="mb-10 text-center sm:mb-14"
+          className="mb-6 inline-flex w-fit items-center gap-2 self-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)] shadow-[var(--shadow-card)]"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...springGentle, delay: 0.08 }}
+        >
+          <span className="inline-flex h-2 w-2 rounded-full bg-[var(--brand-strong)]" />
+          PlotLot land intelligence
+        </motion.div>
+
+        <motion.div
+          className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)] lg:items-end"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
-          <motion.div variants={staggerItem} className="mb-4 flex items-center justify-center gap-2">
-            <svg className="h-4 w-4 text-amber-500/70" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 2L12.5 7.5L18 10L12.5 12.5L10 18L7.5 12.5L2 10L7.5 7.5L10 2Z" clipRule="evenodd" />
-            </svg>
-            <span className="text-sm tracking-wide text-[var(--text-muted)]">Hi there</span>
+          <div className="max-w-5xl">
+            <motion.div
+              variants={staggerItem}
+              className="mb-4 text-sm tracking-wide text-[var(--text-muted)]"
+            >
+              Hi there
+            </motion.div>
+            <motion.h1
+              variants={staggerItem}
+              className="max-w-5xl font-display text-[clamp(3.35rem,7vw,6.2rem)] leading-[0.98] text-[var(--text-primary)]"
+            >
+              {mode === "lookup" ? (
+                <>Analyze any property in the US</>
+              ) : (
+                <>Ask anything about zoning &amp; land</>
+              )}
+            </motion.h1>
+            <motion.p variants={staggerItem} className="mt-5 max-w-2xl text-[15px] leading-7 text-[var(--text-secondary)] sm:text-[17px]">
+              {mode === "lookup"
+                ? "Zoning, density, comps, pro forma, and development potential — in seconds. PlotLot gives operators a structured path from address to decision-ready signal."
+                : "Search properties, research zoning codes, or get answers from our database. Use agent mode when you need an exploratory partner, not just a single lookup."}
+            </motion.p>
+          </div>
+
+          <motion.div variants={staggerItem} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-[2rem] border border-[var(--border-soft)] bg-[var(--bg-surface)] p-2 shadow-[var(--shadow-panel)] backdrop-blur-xl">
+              <div className="rounded-[calc(2rem-0.5rem)] border border-white/50 bg-[var(--bg-surface-raised)] p-4 dark:border-white/5">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">Best for</p>
+                <p className="mt-2 text-lg font-medium text-[var(--text-primary)]">
+                  {mode === "lookup" ? "Structured analysis" : "Exploratory research"}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                  {mode === "lookup"
+                    ? "Run a guided property evaluation with explicit gates before the report."
+                    : "Use the assistant for property questions, comps, and follow-up investigation."}
+                </p>
+              </div>
+            </div>
+
+            <div className={`rounded-[2rem] border p-2 shadow-[var(--shadow-card)] backdrop-blur-xl ${isBackendDegraded ? "border-amber-200/70 bg-[var(--brand-subtle)] dark:border-amber-800/60 dark:bg-amber-950/30" : "border-emerald-200/70 bg-emerald-50/80 dark:border-emerald-800/60 dark:bg-emerald-950/30"}`}>
+              <div className={`rounded-[calc(2rem-0.5rem)] border p-4 ${isBackendDegraded ? "border-amber-200/70 dark:border-amber-800/40" : "border-emerald-200/70 dark:border-emerald-800/40"}`}>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex h-2.5 w-2.5 rounded-full ${isBackendDegraded ? "bg-amber-500" : "bg-emerald-500"}`} />
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">System status</p>
+                </div>
+                <p className="mt-2 text-lg font-medium text-[var(--text-primary)]">
+                  {isBackendDegraded ? "Local backend is degraded" : "Local stack is ready"}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                  {isBackendDegraded
+                    ? capabilityDetails?.db_backed_analysis_ready?.reason === "database_unavailable" || runtimeHealth?.runtime?.startup_warnings?.includes("database_unavailable")
+                      ? "Frontend exploration is available, but database-backed analysis is limited until the local DB is restored."
+                      : "Some backend capabilities are limited right now. The UI will surface reduced functionality clearly."
+                    : "Core frontend and backend services are available for local iteration."}
+                </p>
+              </div>
+            </div>
           </motion.div>
-          <motion.h1
-            variants={staggerItem}
-            className="font-display text-4xl leading-tight text-[var(--text-primary)] sm:text-6xl sm:leading-[1.1]"
-          >
-            Analyze any property<br className="hidden sm:block" /> in the US
-          </motion.h1>
-          <motion.p variants={staggerItem} className="mt-4 text-sm text-[var(--text-muted)] sm:text-base">
-            Zoning, density, comps, pro forma, and development potential — in seconds
-          </motion.p>
         </motion.div>
 
         {/* Input bar — z-30 so autocomplete dropdown (z-50 inside) paints above chips below */}
@@ -593,25 +696,39 @@ export default function Home() {
           onSubmit={handleSubmit}
           {...fadeUp}
           transition={{ ...springGentle, delay: 0.25 }}
-          className="relative z-30 mb-6 w-full max-w-xl sm:mb-8"
+          className="relative z-30 mb-8 w-full max-w-4xl self-center"
         >
           <div
-            className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-3.5"
+            className="glass-panel flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-4"
             style={{ boxShadow: "var(--shadow-elevated)" }}
           >
-            <AddressAutocomplete
-              inputRef={inputRef}
-              value={input}
-              onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
-              onSelect={(address) => sendMessage(address)}
-              placeholder={mode === "lookup" ? "Enter a property address..." : "Enter an address or ask a question..."}
-              disabled={isProcessing}
-            />
+            {mode === "lookup" ? (
+              <AddressAutocomplete
+                inputRef={inputRef}
+                value={input}
+                onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
+                onSelect={(address) => sendMessage(address)}
+                placeholder="Enter a property address..."
+                disabled={isProcessing}
+              />
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
+                placeholder="Ask about zoning, density, or property data..."
+                disabled={isProcessing}
+                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+                data-testid="agent-input"
+              />
+            )}
             <ModeToggle mode={mode} onChange={setMode} />
             <button
               type="submit"
               disabled={!input.trim() || isProcessing}
               aria-label="Send message"
+              data-testid="send-button"
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20 sm:h-9 sm:w-9"
             >
               {isProcessing ? (
@@ -635,7 +752,7 @@ export default function Home() {
         <motion.div
           {...fadeUp}
           transition={{ ...springGentle, delay: 0.35 }}
-          className="relative z-0 min-h-[72px] w-full max-w-xl"
+          className="relative z-0 min-h-[72px] w-full max-w-4xl self-center"
         >
           {mode === "lookup" ? (
             <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
@@ -651,15 +768,35 @@ export default function Home() {
           )}
         </motion.div>
 
+        <motion.div
+          {...fadeUp}
+          transition={{ ...springGentle, delay: 0.42 }}
+          className="mt-8 grid w-full max-w-5xl grid-cols-1 gap-4 self-center md:grid-cols-3"
+        >
+          {[
+            ["Guided lookup", "Address to gated analysis to report, without mixing structured workflow into free-form chat."],
+            ["Premium trust states", "Coverage, degraded backend, and unsupported metrics should be product language, not raw failure output."],
+            ["Decision-ready reports", "Summary hierarchy, confidence cues, and clearer defaults make the report the strongest surface."],
+          ].map(([title, copy]) => (
+            <div key={title} className="rounded-[2rem] border border-[var(--border-soft)] bg-[var(--bg-surface)] p-2 shadow-[var(--shadow-card)]">
+              <div className="rounded-[calc(2rem-0.5rem)] border border-white/50 bg-[var(--bg-surface-raised)] p-5 dark:border-white/5">
+                <p className="text-lg font-medium text-[var(--text-primary)]">{title}</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{copy}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+
         {/* Footer */}
         <motion.p
           {...fadeUp}
           transition={{ ...springGentle, delay: 0.45 }}
-          className="mt-16 text-center text-xs text-[var(--text-muted)]"
+          className="mt-12 text-center text-xs text-[var(--text-muted)]"
         >
           PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
         </motion.p>
-      </div>
+        </div>
+      </main>
     );
   }
 
@@ -670,6 +807,7 @@ export default function Home() {
       <div className="fixed right-4 top-5 z-40 sm:right-6">
         <button
           onClick={handleNewAnalysis}
+          data-testid="new-analysis-button"
           className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] transition-all hover:border-[var(--border-hover)] hover:text-[var(--text-secondary)] active:scale-[0.98]"
           style={{ boxShadow: "var(--shadow-nav)" }}
         >
@@ -802,7 +940,16 @@ export default function Home() {
                       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-800 text-xs font-black text-white">
                         P
                       </div>
-                      <div className="text-sm leading-relaxed text-[var(--text-secondary)] min-w-0">
+                      <div
+                        className="text-sm leading-relaxed text-[var(--text-secondary)] min-w-0"
+                        data-testid={
+                          msg.errorType ||
+                          msg.content.startsWith("Error:") ||
+                          msg.content.startsWith("Connection error:")
+                            ? "report-error"
+                            : undefined
+                        }
+                      >
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -843,13 +990,14 @@ export default function Home() {
                         {/* Error recovery buttons */}
                         {msg.errorType && !msg.isStreaming && (
                           <div className="mt-3 flex gap-2">
-                            {msg.errorType === "timeout" && msg.retryAddress && (
+                            {(msg.errorType === "timeout" || msg.errorType === "backend_unavailable") && msg.retryAddress && (
                               <button
                                 onClick={() => {
                                   setMessages((prev) => prev.filter((m) => m.id !== msg.id));
                                   runAnalysis(msg.retryAddress!);
                                 }}
                                 disabled={isProcessing}
+                                data-testid="report-retry-button"
                                 className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-40"
                               >
                                 Retry
@@ -947,7 +1095,12 @@ export default function Home() {
                 onAddressSelect={(address) => sendMessage(address)}
                 mode={mode}
                 onModeChange={setMode}
-                placeholder={hasReport ? "Ask about this property's zoning..." : "Enter an address or ask a question..."}
+                placeholder={mode === "lookup"
+                  ? "Enter a property address..."
+                  : hasReport
+                    ? "Ask about this property's zoning..."
+                    : "Ask about zoning, density, or property data..."
+                }
                 disabled={isProcessing || !!pendingAddress || awaitingApproval}
                 isProcessing={isProcessing}
               />

@@ -19,6 +19,21 @@ export interface ThinkingEvent {
   thoughts: string[];
 }
 
+export type AnalysisErrorType =
+  | "timeout"
+  | "bad_address"
+  | "backend_unavailable"
+  | "pipeline_error"
+  | "network_error"
+  | "unknown"
+  | "geocoding_failed"
+  | "low_accuracy";
+
+export interface AnalysisError {
+  detail: string;
+  errorType: AnalysisErrorType;
+}
+
 export type DealType = "land_deal" | "wholesale" | "creative_finance" | "hybrid";
 
 export interface AnalysisOptions {
@@ -179,7 +194,45 @@ export interface ZoningReportData {
   suggested_next_steps?: string[];
 }
 
+export interface RuntimeCapabilityDetail {
+  ready: boolean;
+  reason?: string;
+  blocked_by?: string[];
+  dependencies?: string[];
+}
+
+export interface RuntimeHealthData {
+  status: "healthy" | "degraded";
+  checks: Record<string, string>;
+  capabilities?: {
+    db_backed_analysis_ready?: boolean;
+    portfolio_ready?: boolean;
+    agent_chat_ready?: boolean;
+  };
+  capability_details?: {
+    db_backed_analysis_ready?: RuntimeCapabilityDetail;
+    portfolio_ready?: RuntimeCapabilityDetail;
+    agent_chat_ready?: RuntimeCapabilityDetail;
+  };
+  runtime?: {
+    startup_mode?: string;
+    startup_warnings?: string[];
+  };
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export async function fetchRuntimeHealth(): Promise<RuntimeHealthData> {
+  const response = await fetch(`${API_BASE}/health`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Health request failed with HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
 
 /** Extract a human-readable error message from a FastAPI error response. */
 function extractErrorMessage(err: { detail?: unknown }, status: number): string {
@@ -200,7 +253,7 @@ export async function streamAnalysis(
   options: AnalysisOptions,
   onStatus: (status: PipelineStatus) => void,
   onResult: (report: ZoningReportData) => void,
-  onError: (error: string) => void,
+  onError: (error: AnalysisError) => void,
   onThinking?: (event: ThinkingEvent) => void,
   onSuggestions?: (suggestions: string[]) => void,
   onRetry?: (attempt: number) => void,
@@ -225,13 +278,16 @@ export async function streamAnalysis(
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({ detail: "Request failed" }));
-        onError(extractErrorMessage(err, response.status));
+        onError({
+          detail: extractErrorMessage(err, response.status),
+          errorType: "pipeline_error",
+        });
         return;
       }
 
       const reader = response.body?.getReader();
       if (!reader) {
-        onError("No response stream available");
+        onError({ detail: "No response stream available", errorType: "unknown" });
         return;
       }
 
@@ -265,7 +321,10 @@ export async function streamAnalysis(
               } else if (eventType === "suggestions") {
                 onSuggestions?.(parsed.suggestions || []);
               } else if (eventType === "error") {
-                onError(parsed.detail || "Unknown error");
+                onError({
+                  detail: parsed.detail || "Unknown error",
+                  errorType: (parsed.error_type || "unknown") as AnalysisErrorType,
+                });
               }
             } catch {
               // Skip malformed events
@@ -278,7 +337,10 @@ export async function streamAnalysis(
       return; // Success — exit retry loop
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        onError("Request timed out after 2 minutes. The server may be starting up \u2014 try again.");
+        onError({
+          detail: "Request timed out after 2 minutes. The server may be starting up \u2014 try again.",
+          errorType: "timeout",
+        });
         return;
       }
       // Network error — retry if we have attempts left
@@ -287,7 +349,10 @@ export async function streamAnalysis(
         await new Promise((r) => setTimeout(r, 2000));
         continue;
       }
-      onError("Connection failed. The server may be starting up \u2014 try again in a moment.");
+      onError({
+        detail: "Connection failed. The server may be starting up \u2014 try again in a moment.",
+        errorType: "network_error",
+      });
     } finally {
       clearTimeout(timeoutId);
     }

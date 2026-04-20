@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -25,11 +26,11 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "PlotLot - AI Zoning Analysis",
   description:
-    "AI-powered zoning analysis for South Florida real estate. Covers 104 municipalities across Miami-Dade, Broward, and Palm Beach counties.",
+    "AI-powered zoning analysis for US real estate. Covers municipalities across Florida, Texas, Georgia, South Carolina, and North Carolina.",
   openGraph: {
     title: "PlotLot - AI Zoning Analysis",
     description:
-      "Enter any address in South Florida and get instant zoning analysis: density limits, setbacks, allowable uses, and max buildable units.",
+      "Enter any US address and get instant zoning analysis: density limits, setbacks, allowable uses, and max buildable units.",
     siteName: "PlotLot",
     type: "website",
     url: "https://mlopprojects.vercel.app",
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PlotLot - AI Zoning Analysis",
     description:
-      "AI-powered zoning analysis for South Florida real estate. Instant density, setback, and use analysis for 104 municipalities.",
+      "AI-powered zoning analysis for US real estate. Instant density, setback, and use analysis across 5 states.",
   },
 };
 
@@ -47,12 +48,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const app = (
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
               (function() {
                 try {
                   var mode = localStorage.getItem('theme');
@@ -62,20 +64,30 @@ export default function RootLayout({
                 } catch(e) {}
               })();
             `,
-          }}
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} min-h-screen bg-[var(--bg-primary)] font-sans antialiased`}
-      >
-        <ThemeProvider>
-          <ToastProvider>
-            <MapsProvider>
-              <SidebarLayout>{children}</SidebarLayout>
-            </MapsProvider>
-          </ToastProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+            }}
+          />
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} min-h-screen bg-[var(--bg-primary)] font-sans antialiased`}
+        >
+          <ThemeProvider>
+            <ToastProvider>
+              <MapsProvider>
+                <SidebarLayout>{children}</SidebarLayout>
+              </MapsProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+  );
+
+  if (!clerkPublishableKey) {
+    return app;
+  }
+
+  return (
+    <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl="/sign-in">
+      {app}
+    </ClerkProvider>
   );
 }

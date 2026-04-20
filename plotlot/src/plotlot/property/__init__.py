@@ -48,11 +48,14 @@ async def lookup_property(
     *,
     lat: float | None = None,
     lng: float | None = None,
+    state: str = "",
 ) -> PropertyRecord | None:
     """Look up property data via the registered provider for *county*.
 
     This is the main entry point. It delegates to the appropriate
-    :class:`PropertyProvider` based on the county name.
+    :class:`PropertyProvider` based on the county name. For counties
+    without a dedicated provider, falls back to the UniversalProvider
+    which discovers ArcGIS datasets dynamically via Hub.
 
     Returns:
         PropertyRecord or None if no provider is registered or lookup fails.
@@ -68,7 +71,7 @@ async def lookup_property(
         return None
 
     try:
-        return await provider.lookup(address, county, lat=lat, lng=lng)
+        return await provider.lookup(address, county, lat=lat, lng=lng, state=state)
     except Exception:
         import logging
 

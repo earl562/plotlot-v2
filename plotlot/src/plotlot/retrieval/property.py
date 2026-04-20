@@ -534,6 +534,7 @@ async def lookup_property(
     county: str,
     lat: float | None = None,
     lng: float | None = None,
+    state: str = "",
 ) -> PropertyRecord | None:
     """Look up property data from the county Property Appraiser.
 
@@ -555,7 +556,7 @@ async def lookup_property(
     provider = get_provider(county)
     if provider is not None:
         try:
-            record = await provider.lookup(address, county, lat=lat, lng=lng)
+            record = await provider.lookup(address, county, lat=lat, lng=lng, state=state)
             if record:
                 logger.info(
                     "Property found: folio=%s, zoning=%s, lot=%s sqft",

@@ -1,3 +1,7 @@
+---
+model: haiku
+allowed-tools: Bash, Read
+---
 Run the PlotLot test suite and report results.
 
 ## Steps

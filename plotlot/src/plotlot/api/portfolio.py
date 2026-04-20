@@ -5,6 +5,7 @@ When auth is wired in (Supabase), queries will filter by user_id.
 """
 
 import logging
+from typing import Any, cast
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import delete, select
@@ -20,20 +21,32 @@ router = APIRouter(prefix="/api/v1/portfolio", tags=["portfolio"])
 
 def _row_to_response(row: PortfolioEntry) -> SavedAnalysisResponse:
     """Convert a PortfolioEntry ORM row to the API response schema."""
-    report_data = row.report_json
+    from plotlot.api.schemas import ZoningReportResponse
+
+    # Type-cast ORM attributes to their scalar types
+    address: str = cast(str, row.address)  # type: ignore[assignment]
+    municipality: str = cast(str, row.municipality)  # type: ignore[assignment]
+    county: str = cast(str, row.county)  # type: ignore[assignment]
+    zoning_district: str = cast(str, row.zoning_district or "")  # type: ignore[assignment]
+    created_at = row.created_at
+    report_data: dict[str, Any] = cast(dict, row.report_json)  # type: ignore[assignment]
+
     density = report_data.get("density_analysis")
     max_units = density.get("max_units") if density else None
 
+    # Convert dict to ZoningReportResponse
+    report = ZoningReportResponse.model_validate(report_data)
+
     return SavedAnalysisResponse(
         id=str(row.id),
-        address=row.address,
-        municipality=row.municipality,
-        county=row.county,
-        zoning_district=row.zoning_district or "",
+        address=address,
+        municipality=municipality,
+        county=county,
+        zoning_district=zoning_district,
         max_units=max_units,
         confidence=report_data.get("confidence", ""),
-        saved_at=row.created_at.isoformat() if row.created_at else "",
-        report=report_data,
+        saved_at=created_at.isoformat() if created_at else "",
+        report=report,
     )
 
 
@@ -106,7 +119,7 @@ async def delete_analysis(analysis_id: int):
         result = await session.execute(
             delete(PortfolioEntry).where(PortfolioEntry.id == analysis_id)
         )
-        if result.rowcount == 0:  # type: ignore[union-attr]
+        if result.rowcount == 0:  # type: ignore[attr-defined]
             raise HTTPException(status_code=404, detail="Analysis not found")
         await session.commit()
         return {"status": "deleted", "id": str(analysis_id)}

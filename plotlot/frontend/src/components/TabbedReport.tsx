@@ -254,10 +254,14 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
     } finally {
       setPdfLoading(false);
     }
-  }, [report, pdfLoading]);
+  }, [report, pdfLoading, toast]);
 
   return (
-    <div className="w-full space-y-0 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] sm:rounded-3xl" style={{ boxShadow: "var(--shadow-card)" }}>
+    <div
+      className="w-full space-y-0 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] sm:rounded-3xl"
+      style={{ boxShadow: "var(--shadow-card)" }}
+      data-testid="report-root"
+    >
       {/* Header */}
       <div className="space-y-4 p-5 sm:p-8">
         <div className="flex items-start justify-between gap-2">
@@ -306,10 +310,11 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
           <button
             key={tab.id}
             role="tab"
-            id={`tab-${tab.id}`}
+            id={`report-${tab.id}-tab`}
             aria-selected={activeTab === tab.id}
-            aria-controls={`tabpanel-${tab.id}`}
+            aria-controls={`report-section-${tab.id}`}
             onClick={() => setActiveTab(tab.id)}
+            data-testid={`report-${tab.id}-tab`}
             className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors -mb-px sm:text-sm ${
               activeTab === tab.id
                 ? "border-b-2 border-amber-500 text-[var(--text-primary)]"
@@ -323,10 +328,15 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
       </div>
 
       {/* Tab content */}
-      <div className="p-5 sm:p-8" role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+      <div
+        className="p-5 sm:p-8"
+        role="tabpanel"
+        id={`report-section-${activeTab}`}
+        aria-labelledby={`report-${activeTab}-tab`}
+      >
         {/* Property Tab */}
         {activeTab === "property" && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 animate-fade-in" data-testid="report-section-property">
             {report.property_record && <ParcelViewer report={report} />}
 
             {/* Zoning district quick info */}
@@ -340,7 +350,7 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
 
         {/* Zoning Tab */}
         {activeTab === "zoning" && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 animate-fade-in" data-testid="report-section-zoning">
             {/* Partial coverage callout */}
             {getCoverageLevel(report.municipality) === "partial" && !report.zoning_district && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-300">
@@ -421,7 +431,7 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
 
         {/* Analysis Tab */}
         {activeTab === "analysis" && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 animate-fade-in" data-testid="report-section-analysis">
             {/* Density Breakdown */}
             {report.density_analysis && (() => {
               const buildW = lotWidth > 0 ? Math.max(0, lotWidth - 2 * setbackSide) : 0;
@@ -492,7 +502,7 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
 
         {/* Deal Tab */}
         {activeTab === "deal" && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 animate-fade-in" data-testid="report-section-deal">
             {/* Comparable Sales */}
             {report.comp_analysis && report.comp_analysis.comparables && report.comp_analysis.comparables.length > 0 && (
               <div className="space-y-3">

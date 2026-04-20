@@ -1,3 +1,7 @@
+---
+model: sonnet
+allowed-tools: Bash, Read, WebFetch
+---
 Deploy PlotLot to production (Render + Vercel).
 
 ## Pre-deploy Checks

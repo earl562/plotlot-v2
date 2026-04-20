@@ -63,12 +63,14 @@ class Settings(BaseSettings):
         self.database_url = url
         return self
 
-    # Supabase Auth (opt-in — app works without auth configured)
-    supabase_url: str = ""
-    supabase_anon_key: str = ""
-    supabase_service_key: str = ""
-    supabase_jwt_secret: str = ""
+    # Auth (opt-in — app works without auth configured)
     auth_enabled: bool = False
+    # Clerk JWT verification (RS256 via JWKS)
+    clerk_jwks_url: str = ""  # e.g. https://<instance>.clerk.accounts.dev/.well-known/jwks.json
+    # Stripe billing
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_pro_price_id: str = ""
 
     # Rate limiting
     rate_limit_max_requests: int = 30
@@ -80,6 +82,11 @@ class Settings(BaseSettings):
     nvidia_api_key: str = ""
     anthropic_api_key: str = ""
     google_api_key: str = ""
+    openai_api_key: str = ""
+    openai_access_token: str = ""  # OAuth-provided bearer token
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-4.1"
+    openai_reasoning_effort: str = "medium"
 
     # Jina.ai search
     jina_api_key: str = ""
@@ -96,10 +103,13 @@ class Settings(BaseSettings):
             "nvidia_api_key",
             "anthropic_api_key",
             "google_api_key",
+            "openai_api_key",
+            "openai_access_token",
             "jina_api_key",
-            "supabase_anon_key",
-            "supabase_service_key",
-            "supabase_jwt_secret",
+            "stripe_secret_key",
+            "stripe_webhook_secret",
+            "clerk_jwks_url",
+            "openai_base_url",
         ):
             val = getattr(self, field)
             if val and val != val.strip():
@@ -116,6 +126,15 @@ class Settings(BaseSettings):
     mlflow_tracking_uri: str = "sqlite:///mlruns/mlflow.db"
     mlflow_experiment_name: str = "plotlot-rag"
 
+    # GCP / Firestore
+    gcp_project_id: str = ""
+    firestore_database: str = "(default)"
+
+    # ArcGIS Hub
+    arcgis_hub_api_url: str = "https://hub.arcgis.com/api/v3/datasets"
+    hub_discovery_timeout: float = 10.0
+    hub_cache_ttl_hours: int = 168  # 7 days
+
     # Logging
     log_json: bool = True
     log_level: str = "INFO"
@@ -124,6 +143,9 @@ class Settings(BaseSettings):
     cors_origins: list[str] = [
         "https://mlopprojects.vercel.app",
         "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
         "https://plotlot-api-production.up.railway.app",
     ]
 

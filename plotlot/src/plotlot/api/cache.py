@@ -11,6 +11,7 @@ a 30-60s pipeline latency.
 """
 
 from datetime import datetime, timedelta, timezone
+from typing import Any, cast
 
 from sqlalchemy import select, update
 
@@ -54,7 +55,9 @@ async def get_cached_report(address: str) -> dict | None:
                 .values(hit_count=ReportCache.hit_count + 1)
             )
             await session.commit()
-            return cached.report_json
+            # Type-cast ORM attribute to dict
+            report_data: dict[str, Any] = cast(dict, cached.report_json)  # type: ignore[assignment]
+            return report_data
         return None
     finally:
         await session.close()
@@ -105,9 +108,10 @@ async def cache_report(address: str, report: dict) -> None:
         )
         cached = existing.scalar_one_or_none()
         if cached:
-            cached.report_json = report
-            cached.expires_at = datetime.now(timezone.utc) + timedelta(hours=CACHE_TTL_HOURS)
-            cached.hit_count = 0
+            # Type-cast ORM attributes for assignment
+            cached.report_json = report  # type: ignore[assignment]
+            cached.expires_at = datetime.now(timezone.utc) + timedelta(hours=CACHE_TTL_HOURS)  # type: ignore[assignment]
+            cached.hit_count = 0  # type: ignore[assignment]
         else:
             session.add(
                 ReportCache(

@@ -37,19 +37,33 @@ export default function InputBar({
           className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2.5 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-4 sm:py-3"
           style={{ boxShadow: "var(--shadow-elevated)" }}
         >
-          <AddressAutocomplete
-            inputRef={inputRef}
-            value={value}
-            onChange={onChange}
-            onSelect={onAddressSelect}
-            placeholder={placeholder}
-            disabled={disabled}
-          />
+          {mode === "lookup" ? (
+            <AddressAutocomplete
+              inputRef={inputRef}
+              value={value}
+              onChange={onChange}
+              onSelect={onAddressSelect}
+              placeholder={placeholder}
+              disabled={disabled}
+            />
+          ) : (
+            <input
+              ref={inputRef}
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder}
+              disabled={disabled}
+              className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+              data-testid="agent-input"
+            />
+          )}
           <ModeToggle mode={mode} onChange={onModeChange} />
           <button
             type="submit"
             disabled={!value.trim() || isProcessing}
             aria-label="Send message"
+            data-testid="send-button"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20"
           >
             {isProcessing ? (

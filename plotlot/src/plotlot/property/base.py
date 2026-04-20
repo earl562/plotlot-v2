@@ -23,6 +23,7 @@ class PropertyProvider(ABC):
         *,
         lat: float | None = None,
         lng: float | None = None,
+        state: str = "",
     ) -> PropertyRecord | None:
         """Look up a property record from the county Property Appraiser.
 
@@ -31,6 +32,8 @@ class PropertyProvider(ABC):
             county: County name (e.g., "Miami-Dade").
             lat: Latitude from geocoding (used for spatial zoning queries).
             lng: Longitude from geocoding (used for spatial zoning queries).
+            state: Two-letter state code (e.g., "FL"). Used by UniversalProvider
+                   for Hub discovery. Existing providers can ignore this.
 
         Returns:
             PropertyRecord with all available data, or None if not found.

@@ -187,7 +187,8 @@ def build_architectural_prompt(req: BuildingRenderRequest, view: str = "front") 
 
     # Core description
     prompt = (
-        f"Photorealistic architectural rendering of a {stories_label} {style}{municipality_note}. "
+        f"Ultra-realistic architectural visualization of a {stories_label} {style}{municipality_note}. "
+        f"Photorealistic rendering, magazine-quality real estate photography style. "
     )
 
     # Precise dimensions and lot context
@@ -245,11 +246,11 @@ def build_architectural_prompt(req: BuildingRenderRequest, view: str = "front") 
 
     # Lighting and quality
     prompt += (
-        "Lighting: warm late-afternoon golden hour sunlight casting soft shadows, "
-        "blue sky with scattered cumulus clouds. "
-        "Quality: high-resolution photorealistic architectural visualization, "
+        "Lighting: warm late-afternoon golden hour sunlight casting soft long shadows, "
+        "blue sky with scattered cumulus clouds, warm amber light on the facade. "
+        "Quality: ultra-high-resolution photorealistic architectural visualization, "
         "professional real estate marketing photography, shallow depth of field, "
-        "no watermarks, no text overlays, no people."
+        "8K detail, no watermarks, no text overlays, no people."
     )
 
     return prompt
@@ -265,22 +266,26 @@ async def generate_building_image(prompt: str) -> str:
     from google import genai
 
     client = genai.Client(api_key=settings.google_api_key)
-    response = client.models.generate_content(
-        model="gemini-3-pro-image-preview",
-        contents=prompt,
-        config=genai.types.GenerateContentConfig(
-            response_modalities=["IMAGE", "TEXT"],
-            image_config=genai.types.ImageConfig(
-                aspect_ratio="16:9",
-                image_size="2K",
+    try:
+        response = await client.aio.models.generate_content(
+            model="gemini-3.1-flash-image-preview",
+            contents=prompt,
+            config=genai.types.GenerateContentConfig(
+                response_modalities=["IMAGE", "TEXT"],
             ),
-        ),
-    )
+        )
+    except Exception as e:
+        logger.error("Gemini image generation API error: %s: %s", type(e).__name__, e)
+        raise ValueError(f"Gemini API error: {type(e).__name__}: {e}") from e
 
     # Extract image from response
-    for part in response.candidates[0].content.parts:
-        if part.inline_data is not None:
-            return base64.b64encode(part.inline_data.data).decode("utf-8")
+    if response.candidates and len(response.candidates) > 0:
+        content = response.candidates[0].content
+        if content is not None and hasattr(content, "parts") and content.parts:
+            for part in content.parts:  # type: ignore[union-attr]
+                if part.inline_data is not None and part.inline_data.data:
+                    data: bytes = part.inline_data.data
+                    return base64.b64encode(data).decode("utf-8")
 
     raise ValueError("Gemini response contained no image data")
 
@@ -289,7 +294,60 @@ _VIEWS = ["front", "aerial", "side"]
 
 
 # ---------------------------------------------------------------------------
-# Route
+# Development concept endpoint — request/response models + cache
+# ---------------------------------------------------------------------------
+
+
+class ConceptRenderRequest(BaseModel):
+    address: str
+    municipality: str
+    zoning_district: str
+    property_type: str  # multifamily, mixed_use, townhome, commercial_mf, single_family
+    max_units: int
+    lot_sqft: float
+
+
+class ConceptRenderResponse(BaseModel):
+    image_base64: str
+    prompt_used: str
+    cached: bool
+
+
+_concept_cache: OrderedDict[str, tuple[str, str]] = OrderedDict()
+
+_CONCEPT_TYPE_LABELS: dict[str, str] = {
+    "multifamily": "multifamily residential",
+    "commercial_mf": "large multifamily residential complex",
+    "mixed_use": "mixed-use residential and retail",
+    "townhome": "townhome",
+    "single_family": "single-family",
+    "commercial": "commercial",
+    "land": "residential",
+}
+
+
+def build_concept_prompt(req: ConceptRenderRequest) -> str:
+    """Build a development concept visualization prompt."""
+    label = _CONCEPT_TYPE_LABELS.get(req.property_type, req.property_type.replace("_", " "))
+    lot_acres = req.lot_sqft / 43560
+
+    return (
+        f"Photorealistic architectural rendering of a completed {req.max_units}-unit {label} "
+        f"development at {req.address}, {req.municipality}. "
+        f"South Florida {req.municipality} architectural style, "
+        f"finished professional landscaping with tropical royal palm trees, "
+        f"mature bougainvillea hedges, paved walkways, and manicured bermuda grass lawns. "
+        f"Street-level perspective from the public sidewalk, showing the full building frontage. "
+        f"The {lot_acres:.2f}-acre site is fully developed with the completed {req.zoning_district} project. "
+        f"Golden hour lighting with warm amber and rose sky at dusk, "
+        f"soft long shadows across the landscaped grounds. "
+        f"Ultra-realistic visualization quality, magazine-quality real estate development marketing. "
+        f"No people, no watermarks, no text overlays."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Routes
 # ---------------------------------------------------------------------------
 
 
@@ -343,10 +401,12 @@ async def render_building(request: BuildingRenderRequest) -> BuildingRenderRespo
         if isinstance(result, Exception):
             logger.warning("View '%s' generation failed: %s", view, result)
             continue
+        # Type narrowing: result is str at this point (Exception cases already skipped)
+        image_b64: str = result  # type: ignore[assignment]
         view_images.append(
-            BuildingViewImage(view=view, image_base64=result, prompt_used=prompts[view])
+            BuildingViewImage(view=view, image_base64=image_b64, prompt_used=prompts[view])
         )
-        cache_entries.append((view, result, prompts[view]))
+        cache_entries.append((view, image_b64, prompts[view]))
 
     if not view_images:
         raise HTTPException(
@@ -372,3 +432,40 @@ async def render_building(request: BuildingRenderRequest) -> BuildingRenderRespo
         cached=False,
         generation_time_ms=elapsed_ms,
     )
+
+
+@router.post("/concept", response_model=ConceptRenderResponse)
+async def render_concept(request: ConceptRenderRequest) -> ConceptRenderResponse:
+    """Generate a development concept visualization for a completed build-out."""
+    if not settings.google_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Concept rendering unavailable — GOOGLE_API_KEY not configured",
+        )
+
+    cache_key = hashlib.md5(
+        f"{request.address}|{request.property_type}|{request.max_units}".encode()
+    ).hexdigest()
+
+    if cache_key in _concept_cache:
+        _concept_cache.move_to_end(cache_key)
+        b64, prompt = _concept_cache[cache_key]
+        logger.info("Concept render cache hit: %s", cache_key[:8])
+        return ConceptRenderResponse(image_base64=b64, prompt_used=prompt, cached=True)
+
+    prompt = build_concept_prompt(request)
+    t0 = time.monotonic()
+
+    try:
+        image_b64 = await generate_building_image(prompt)
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
+
+    elapsed_ms = int((time.monotonic() - t0) * 1000)
+
+    _concept_cache[cache_key] = (image_b64, prompt)
+    if len(_concept_cache) > _MAX_CACHE:
+        _concept_cache.popitem(last=False)
+
+    logger.info("Concept render: %dms: %s", elapsed_ms, cache_key[:8])
+    return ConceptRenderResponse(image_base64=image_b64, prompt_used=prompt, cached=False)

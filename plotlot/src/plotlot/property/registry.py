@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 _PROVIDERS: dict[str, PropertyProvider] = {}
 _initialized = False
+_universal_provider: PropertyProvider | None = None
 
 
 def _ensure_registered() -> None:
@@ -34,13 +35,27 @@ def _ensure_registered() -> None:
 
 
 def get_provider(county: str) -> PropertyProvider | None:
-    """Return the registered provider for *county*, or ``None``.
+    """Return the registered provider for *county*.
 
-    Lookup is case-insensitive and strips whitespace.
+    Lookup is case-insensitive and strips whitespace. Falls back to the
+    UniversalProvider for counties without a dedicated provider.
     """
     _ensure_registered()
     key = county.lower().strip()
-    return _PROVIDERS.get(key)
+    provider = _PROVIDERS.get(key)
+    if provider is None:
+        return _get_universal_fallback()
+    return provider
+
+
+def _get_universal_fallback() -> PropertyProvider:
+    """Lazy-init the UniversalProvider singleton."""
+    global _universal_provider  # noqa: PLW0603
+    if _universal_provider is None:
+        from plotlot.property.universal import UniversalProvider
+
+        _universal_provider = UniversalProvider()
+    return _universal_provider
 
 
 def register_provider(county: str, provider: PropertyProvider) -> None:

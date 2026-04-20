@@ -10,6 +10,7 @@ import asyncio
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -17,23 +18,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from plotlot.api.auth import get_current_user
+from plotlot.api.billing import router as billing_router  # noqa: F401 — registered below
 from plotlot.api.chat import router as chat_router
 from plotlot.api.geometry import router as geometry_router
-from plotlot.api.render import router as render_router
 from plotlot.api.middleware import rate_limiter
 from plotlot.api.portfolio import router as portfolio_router
+from plotlot.api.render import router as render_router
 from plotlot.api.routes import router
 from plotlot.config import settings
 from plotlot.observability.logging import correlation_id, setup_logging
+from plotlot.observability.tracing import configure_mlflow
 from plotlot.storage.db import get_session, init_db
 
 logger = logging.getLogger(__name__)
+
+_runtime_health = {
+    "startup_mode": "starting",
+    "startup_warnings": [],
+}
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize DB on startup, cleanup on shutdown."""
     setup_logging(json_format=settings.log_json, level=settings.log_level)
+    _runtime_health["startup_mode"] = "healthy"
+    _runtime_health["startup_warnings"] = []
 
     # Initialize Sentry error tracking
     if settings.sentry_dsn:
@@ -50,24 +60,14 @@ async def lifespan(app: FastAPI):
             logger.warning("Sentry init failed: %s", e)
 
     # Initialize MLflow tracing
-    from plotlot.observability.tracing import (
-        set_tracking_uri,
-        set_experiment,
-        enable_async_logging,
-        mlflow as _mlflow_mod,
-    )
-
-    if _mlflow_mod is not None:
-        set_tracking_uri(settings.mlflow_tracking_uri)
-        set_experiment(settings.mlflow_experiment_name)
-        enable_async_logging()
+    if configure_mlflow(settings.mlflow_tracking_uri, settings.mlflow_experiment_name):
         logger.info("MLflow tracing enabled: %s", settings.mlflow_tracking_uri)
     else:
-        logger.info("MLflow not installed — tracing disabled")
+        logger.warning("MLflow tracing unavailable — API will start in degraded mode")
+        _runtime_health["startup_mode"] = "degraded"
+        _runtime_health["startup_warnings"].append("mlflow_unavailable")
 
     # Log the database URL (redacted) for debugging deployment issues
-    from urllib.parse import urlparse
-
     parsed = urlparse(settings.database_url)
     redacted_host = f"{parsed.hostname}:{parsed.port}" if parsed.port else parsed.hostname
     logger.info("Connecting to database at %s/%s", redacted_host, parsed.path.lstrip("/"))
@@ -78,11 +78,15 @@ async def lifespan(app: FastAPI):
         logger.error(
             "Database initialization timed out after 15s — API will start in degraded mode"
         )
+        _runtime_health["startup_mode"] = "degraded"
+        _runtime_health["startup_warnings"].append("database_init_timeout")
     except Exception as e:
         logger.error("Database initialization failed: %s — API will start in degraded mode", e)
+        _runtime_health["startup_mode"] = "degraded"
+        _runtime_health["startup_warnings"].append("database_unavailable")
     # Log auth and rate-limiting status
     if settings.auth_enabled:
-        logger.info("Supabase auth ENABLED (JWT verification active)")
+        logger.info("Clerk auth ENABLED (JWKS RS256 verification active)")
     else:
         logger.info("Auth DISABLED — anonymous access allowed (set AUTH_ENABLED=true to enable)")
     logger.info(
@@ -174,16 +178,64 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(billing_router)
 app.include_router(chat_router)
 app.include_router(portfolio_router)
 app.include_router(geometry_router)
 app.include_router(render_router)
+
+# Clause builder document generation (LOI, PSA, Deal Summary, Pro Forma)
+from plotlot.api.documents import router as documents_router  # noqa: E402
+
+app.include_router(documents_router)
+
+
+# ---------------------------------------------------------------------------
+# Address autocomplete (Geocodio-backed, replaces Google Places dependency)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/v1/autocomplete")
+async def autocomplete(q: str = ""):
+    """Return address suggestions using Geocodio forward geocoding."""
+    if len(q) < 3 or not settings.geocodio_api_key:
+        return {"suggestions": []}
+
+    import httpx
+
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get(
+                "https://api.geocod.io/v1.7/geocode",
+                params={"q": q, "api_key": settings.geocodio_api_key, "limit": 5},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:
+        return {"suggestions": []}
+
+    suggestions = []
+    for result in data.get("results", []):
+        formatted = result.get("formatted_address", "")
+        components = result.get("address_components", {})
+        if formatted:
+            suggestions.append(
+                {
+                    "address": formatted,
+                    "street": f"{components.get('number', '')} {components.get('formatted_street', '')}".strip(),
+                    "city": components.get("city", ""),
+                    "state": components.get("state", ""),
+                    "zip": components.get("zip", ""),
+                }
+            )
+    return {"suggestions": suggestions}
 
 
 @app.get("/health")
 async def health():
     """Health check — verifies DB connectivity, ingestion freshness, MLflow."""
     checks = {}
+    parsed_db = urlparse(settings.database_url)
 
     session = None
     try:
@@ -195,9 +247,21 @@ async def health():
 
         # Ingestion freshness
         try:
+            from datetime import datetime
+
             result = await session.execute(text("SELECT MAX(created_at) FROM ordinance_chunks"))
             latest = result.scalar()
-            checks["last_ingestion"] = latest.isoformat() if latest else "never"
+            if asyncio.iscoroutine(latest):
+                latest = await latest
+
+            if latest is None:
+                checks["last_ingestion"] = "never"
+            elif isinstance(latest, datetime):
+                checks["last_ingestion"] = latest.isoformat()
+            elif isinstance(latest, str):
+                checks["last_ingestion"] = latest
+            else:
+                checks["last_ingestion"] = "unknown"
         except Exception:
             checks["last_ingestion"] = "unknown"
     except Exception as e:
@@ -220,7 +284,48 @@ async def health():
         checks["mlflow"] = "not_installed"
 
     status = "healthy" if checks.get("database") == "ok" else "degraded"
-    return {"status": status, "checks": checks}
+    database_ready = checks.get("database") == "ok"
+    agent_chat_ready = bool(settings.openai_access_token or settings.openai_api_key)
+    capability_details = {
+        "db_backed_analysis_ready": {
+            "ready": database_ready,
+            "reason": "database_ok" if database_ready else "database_unavailable",
+            "blocked_by": [] if database_ready else ["database"],
+            "dependencies": ["database"],
+        },
+        "portfolio_ready": {
+            "ready": database_ready,
+            "reason": "database_ok" if database_ready else "database_unavailable",
+            "blocked_by": [] if database_ready else ["database"],
+            "dependencies": ["database"],
+        },
+        "agent_chat_ready": {
+            "ready": agent_chat_ready,
+            "reason": "llm_credentials_present" if agent_chat_ready else "llm_credentials_missing",
+            "blocked_by": [] if agent_chat_ready else ["llm_credentials"],
+            "dependencies": ["llm_credentials"],
+        },
+    }
+    return {
+        "status": status,
+        "checks": checks,
+        "database_target": {
+            "host": parsed_db.hostname or "unknown",
+            "port": parsed_db.port,
+            "database": parsed_db.path.lstrip("/") or "unknown",
+            "ssl_required": settings.database_require_ssl,
+        },
+        "capabilities": {
+            "db_backed_analysis_ready": database_ready,
+            "portfolio_ready": database_ready,
+            "agent_chat_ready": agent_chat_ready,
+        },
+        "capability_details": capability_details,
+        "runtime": {
+            "startup_mode": _runtime_health["startup_mode"],
+            "startup_warnings": list(_runtime_health["startup_warnings"]),
+        },
+    }
 
 
 @app.get("/debug/traces")
@@ -265,137 +370,47 @@ async def debug_traces(limit: int = 10):
 
 @app.get("/debug/llm")
 async def debug_llm():
-    """Multi-provider LLM connectivity test.
-
-    Tests all three providers in the fallback chain:
-    1. Claude Sonnet 4.6 (Anthropic)
-    2. Google Gemini 2.5 Flash
-    3. NVIDIA NIM (Llama + Kimi)
-    """
+    """OpenAI SDK connectivity test for the primary LLM integration."""
     import time
-    import httpx
+    from openai import AsyncOpenAI
     from plotlot.config import settings as _s
 
     diag: dict = {"providers": {}}
 
-    # --- Provider 1: Claude ---
-    if _s.anthropic_api_key:
+    token = _s.openai_access_token or _s.openai_api_key
+    if token:
         t0 = time.monotonic()
         try:
-            import anthropic
-
-            client = anthropic.AsyncAnthropic(
-                api_key=_s.anthropic_api_key,
-                timeout=15.0,
-            )
-            resp = await client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=10,
+            client_kwargs = {"api_key": token, "timeout": 15.0}
+            if _s.openai_base_url:
+                client_kwargs["base_url"] = _s.openai_base_url
+            client = AsyncOpenAI(**client_kwargs)
+            resp = await client.chat.completions.create(
+                model=_s.openai_model or "gpt-4.1",
                 messages=[{"role": "user", "content": "Say 'ok' in one word."}],
+                max_completion_tokens=8,
+                temperature=0,
+                reasoning_effort=_s.openai_reasoning_effort,
             )
             elapsed = round(time.monotonic() - t0, 2)
-            text = resp.content[0].text if resp.content else ""
-            diag["providers"]["claude"] = {
+            text = resp.choices[0].message.content or ""
+            diag["providers"]["openai"] = {
                 "status": "ok",
-                "model": "claude-sonnet-4-6",
+                "model": _s.openai_model or "gpt-4.1",
+                "base_url": _s.openai_base_url,
                 "latency_s": elapsed,
                 "response": text[:100],
             }
         except Exception as e:
             elapsed = round(time.monotonic() - t0, 2)
-            diag["providers"]["claude"] = {
+            diag["providers"]["openai"] = {
                 "status": "error",
-                "model": "claude-sonnet-4-6",
+                "model": _s.openai_model or "gpt-4.1",
                 "error": f"{type(e).__name__}: {e}",
                 "elapsed_s": elapsed,
             }
     else:
-        diag["providers"]["claude"] = {"status": "no_api_key"}
-
-    # --- Provider 2: Gemini ---
-    if _s.google_api_key:
-        gemini_url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-        gemini_headers = {
-            "Authorization": f"Bearer {_s.google_api_key}",
-            "Content-Type": "application/json",
-        }
-        t0 = time.monotonic()
-        async with httpx.AsyncClient(
-            timeout=httpx.Timeout(connect=10.0, read=15.0, write=10.0, pool=5.0),
-        ) as client:
-            try:
-                resp = await client.post(
-                    gemini_url,
-                    json={
-                        "model": "gemini-2.5-flash",
-                        "messages": [{"role": "user", "content": "Say 'ok' in one word."}],
-                        "temperature": 0,
-                        "max_tokens": 5,
-                    },
-                    headers=gemini_headers,
-                )
-                elapsed = round(time.monotonic() - t0, 2)
-                diag["providers"]["gemini"] = {
-                    "status": resp.status_code,
-                    "model": "gemini-2.5-flash",
-                    "latency_s": elapsed,
-                    "body": resp.text[:300],
-                }
-            except Exception as e:
-                elapsed = round(time.monotonic() - t0, 2)
-                diag["providers"]["gemini"] = {
-                    "status": "error",
-                    "error": f"{type(e).__name__}: {e}",
-                    "elapsed_s": elapsed,
-                }
-    else:
-        diag["providers"]["gemini"] = {"status": "no_api_key"}
-
-    # --- Provider 3: NVIDIA NIM ---
-    nvidia_models = [
-        "meta/llama-3.3-70b-instruct",
-        "moonshotai/kimi-k2.5",
-    ]
-
-    api_key = _s.nvidia_api_key
-    if not api_key:
-        diag["providers"]["nvidia"] = {"status": "no_api_key"}
-    else:
-        diag["providers"]["nvidia"] = {}
-        headers = {
-            "Authorization": f"Bearer {api_key.strip()}",
-            "Content-Type": "application/json",
-        }
-        url = "https://integrate.api.nvidia.com/v1/chat/completions"
-
-        async with httpx.AsyncClient(
-            timeout=httpx.Timeout(connect=10.0, read=30.0, write=10.0, pool=5.0),
-        ) as client:
-            for model in nvidia_models:
-                t0 = time.monotonic()
-                try:
-                    resp = await client.post(
-                        url,
-                        json={
-                            "model": model,
-                            "messages": [{"role": "user", "content": "Say 'ok' in one word."}],
-                            "temperature": 0,
-                            "max_tokens": 5,
-                        },
-                        headers=headers,
-                    )
-                    elapsed = round(time.monotonic() - t0, 2)
-                    diag["providers"]["nvidia"][model] = {
-                        "status": resp.status_code,
-                        "latency_s": elapsed,
-                        "body": resp.text[:300],
-                    }
-                except Exception as e:
-                    elapsed = round(time.monotonic() - t0, 2)
-                    diag["providers"]["nvidia"][model] = {
-                        "error": f"{type(e).__name__}: {e}",
-                        "elapsed_s": elapsed,
-                    }
+        diag["providers"]["openai"] = {"status": "no_credentials"}
 
     # --- Circuit breaker states ---
     from plotlot.retrieval.llm import _breakers

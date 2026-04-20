@@ -1,113 +1,147 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 
-test.describe("Design System Verification", () => {
-  test("welcome page renders correctly in light mode", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+async function gotoWelcome(page: Page) {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("PlotLot", { exact: true }).first()).toBeVisible();
+}
 
-    // Nav elements
-    await expect(page.getByText("PlotLot", { exact: true })).toBeVisible();
-    await expect(page.getByText("Beta", { exact: true })).toBeVisible();
-    await expect(page.getByText("104 municipalities", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Toggle dark mode" })).toBeVisible();
+async function expectCompactHero(heading: Locator) {
+  await expect(heading).toBeVisible();
 
-    // Welcome content
-    await expect(page.getByText("Hi there")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Analyze any property in South Florida" })).toBeVisible();
-    await expect(page.getByPlaceholder("Enter an address or ask a question...")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled();
+  const metrics = await heading.evaluate((node) => {
+    const el = node as HTMLElement;
+    const style = window.getComputedStyle(el);
+    const lineHeight = Number.parseFloat(style.lineHeight);
+    const rect = el.getBoundingClientRect();
+    const lineCount =
+      Number.isFinite(lineHeight) && lineHeight > 0
+        ? Math.round(rect.height / lineHeight)
+        : el.getClientRects().length;
 
-    // 4 suggestion chips
-    await expect(page.getByRole("button", { name: /Analyze a property in Miami Gardens/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Find vacant lots/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Zoning rules in Miramar/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /What can I build/ })).toBeVisible();
-
-    await page.screenshot({ path: "tests/screenshots/ds-01-light-welcome.png", fullPage: true });
+    return {
+      lineCount,
+      width: rect.width,
+      fontSize: Number.parseFloat(style.fontSize),
+    };
   });
 
-  test("dark mode toggle works", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+  expect(metrics.width).toBeGreaterThan(320);
+  expect(metrics.fontSize).toBeGreaterThan(40);
+  expect(metrics.lineCount).toBeLessThanOrEqual(3);
+}
 
-    // Should start in light mode
+async function expectModeButtonState(active: Locator, inactive: Locator) {
+  const [activeBg, inactiveBg] = await Promise.all([
+    active.evaluate((node) => window.getComputedStyle(node as HTMLElement).backgroundColor),
+    inactive.evaluate((node) => window.getComputedStyle(node as HTMLElement).backgroundColor),
+  ]);
+
+  expect(activeBg).not.toBe("rgba(0, 0, 0, 0)");
+  expect(activeBg).not.toBe(inactiveBg);
+}
+
+test.describe("PlotLot design system", () => {
+  test("lookup welcome screen matches the current editorial hero contract", async ({ page }) => {
+    await gotoWelcome(page);
+
+    await expect(page.getByText("Beta", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("5 states", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Toggle dark mode" })).toBeVisible();
+    await expect(page.getByText("PlotLot is running in degraded local mode.")).toBeVisible();
+
+    const heading = page.getByRole("heading", { name: "Analyze any property in the US" });
+    await expectCompactHero(heading);
+    await expect(page.getByText("Zoning, density, comps, pro forma, and development potential")).toBeVisible();
+
+    const input = page.getByPlaceholder("Enter a property address...");
+    await expect(input).toBeVisible();
+    await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled();
+
+    for (const chip of ["Houston, TX", "Atlanta, GA", "Miami Gardens, FL"]) {
+      await expect(page.getByRole("button", { name: chip })).toBeVisible();
+    }
+
+    await expect(page.getByText(/PlotLot analyzes zoning, density, comps/i)).toBeVisible();
+    await page.screenshot({ path: "tests/screenshots/ds-01-lookup-welcome.png", fullPage: true });
+  });
+
+  test("agent welcome swaps into the tool-first surface without breaking the hero", async ({ page }) => {
+    await gotoWelcome(page);
+
+    const lookupButton = page.getByRole("button", { name: "Lookup" });
+    const agentButton = page.getByRole("button", { name: "Agent" });
+    await agentButton.click();
+
+    await expectCompactHero(
+      page.getByRole("heading", { name: "Ask anything about zoning & land" }),
+    );
+    await expect(page.getByPlaceholder("Ask about zoning, density, or property data...")).toBeVisible();
+
+    for (const label of [
+      "Analyze Property",
+      "Generate LOI",
+      "Search Comps",
+      "Run Pro Forma",
+      "Search Properties",
+    ]) {
+      await expect(page.getByRole("button", { name: new RegExp(label) })).toBeVisible();
+    }
+
+    await expect(page.getByText("Analyze a property first").first()).toBeVisible();
+    await expectModeButtonState(agentButton, lookupButton);
+    await page.screenshot({ path: "tests/screenshots/ds-02-agent-welcome.png", fullPage: true });
+  });
+
+  test("theme toggle persists while switching between lookup and agent modes", async ({ page }) => {
+    await gotoWelcome(page);
+
     const html = page.locator("html");
     await expect(html).not.toHaveClass(/dark/);
 
-    // Click dark mode toggle
     await page.getByRole("button", { name: "Toggle dark mode" }).click();
     await expect(html).toHaveClass(/dark/);
 
-    await page.screenshot({ path: "tests/screenshots/ds-02-dark-welcome.png", fullPage: true });
+    await page.getByRole("button", { name: "Agent" }).click();
+    await expect(page.getByRole("heading", { name: "Ask anything about zoning & land" })).toBeVisible();
+    await expect(html).toHaveClass(/dark/);
 
-    // Toggle back to light
-    await page.getByRole("button", { name: "Toggle dark mode" }).click();
-    await expect(html).not.toHaveClass(/dark/);
+    await page.getByRole("button", { name: "Lookup" }).click();
+    await expect(page.getByRole("heading", { name: "Analyze any property in the US" })).toBeVisible();
+    await expect(html).toHaveClass(/dark/);
   });
 
-  test("dark mode persists across navigation", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+  test("lookup address submission reveals the four-card deal gate before any backend analysis", async ({ page }) => {
+    await gotoWelcome(page);
 
-    // Enable dark mode
-    await page.getByRole("button", { name: "Toggle dark mode" }).click();
-    await expect(page.locator("html")).toHaveClass(/dark/);
+    await page.getByPlaceholder("Enter a property address...").fill("18901 NW 27th Ave, Miami Gardens, FL 33056");
+    await page.getByRole("button", { name: "Send message" }).click();
 
-    // Navigate to admin
-    await page.goto("/admin");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("deal-type-selector")).toBeVisible();
+    await expect(page.getByText("What type of deal are you evaluating?")).toBeVisible();
 
-    // Dark mode should persist
-    await expect(page.locator("html")).toHaveClass(/dark/);
-
-    await page.screenshot({ path: "tests/screenshots/ds-03-dark-admin.png", fullPage: true });
-  });
-
-  test("no text-[10px] or text-[11px] in rendered DOM", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    // Check that no elements use sub-12px font sizes
-    const tinyText = await page.evaluate(() => {
-      const elements = document.querySelectorAll("*");
-      const violations: string[] = [];
-      elements.forEach((el) => {
-        const style = window.getComputedStyle(el);
-        const fontSize = parseFloat(style.fontSize);
-        if (fontSize < 12 && el.textContent?.trim()) {
-          violations.push(`${el.tagName}: "${el.textContent?.trim().slice(0, 30)}" (${fontSize}px)`);
-        }
-      });
-      return violations;
-    });
-
-    // Allow empty or whitespace-only elements, but flag visible text < 12px
-    if (tinyText.length > 0) {
-      console.warn("Elements with text < 12px:", tinyText);
+    for (const card of [
+      "deal-type-land",
+      "deal-type-wholesale",
+      "deal-type-creative-finance",
+      "deal-type-hybrid",
+    ]) {
+      await expect(page.getByTestId(card)).toBeVisible();
     }
-    // This is informational — some browser defaults may be < 12px
+
+    await expect(page.getByRole("button", { name: /Land Deal:/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Wholesale:/ })).toBeVisible();
   });
 
-  test("input bar has proper focus styling", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+  test("lookup mode rejects non-address prompts instead of drifting into chat", async ({ page }) => {
+    await gotoWelcome(page);
 
-    const input = page.getByPlaceholder("Enter an address or ask a question...");
-    await input.click();
+    await page.getByPlaceholder("Enter a property address...").fill("What can I build in Houston?");
+    await page.getByRole("button", { name: "Send message" }).click();
 
-    // Input should be focusable and visible
-    await expect(input).toBeFocused();
-
-    await page.screenshot({ path: "tests/screenshots/ds-04-input-focus.png" });
-  });
-
-  test("suggestion chips have hover interaction", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    const chip = page.getByRole("button", { name: /Analyze a property in Miami Gardens/ });
-    await chip.hover();
-
-    await page.screenshot({ path: "tests/screenshots/ds-05-chip-hover.png" });
+    await expect(
+      page.getByText("Please enter a street address to run a lookup analysis"),
+    ).toBeVisible();
+    await expect(page.getByTestId("deal-type-selector")).toHaveCount(0);
   });
 });

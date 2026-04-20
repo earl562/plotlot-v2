@@ -19,7 +19,9 @@ Usage (replaces `import mlflow` in all modules):
 
 import functools
 import logging
+import socket
 from contextlib import contextmanager
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +175,34 @@ def set_experiment(name: str) -> None:
 def enable_async_logging() -> None:
     if _HAS_MLFLOW:
         _mlflow.config.enable_async_logging()
+
+
+def configure_mlflow(
+    tracking_uri: str,
+    experiment_name: str,
+    *,
+    enable_async_logging: bool = True,
+) -> bool:
+    """Configure MLflow, failing open when the tracking backend is unavailable."""
+    if not _HAS_MLFLOW:
+        return False
+
+    parsed = urlparse(tracking_uri)
+    if parsed.scheme in {"postgres", "postgresql"} and parsed.hostname and parsed.port:
+        try:
+            with socket.create_connection((parsed.hostname, parsed.port), timeout=1.0):
+                pass
+        except OSError:
+            return False
+
+    try:
+        _mlflow.set_tracking_uri(tracking_uri)
+        _mlflow.set_experiment(experiment_name)
+        if enable_async_logging:
+            _mlflow.config.enable_async_logging()
+        return True
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------------

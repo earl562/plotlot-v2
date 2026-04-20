@@ -1,6 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { DensityAnalysisData } from "@/lib/api";
+import { springBar, springGentle, staggerContainer, staggerItem } from "@/lib/motion";
 
 interface DensityBreakdownProps {
   analysis: DensityAnalysisData;
@@ -23,7 +25,12 @@ export default function DensityBreakdown({ analysis, buildableFootprintSqft, cur
             Governing: {analysis.governing_constraint}
           </p>
         </div>
-        <div className="shrink-0 text-right">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={springGentle}
+          className="shrink-0 text-right"
+        >
           <div className="font-display text-4xl text-[var(--text-primary)] sm:text-5xl">
             {isCommercial
               ? `${analysis.max_gla_sqft!.toLocaleString()}`
@@ -32,22 +39,33 @@ export default function DensityBreakdown({ analysis, buildableFootprintSqft, cur
           <div className="mt-1 text-xs text-[var(--text-muted)]">
             {isCommercial ? "sqft GLA" : `${analysis.lot_size_sqft.toLocaleString()} sqft lot`}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Constraint bars */}
-      <div className="space-y-3">
-        {analysis.constraints.map((c) => {
+      {/* Constraint bars — spring animated, governing bar first then stagger */}
+      <motion.div
+        className="space-y-3"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {analysis.constraints.map((c, idx) => {
           const pct = Math.min((c.raw_value / maxRaw) * 100, 100);
+          const delay = c.is_governing ? 0 : 0.15 + idx * 0.08;
           return (
-            <div key={c.name}>
+            <motion.div key={c.name} variants={staggerItem}>
               <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-[var(--text-secondary)]">{c.name}</span>
                   {c.is_governing && (
-                    <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-amber-800">
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ ...springGentle, delay: 0.3 }}
+                      className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-amber-800"
+                    >
                       GOVERNING
-                    </span>
+                    </motion.span>
                   )}
                 </div>
                 <span className="text-xs font-mono text-stone-500">
@@ -57,20 +75,22 @@ export default function DensityBreakdown({ analysis, buildableFootprintSqft, cur
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-surface-raised)]">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
+                <motion.div
+                  className={`h-full rounded-full ${
                     c.is_governing
                       ? "bg-gradient-to-r from-amber-400 to-amber-600"
                       : "bg-stone-400"
                   }`}
-                  style={{ width: `${pct}%` }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ ...springBar, delay }}
                 />
               </div>
               <p className="mt-0.5 truncate text-xs text-stone-500 font-mono">{c.formula}</p>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Compact stats from development summary */}
       {(buildableFootprintSqft || currentCoveragePct) && (

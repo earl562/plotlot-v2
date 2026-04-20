@@ -169,6 +169,48 @@ async def test_analyze_pipeline_error(client):
     assert "LLM provider down" in resp.json()["detail"]
 
 
+@pytest.mark.asyncio
+async def test_analyze_backend_unavailable_error_is_actionable(client):
+    """Connection-refused pipeline errors should become actionable degraded guidance."""
+    with patch(
+        "plotlot.api.routes.lookup_address",
+        new_callable=AsyncMock,
+        side_effect=OSError("[Errno 61] Connection refused"),
+    ):
+        resp = await client.post(
+            "/api/v1/analyze",
+            json={"address": "171 NE 209th Ter, Miami, FL 33179"},
+        )
+    assert resp.status_code == 502
+    assert "data backend is offline" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
+    """Streaming analyze should emit actionable backend-unavailable SSE errors."""
+    with patch(
+        "plotlot.api.routes.geocode_address",
+        new_callable=AsyncMock,
+        return_value={
+            "municipality": "Miami Gardens",
+            "county": "Miami-Dade",
+            "lat": 25.957,
+            "lng": -80.199,
+        },
+    ), patch(
+        "plotlot.api.routes.lookup_property",
+        new_callable=AsyncMock,
+        side_effect=OSError("[Errno 61] Connection refused"),
+    ):
+        resp = await client.post(
+            "/api/v1/analyze/stream",
+            json={"address": "171 NE 209th Ter, Miami, FL 33179"},
+        )
+    assert resp.status_code == 200
+    assert "backend_unavailable" in resp.text
+    assert "data backend is offline" in resp.text
+
+
 # ---------------------------------------------------------------------------
 # Chat endpoint tests (Phase 5c)
 # ---------------------------------------------------------------------------
@@ -198,6 +240,35 @@ async def test_chat_streams_response(client):
     body = resp.text
     assert "token" in body
     assert "done" in body
+
+
+@pytest.mark.asyncio
+async def test_chat_reports_actionable_error_when_llm_unavailable(client):
+    """Chat surfaces a useful error when the LLM returns no response."""
+    from plotlot.api.chat import _sessions
+
+    _sessions._conversations.clear()
+    _sessions._last_access.clear()
+
+    with (
+        patch("plotlot.api.chat.call_llm", new_callable=AsyncMock, return_value=None),
+        patch("plotlot.api.chat.settings") as mock_settings,
+    ):
+        mock_settings.openai_api_key = ""
+        mock_settings.openai_access_token = ""
+        resp = await client.post(
+            "/api/v1/chat",
+            json={
+                "message": "What can I build?",
+                "history": [],
+                "report_context": None,
+            },
+        )
+
+    assert resp.status_code == 200
+    body = resp.text
+    assert "no LLM credentials are configured" in body
+    assert "OPENAI_API_KEY" in body
 
 
 @pytest.mark.asyncio

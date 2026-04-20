@@ -33,3 +33,4 @@ mlruns/
 # Frontend
 **/node_modules/
 .vercel
+.omx/

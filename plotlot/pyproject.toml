@@ -16,10 +16,18 @@ dependencies = [
     "uvicorn[standard]>=0.32",
     "alembic>=1.18.4",
     "pyjwt>=2.11.0",
+    "cryptography>=42.0",
+    "stripe>=11.0",
     "shapely>=2.0",
     "reportlab>=4.0",
     "sentry-sdk[fastapi]>=2.0",
     "google-genai>=1.0",
+    "google-cloud-firestore>=2.16",
+    "python-docx>=1.1",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+    "openpyxl>=3.1",
+    "openai>=2.31.0",
 ]
 
 [project.optional-dependencies]
@@ -47,12 +55,14 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "eval: evaluation tests against golden dataset",
     "e2e: end-to-end pipeline regression tests",
     "integration: tests requiring live external services (DB, APIs, LLM)",
+    "live: tests that hit real external APIs (ArcGIS Hub, county endpoints)",
 ]
 
 [tool.mypy]

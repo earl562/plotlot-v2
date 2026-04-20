@@ -3,6 +3,34 @@
     "frontend-design@claude-plugins-official": true,
     "playwright@claude-plugins-official": true
   },
+  "permissions": {
+    "allow": [
+      "Bash(gemini *)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run ruff *)",
+      "Bash(uv run mypy *)",
+      "Bash(cd plotlot && uv run *)",
+      "Bash(cd plotlot/frontend && npm *)",
+      "Bash(cd plotlot/frontend && npx *)",
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(curl http://localhost:*)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(gh *)",
+      "Bash(ls *)",
+      "Bash(vercel *)",
+      "WebFetch(domain:*.arcgis.com)",
+      "WebFetch(domain:hub.arcgis.com)",
+      "WebFetch(domain:library.municode.com)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -31,6 +59,26 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash /Users/earlperry/Desktop/Projects/EP/.claude/hooks/tdd-guard.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/earlperry/Desktop/Projects/EP/.claude/hooks/auto-test.sh",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
             "command": "FILE=$(cat | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\"); if [[ \"$FILE\" == *.ts* ]]; then cd /Users/earlperry/Desktop/Projects/EP/plotlot/frontend && npx next lint --file \"${FILE#*/frontend/}\" 2>&1 | tail -5; fi",
             "timeout": 30
           }
@@ -42,8 +90,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/earlperry/Desktop/Projects/EP/plotlot && uv run ruff check src/ 2>&1 | tail -10; echo '---'; uv run pytest tests/unit/ -x -q 2>&1 | tail -15",
-            "timeout": 120
+            "command": "echo '=== PlotLot Health Dashboard ===' && echo '--- ruff ---' && cd /Users/earlperry/Desktop/Projects/EP/plotlot && uv run ruff check src/ 2>&1 | tail -3 && echo '--- mypy ---' && uv run mypy src/plotlot/ 2>&1 | tail -3 && echo '--- pytest ---' && uv run pytest tests/unit/ -x -q 2>&1 | tail -5",
+            "timeout": 180
           }
         ]
       }

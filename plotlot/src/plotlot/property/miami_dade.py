@@ -21,5 +21,6 @@ class MiamiDadeProvider(PropertyProvider):
         *,
         lat: float | None = None,
         lng: float | None = None,
+        state: str = "",
     ) -> PropertyRecord | None:
         return await _lookup_miami_dade(address, lat, lng)

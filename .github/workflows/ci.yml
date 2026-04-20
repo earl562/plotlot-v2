@@ -18,11 +18,22 @@ jobs:
       - run: uv sync --frozen --dev
       - run: uv run ruff check src/ tests/
       - run: uv run ruff format --check src/ tests/
+
+  typecheck:
+    runs-on: ubuntu-latest
+    needs: lint
+    defaults:
+      run:
+        working-directory: plotlot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen --dev
       - run: uv run mypy src/plotlot/ --no-error-summary
 
   test:
     runs-on: ubuntu-latest
-    needs: lint
+    needs: typecheck
     defaults:
       run:
         working-directory: plotlot
@@ -47,3 +58,109 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --frozen --dev --extra eval
       - run: uv run python -m pytest tests/unit/ -v --tb=short
+
+  frontend-ui:
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: plotlot/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run test:ui
+
+  playwright-no-db:
+    runs-on: ubuntu-latest
+    needs: frontend-ui
+    defaults:
+      run:
+        working-directory: plotlot/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:no-db
+
+  playwright-db:
+    runs-on: ubuntu-latest
+    needs: frontend-ui
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: plotlot
+          POSTGRES_PASSWORD: plotlot
+          POSTGRES_DB: plotlot
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U plotlot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen --dev --extra eval
+        working-directory: plotlot
+      - run: uv run uvicorn plotlot.api.main:app --host 127.0.0.1 --port 8000 > /tmp/plotlot-api.log 2>&1 &
+        working-directory: plotlot
+      - run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health | grep -q '"status":"healthy"'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/plotlot-api.log
+          echo "Backend failed db-backed preflight"
+          exit 1
+        working-directory: plotlot
+      - run: npm ci
+        working-directory: plotlot/frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: plotlot/frontend
+      - run: npm run test:e2e:db
+        working-directory: plotlot/frontend
+
+  eval:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: plotlot
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: plotlot
+          POSTGRES_PASSWORD: plotlot
+          POSTGRES_DB: plotlot
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U plotlot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen --dev --extra eval
+      - run: uv run python -m pytest tests/eval/ -v --tb=short

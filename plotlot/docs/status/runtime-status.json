@@ -1,0 +1,31 @@
+{
+  "updated_at": "2026-04-10T00:27:52Z",
+  "frontend_url": "http://localhost:3002",
+  "frontend_status": "ok",
+  "backend_url": "http://127.0.0.1:8000",
+  "backend_status": "healthy",
+  "backend_health_raw": {
+    "status": "healthy",
+    "checks": {
+      "database": "ok",
+      "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+      "mlflow": "ok"
+    }
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "status": "ok"
+  },
+  "mlflow_status": "ok",
+  "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+  "processes": {
+    "backend_seen": true,
+    "frontend_seen": true
+  },
+  "open_issues": [
+    "No automated heartbeat to Discord/origin yet",
+    "No enforced handoff protocol across sessions"
+  ],
+  "next_action": "Review CURRENT_STATE.md and continue highest-priority fix"
+}

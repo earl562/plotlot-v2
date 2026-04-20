@@ -22,5 +22,6 @@ class BrowardProvider(PropertyProvider):
         *,
         lat: float | None = None,
         lng: float | None = None,
+        state: str = "",
     ) -> PropertyRecord | None:
         return await _lookup_broward(address, lat, lng)

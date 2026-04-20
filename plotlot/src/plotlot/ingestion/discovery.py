@@ -195,6 +195,298 @@ NC_CHARLOTTE_METRO: dict[str, list[str]] = {
     ],
 }
 
+# TX major metro municipalities by county.
+# Covers Houston, Dallas-Fort Worth, San Antonio, Austin, and El Paso metros.
+TEXAS_METROS: dict[str, list[str]] = {
+    "harris": [
+        "Houston",
+        "Bellaire",
+        "Humble",
+        "Jersey Village",
+        "Katy",
+        "La Porte",
+        "Missouri City",
+        "Pasadena",
+        "Pearland",
+        "Spring Valley Village",
+        "Stafford",
+        "Sugar Land",
+        "West University Place",
+    ],
+    "fort_bend": [
+        "Richmond",
+        "Rosenberg",
+        "Fulshear",
+        "Needville",
+    ],
+    "montgomery": [
+        "Conroe",
+        "The Woodlands",
+        "Shenandoah",
+        "Magnolia",
+    ],
+    "dallas": [
+        "Dallas",
+        "Balch Springs",
+        "Cedar Hill",
+        "Cockrell Hill",
+        "DeSoto",
+        "Duncanville",
+        "Farmers Branch",
+        "Garland",
+        "Glenn Heights",
+        "Grand Prairie",
+        "Highland Park",
+        "Irving",
+        "Lancaster",
+        "Mesquite",
+        "Richardson",
+        "Rowlett",
+        "Sachse",
+        "Seagoville",
+        "University Park",
+        "Wilmer",
+    ],
+    "tarrant": [
+        "Fort Worth",
+        "Arlington",
+        "Bedford",
+        "Benbrook",
+        "Colleyville",
+        "Euless",
+        "Grapevine",
+        "Haltom City",
+        "Hurst",
+        "Keller",
+        "Mansfield",
+        "North Richland Hills",
+        "Southlake",
+        "Watauga",
+    ],
+    "collin": [
+        "Allen",
+        "Frisco",
+        "McKinney",
+        "Plano",
+        "Prosper",
+        "Wylie",
+    ],
+    "denton": [
+        "Denton",
+        "Flower Mound",
+        "Lewisville",
+        "Little Elm",
+        "The Colony",
+    ],
+    "bexar": [
+        "San Antonio",
+        "Alamo Heights",
+        "Castle Hills",
+        "Converse",
+        "Helotes",
+        "Leon Valley",
+        "Live Oak",
+        "Schertz",
+        "Selma",
+        "Universal City",
+        "Windcrest",
+    ],
+    "travis": [
+        "Austin",
+        "Bee Cave",
+        "Cedar Park",
+        "Lakeway",
+        "Pflugerville",
+        "Rollingwood",
+        "Sunset Valley",
+        "West Lake Hills",
+    ],
+    "williamson": [
+        "Georgetown",
+        "Round Rock",
+        "Leander",
+        "Taylor",
+    ],
+    "el_paso": [
+        "El Paso",
+        "Anthony",
+        "Socorro",
+        "Horizon City",
+    ],
+}
+
+# GA major metro municipalities by county.
+# Covers Atlanta metro, Savannah, Augusta, and Columbus.
+GEORGIA_METROS: dict[str, list[str]] = {
+    "fulton": [
+        "Atlanta",
+        "Alpharetta",
+        "College Park",
+        "East Point",
+        "Fairburn",
+        "Hapeville",
+        "Johns Creek",
+        "Milton",
+        "Mountain Park",
+        "Palmetto",
+        "Roswell",
+        "Sandy Springs",
+        "Union City",
+    ],
+    "dekalb": [
+        "Avondale Estates",
+        "Brookhaven",
+        "Chamblee",
+        "Clarkston",
+        "Decatur",
+        "Doraville",
+        "Dunwoody",
+        "Lithonia",
+        "Pine Lake",
+        "Stone Mountain",
+        "Stonecrest",
+        "Tucker",
+    ],
+    "gwinnett": [
+        "Buford",
+        "Dacula",
+        "Duluth",
+        "Lawrenceville",
+        "Lilburn",
+        "Loganville",
+        "Norcross",
+        "Peachtree Corners",
+        "Snellville",
+        "Suwanee",
+    ],
+    "cobb": [
+        "Acworth",
+        "Austell",
+        "Kennesaw",
+        "Marietta",
+        "Powder Springs",
+        "Smyrna",
+    ],
+    "clayton": [
+        "Forest Park",
+        "Jonesboro",
+        "Lake City",
+        "Morrow",
+        "Riverdale",
+    ],
+    "chatham": [
+        "Savannah",
+        "Bloomingdale",
+        "Garden City",
+        "Pooler",
+        "Port Wentworth",
+        "Tybee Island",
+        "Thunderbolt",
+    ],
+    "richmond": [
+        "Augusta",
+        "Hephzibah",
+    ],
+    "muscogee": [
+        "Columbus",
+    ],
+    "bibb": [
+        "Macon",
+    ],
+    "hall": [
+        "Gainesville",
+    ],
+    "henry": [
+        "McDonough",
+        "Hampton",
+        "Locust Grove",
+        "Stockbridge",
+    ],
+    "forsyth": [
+        "Cumming",
+    ],
+    "cherokee": [
+        "Canton",
+        "Holly Springs",
+        "Woodstock",
+    ],
+    "douglas": [
+        "Douglasville",
+    ],
+}
+
+# SC major metro municipalities by county.
+# Covers Charleston, Columbia, Greenville, and Myrtle Beach metros.
+SOUTH_CAROLINA_METROS: dict[str, list[str]] = {
+    "charleston": [
+        "Charleston",
+        "Folly Beach",
+        "Isle of Palms",
+        "Mount Pleasant",
+        "North Charleston",
+        "Sullivan's Island",
+    ],
+    "berkeley": [
+        "Goose Creek",
+        "Hanahan",
+        "Moncks Corner",
+        "Summerville",
+    ],
+    "dorchester": [
+        "Summerville",
+        "St. George",
+    ],
+    "richland": [
+        "Columbia",
+        "Forest Acres",
+        "Irmo",
+    ],
+    "lexington": [
+        "Cayce",
+        "Lexington",
+        "West Columbia",
+    ],
+    "greenville": [
+        "Greenville",
+        "Greer",
+        "Mauldin",
+        "Simpsonville",
+        "Travelers Rest",
+    ],
+    "spartanburg": [
+        "Spartanburg",
+        "Boiling Springs",
+        "Duncan",
+        "Inman",
+    ],
+    "horry": [
+        "Myrtle Beach",
+        "Conway",
+        "North Myrtle Beach",
+        "Surfside Beach",
+    ],
+    "georgetown": [
+        "Georgetown",
+        "Pawleys Island",
+    ],
+    "york": [
+        "Rock Hill",
+        "Fort Mill",
+        "Tega Cay",
+        "York",
+    ],
+    "beaufort": [
+        "Beaufort",
+        "Bluffton",
+        "Hilton Head Island",
+        "Port Royal",
+    ],
+    "aiken": [
+        "Aiken",
+        "North Augusta",
+    ],
+}
+
 
 # Known name mismatches between our target list and Municode client names.
 _NAME_MAP: dict[str, str] = {
@@ -211,6 +503,23 @@ _NAME_MAP: dict[str, str] = {
     # NC Charlotte metro aliases
     "Indian Trail": "Indian Trail",
     "Mint Hill": "Mint Hill",
+    # TX aliases
+    "West University Place": "West University Place",
+    "Spring Valley Village": "Spring Valley Village",
+    "North Richland Hills": "North Richland Hills",
+    "The Woodlands": "Woodlands",
+    "The Colony": "Colony",
+    # GA aliases
+    "Peachtree Corners": "Peachtree Corners",
+    "Stone Mountain": "Stone Mountain",
+    # SC aliases
+    "Mount Pleasant": "Mount Pleasant",
+    "North Charleston": "North Charleston",
+    "Sullivan's Island": "Sullivans Island",
+    "Isle of Palms": "Isle of Palms",
+    "North Myrtle Beach": "North Myrtle Beach",
+    "Hilton Head Island": "Hilton Head Island",
+    "North Augusta": "North Augusta",
 }
 
 # Module-level cache
@@ -247,6 +556,7 @@ def _write_disk_cache(configs: dict[str, MunicodeConfig]) -> None:
                     "product_id": cfg.product_id,
                     "job_id": cfg.job_id,
                     "zoning_node_id": cfg.zoning_node_id,
+                    "state": cfg.state,
                 }
                 for key, cfg in configs.items()
             },
@@ -295,6 +605,16 @@ def _make_key(name: str) -> str:
 # Defined after _make_key so the helper is available.
 NC_CHARLOTTE_METRO_KEYS: set[str] = {
     _make_key(name) for names in NC_CHARLOTTE_METRO.values() for name in names
+}
+
+TEXAS_METROS_KEYS: set[str] = {_make_key(name) for names in TEXAS_METROS.values() for name in names}
+
+GEORGIA_METROS_KEYS: set[str] = {
+    _make_key(name) for names in GEORGIA_METROS.values() for name in names
+}
+
+SOUTH_CAROLINA_METROS_KEYS: set[str] = {
+    _make_key(name) for names in SOUTH_CAROLINA_METROS.values() for name in names
 }
 
 
@@ -421,6 +741,7 @@ async def _discover_municipality(
     county: str,
     name: str,
     fl_clients: list[dict],
+    state: str = "FL",
 ) -> tuple[str, MunicodeConfig | None]:
     """Discover a single municipality's Municode config.
 
@@ -516,6 +837,7 @@ async def _discover_municipality(
                     product_id=product_id,
                     job_id=job_id,
                     zoning_node_id=node_id,
+                    state=state,
                 )
                 logger.info(
                     "Discovered %s: client=%d product=%d job=%d node=%s (%d children)",
@@ -554,7 +876,9 @@ async def discover_all(
         tasks = []
         for county, names in SOUTH_FLORIDA_MUNICIPALITIES.items():
             for name in names:
-                tasks.append(_discover_municipality(client, semaphore, county, name, fl_clients))
+                tasks.append(
+                    _discover_municipality(client, semaphore, county, name, fl_clients, state="FL")
+                )
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -595,7 +919,9 @@ async def discover_nc(
         tasks = []
         for county, names in NC_CHARLOTTE_METRO.items():
             for name in names:
-                tasks.append(_discover_municipality(client, semaphore, county, name, nc_clients))
+                tasks.append(
+                    _discover_municipality(client, semaphore, county, name, nc_clients, state="NC")
+                )
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -627,13 +953,77 @@ def get_nc_municode_configs() -> dict[str, MunicodeConfig]:
     return dict(_NC_FALLBACK_CONFIGS)
 
 
+async def _discover_state(
+    state_abbr: str,
+    metros: dict[str, list[str]],
+    max_concurrent: int = 5,
+) -> dict[str, MunicodeConfig]:
+    """Generic state discovery — queries Municode for all municipalities in a state.
+
+    Args:
+        state_abbr: Two-letter state code (TX, GA, SC).
+        metros: Dict of {county: [municipality_names]} to discover.
+        max_concurrent: Max parallel API calls.
+
+    Returns:
+        Dict of {key: MunicodeConfig} for discovered municipalities.
+    """
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        state_clients = await _fetch_json(client, "Clients/stateAbbr", stateAbbr=state_abbr)
+        if not state_clients or not isinstance(state_clients, list):
+            logger.error("Failed to fetch %s clients from Municode Library API", state_abbr)
+            return {}
+
+        logger.info("Fetched %d %s clients from Municode", len(state_clients), state_abbr)
+
+        tasks = []
+        for county, names in metros.items():
+            for name in names:
+                tasks.append(
+                    _discover_municipality(
+                        client, semaphore, county, name, state_clients, state=state_abbr
+                    )
+                )
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        configs: dict[str, MunicodeConfig] = {}
+        for result in results:
+            if isinstance(result, BaseException):
+                logger.warning("%s discovery task failed: %s", state_abbr, result)
+                continue
+            key, config = result
+            if config is not None:
+                configs[key] = config
+
+        logger.info("Discovered %d %s municipalities with zoning data", len(configs), state_abbr)
+        return configs
+
+
+async def discover_tx(max_concurrent: int = 5) -> dict[str, MunicodeConfig]:
+    """Discover TX municipalities with zoning data on Municode."""
+    return await _discover_state("TX", TEXAS_METROS, max_concurrent)
+
+
+async def discover_ga(max_concurrent: int = 5) -> dict[str, MunicodeConfig]:
+    """Discover GA municipalities with zoning data on Municode."""
+    return await _discover_state("GA", GEORGIA_METROS, max_concurrent)
+
+
+async def discover_sc(max_concurrent: int = 5) -> dict[str, MunicodeConfig]:
+    """Discover SC municipalities with zoning data on Municode."""
+    return await _discover_state("SC", SOUTH_CAROLINA_METROS, max_concurrent)
+
+
 async def get_all_municode_configs(
     force_refresh: bool = False,
 ) -> dict[str, MunicodeConfig]:
-    """Get FL + NC Municode configs combined, using cached discovery results.
+    """Get FL + NC + TX + GA + SC Municode configs, using cached discovery results.
 
-    Runs FL and NC discovery in parallel, merges results, and applies
-    fallback configs for both states.
+    Runs all 5 state discoveries in parallel, merges results, and applies
+    fallback configs for FL and NC (other states use discovery-only).
     """
     global _cached_configs
 
@@ -649,16 +1039,22 @@ async def get_all_municode_configs(
                 _cached_configs = disk_configs
                 return _cached_configs
 
-        logger.info("Running combined FL + NC Municode auto-discovery...")
+        logger.info("Running combined FL + NC + TX + GA + SC Municode auto-discovery...")
         configs: dict[str, MunicodeConfig] = {}
         try:
-            fl_configs, nc_configs = await asyncio.gather(
+            fl_configs, nc_configs, tx_configs, ga_configs, sc_configs = await asyncio.gather(
                 discover_all(),
                 discover_nc(),
+                discover_tx(),
+                discover_ga(),
+                discover_sc(),
                 return_exceptions=False,
             )
             configs.update(fl_configs)
             configs.update(nc_configs)
+            configs.update(tx_configs)
+            configs.update(ga_configs)
+            configs.update(sc_configs)
         except Exception as e:
             logger.error("Combined discovery failed, returning fallback configs: %s", e)
             from plotlot.core.types import _FALLBACK_CONFIGS, _NC_FALLBACK_CONFIGS
@@ -682,7 +1078,7 @@ async def get_all_municode_configs(
 
         _cached_configs = configs
         _write_disk_cache(configs)
-        logger.info("Cached %d FL + NC municipality configs", len(_cached_configs))
+        logger.info("Cached %d municipality configs across 5 states", len(_cached_configs))
         return _cached_configs
 
 

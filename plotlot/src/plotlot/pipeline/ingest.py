@@ -3,22 +3,33 @@
 Orchestrates the full data pipeline for loading zoning ordinances
 into pgvector for hybrid search. Network-bound steps (scrape, embed)
 use retry with exponential backoff for resilience.
+
+DDIA patterns applied:
+- Partitioned processing: each municipality is an independent partition
+- Checkpoint-based resumability: progress persisted per-municipality
+- Idempotent writes: upsert on natural key (municipality, node_id, chunk_index)
+- Bounded resources: connection pool sized to Neon free tier limits
+- Error isolation: one municipality failing doesn't stop the batch
 """
 
 import asyncio
 import logging
+import uuid
 from datetime import datetime, timezone
 
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plotlot.core.types import MUNICODE_CONFIGS
 from plotlot.ingestion.chunker import chunk_sections
-from plotlot.ingestion.embedder import EMBEDDING_DIM, MODEL_ID as EMBEDDING_MODEL_ID, embed_texts
+from plotlot.ingestion.embedder import EMBEDDING_DIM
+from plotlot.ingestion.embedder import MODEL_ID as EMBEDDING_MODEL_ID
+from plotlot.ingestion.embedder import embed_texts
 from plotlot.ingestion.scraper import MunicodeScraper
 from plotlot.observability.tracing import log_metrics, start_span
 from plotlot.storage.db import get_session, init_db
-from plotlot.storage.models import OrdinanceChunk
+from plotlot.storage.models import IngestionCheckpoint, OrdinanceChunk
 
 logger = logging.getLogger(__name__)
 
@@ -314,32 +325,186 @@ async def ingest_municipality(key: str) -> int:
             await session.close()
 
 
-async def ingest_all() -> dict[str, int]:
-    """Ingest all discovered municipalities.
+async def _checkpoint_mark(
+    session: AsyncSession, batch_id: str, key: str, status: str, **kwargs
+) -> None:
+    """Update a checkpoint row. Creates if not exists via upsert."""
+    values = {"batch_id": batch_id, "municipality_key": key, "status": status, **kwargs}
+    stmt = pg_insert(IngestionCheckpoint).values(values)
+    stmt = stmt.on_conflict_do_update(
+        constraint="uq_checkpoint_batch_muni",
+        set_={k: v for k, v in values.items() if k not in ("batch_id", "municipality_key")},
+    )
+    await session.execute(stmt)
+    await session.commit()
+
+
+async def _get_completed_keys(session: AsyncSession, batch_id: str) -> set[str]:
+    """Return municipality keys already completed in this batch."""
+    result = await session.execute(
+        select(IngestionCheckpoint.municipality_key).where(
+            IngestionCheckpoint.batch_id == batch_id,
+            IngestionCheckpoint.status == "complete",
+        )
+    )
+    return {row[0] for row in result.fetchall()}
+
+
+async def ingest_all(
+    state_filter: str | None = None,
+    resume_batch: str | None = None,
+) -> dict[str, int]:
+    """Ingest municipalities with checkpoint-driven resumability.
+
+    DDIA patterns:
+    - Each municipality is a partition — failures are isolated
+    - Checkpoints persist to DB — crash at #85 resumes from #86
+    - Idempotent upserts — re-running is safe, not wasteful
+    - Bounded connections — pool_size=2 respects Neon free tier
+
+    Args:
+        state_filter: Only ingest municipalities for this state (e.g. "FL").
+        resume_batch: Resume a previous batch by ID. If None, starts fresh.
 
     Returns:
         Dict of {municipality_key: chunks_stored}.
     """
     configs = await _resolve_all_configs()
-    logger.info("Ingesting %d municipalities", len(configs))
 
-    results = {}
-    for key in configs:
+    # Filter by state if requested
+    if state_filter:
+        configs = {k: v for k, v in configs.items() if v.state == state_filter.upper()}
+
+    batch_id = resume_batch or f"batch-{uuid.uuid4().hex[:8]}"
+    logger.info(
+        "Batch %s: %d municipalities%s",
+        batch_id,
+        len(configs),
+        f" (state={state_filter.upper()})" if state_filter else "",
+    )
+
+    # Initialize DB and check for already-completed municipalities.
+    # Fail open when the checkpoint database is unavailable so discovery-only
+    # unit tests and degraded local runs can still exercise orchestration logic.
+    checkpointing_enabled = True
+    completed: set[str] = set()
+    try:
+        await init_db()
+        session = await get_session()
+        try:
+            completed = await _get_completed_keys(session, batch_id)
+        finally:
+            await session.close()
+    except Exception as e:
+        checkpointing_enabled = False
+        logger.warning(
+            "Checkpoint database unavailable for batch %s — continuing without resumability: %s",
+            batch_id,
+            e,
+        )
+
+    if completed:
+        logger.info("Resuming batch %s: %d already complete, skipping", batch_id, len(completed))
+
+    remaining = {k: v for k, v in configs.items() if k not in completed}
+    logger.info("Processing %d municipalities (%d skipped)", len(remaining), len(completed))
+
+    results: dict[str, int] = {k: 0 for k in completed}  # pre-fill completed
+    succeeded = 0
+    failed = 0
+
+    for i, (key, config) in enumerate(sorted(remaining.items()), 1):
+        # Mark running
+        if checkpointing_enabled:
+            session = await get_session()
+            try:
+                await _checkpoint_mark(
+                    session,
+                    batch_id,
+                    key,
+                    "running",
+                    state=config.state,
+                    started_at=datetime.now(timezone.utc),
+                )
+            finally:
+                await session.close()
+
         try:
             count = await ingest_municipality(key)
             results[key] = count
+            succeeded += 1
+
+            # Mark complete
+            if checkpointing_enabled:
+                session = await get_session()
+                try:
+                    await _checkpoint_mark(
+                        session,
+                        batch_id,
+                        key,
+                        "complete",
+                        state=config.state,
+                        chunks_stored=count,
+                        completed_at=datetime.now(timezone.utc),
+                    )
+                finally:
+                    await session.close()
+
+            logger.info(
+                "[%d/%d] %-30s %4d chunks  (batch %s)",
+                i,
+                len(remaining),
+                config.municipality,
+                count,
+                batch_id,
+            )
+
         except Exception as e:
-            logger.error("Failed to ingest %s: %s", key, e)
+            failed += 1
             results[key] = 0
 
+            # Mark failed with error message
+            if checkpointing_enabled:
+                session = await get_session()
+                try:
+                    await _checkpoint_mark(
+                        session,
+                        batch_id,
+                        key,
+                        "failed",
+                        state=config.state,
+                        error_message=str(e)[:500],
+                        completed_at=datetime.now(timezone.utc),
+                    )
+                finally:
+                    await session.close()
+
+            logger.error(
+                "[%d/%d] %-30s FAILED: %s",
+                i,
+                len(remaining),
+                config.municipality,
+                e,
+            )
+
     total = sum(results.values())
-    logger.info("Ingestion complete: %d total chunks across %d municipalities", total, len(results))
+    logger.info(
+        "Batch %s complete: %d chunks across %d municipalities (%d succeeded, %d failed, %d skipped)",
+        batch_id,
+        total,
+        len(configs),
+        succeeded,
+        failed,
+        len(completed),
+    )
 
     _safe_log_metrics(
         {
             "ingest.total_chunks": total,
-            "ingest.municipalities_processed": len(results),
-            "ingest.municipalities_failed": sum(1 for v in results.values() if v == 0),
+            "ingest.municipalities_processed": succeeded + failed,
+            "ingest.municipalities_succeeded": succeeded,
+            "ingest.municipalities_failed": failed,
+            "ingest.municipalities_skipped": len(completed),
         }
     )
 

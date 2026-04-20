@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /plotlot_county_datasets/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /plotlot_field_mappings/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

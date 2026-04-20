@@ -8,18 +8,28 @@ async function analyzeAddress(
   address: string,
 ) {
   await page.goto("/");
-  // Switch to Chat mode if Quick Analysis is the default
-  const chatBtn = page.getByRole("button", { name: "Chat with Agent" });
-  if (await chatBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await chatBtn.click();
+  // Switch to Agent mode for direct pipeline (no deal type gate)
+  const agentBtn = page.getByRole("button", { name: "Agent" });
+  if (await agentBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await agentBtn.click();
   }
-  const input = page.getByRole("textbox", { name: /address|question/ });
+
+  const input = page
+    .getByPlaceholder("Ask about zoning, density, or property data...")
+    .or(page.getByPlaceholder("Enter a property address..."))
+    .first();
+  await expect(input).toBeVisible();
   await input.fill(address);
-  await page.getByRole("button", { name: "Send message" }).click();
+
+  const sendButton = page.getByRole("button", { name: "Send message" });
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
+
   // Wait for pipeline to start — either stepper or the report itself
-  // (pipeline can be fast enough that stepper is gone before we check)
   await expect(
-    page.getByText("Geocoding").or(page.getByText("MAX ALLOWABLE UNITS")),
+    page.getByText("Geocoding", { exact: true })
+      .first()
+      .or(page.getByText("MAX ALLOWABLE UNITS").first()),
   ).toBeVisible({ timeout: 30_000 });
 }
 
@@ -53,30 +63,21 @@ test.describe("Scenario 1: Welcome Screen", () => {
   test("renders all UI elements correctly", async ({ page }) => {
     await page.goto("/");
 
-    // Nav bar
-    await expect(page.locator("nav")).toContainText("PlotLot");
-    await expect(page.locator("nav")).toContainText("Beta");
-    await expect(page.locator("nav")).toContainText("104 municipalities");
+    // Sidebar branding
+    await expect(page.getByText("PlotLot").first()).toBeVisible();
+    await expect(page.getByText("Beta").first()).toBeVisible();
+    await expect(page.getByText("5 states")).toBeVisible();
 
     // Mode toggle visible
-    await expect(page.getByRole("button", { name: "Quick Analysis" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Chat with Agent" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Lookup" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Agent" })).toBeVisible();
 
-    // Switch to Chat mode to verify chat UI
-    await page.getByRole("button", { name: "Chat with Agent" }).click();
-
-    // Greeting + heading
+    // Greeting + heading (Lookup mode is default)
     await expect(page.getByText("Hi there")).toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        name: /Analyze any property/,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText("Analyze any property")).toBeVisible();
 
     // Input bar
-    const input = page.getByRole("textbox", {
-      name: /address|question/,
-    });
+    const input = page.getByPlaceholder("Enter a property address...");
     await expect(input).toBeVisible();
 
     // Send button disabled when empty
@@ -84,13 +85,8 @@ test.describe("Scenario 1: Welcome Screen", () => {
       page.getByRole("button", { name: "Send message" }),
     ).toBeDisabled();
 
-    // 4 suggestion chips
-    for (const text of [
-      /Miami Gardens/,
-      /vacant lots/,
-      /Zoning rules in Miramar/,
-      /build on my lot/,
-    ]) {
+    // Capability chips (lookup mode)
+    for (const text of [/Houston, TX/, /Atlanta, GA/, /Miami Gardens, FL/]) {
       await expect(page.getByRole("button", { name: text })).toBeVisible();
     }
 
@@ -432,7 +428,9 @@ test.describe("Scenario 10: Agent Mode Flow", () => {
     await expect(page.getByText("Analyze Property")).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText("Generate LOI")).toBeVisible();
     await expect(page.getByText("Search Comps")).toBeVisible();
-    await expect(page.getByText("Search Properties")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Search Properties/i }),
+    ).toBeVisible();
 
     // "Generate LOI" should show "Analyze a property first" hint
     await expect(page.getByText("Analyze a property first").first()).toBeVisible();
@@ -447,7 +445,7 @@ test.describe("Scenario 11: Mode Switching", () => {
     await page.goto("/");
 
     // Start in lookup mode — should show address example chips
-    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
 
     // Switch to agent mode
     const modeToggle = page.locator("[data-mode-toggle]").or(
@@ -469,6 +467,6 @@ test.describe("Scenario 11: Mode Switching", () => {
     }
 
     // Should show address chips again
-    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
   });
 });

@@ -190,6 +190,8 @@ async def lookup_address(address: str) -> ZoningReport | None:
             # Skip abbreviations (Broward uses "MM" for Miramar, "FTL" for Fort Lauderdale)
             if prop_record.municipality:
                 pa_muni = prop_record.municipality.strip().title()
+                if county.lower() == "miami-dade" and pa_muni == "Unincorporated County":
+                    pa_muni = "Unincorporated Miami-Dade"
                 if pa_muni and len(pa_muni) > 3 and pa_muni.lower() != municipality.lower():
                     logger.info(
                         "Municipality override: %s → %s (from property record)",

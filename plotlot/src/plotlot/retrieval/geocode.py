@@ -153,6 +153,7 @@ async def _geocodio_geocode(address: str) -> dict | None:
 
     city = components.get("city", "")
     county = components.get("county", "")
+    state = components.get("state", "")
 
     # Geocodio returns county as "Miami-Dade County" — normalize
     county_clean = re.sub(r"\s+County$", "", county).strip()
@@ -161,6 +162,7 @@ async def _geocodio_geocode(address: str) -> dict | None:
         "formatted_address": top.get("formatted_address", address),
         "municipality": city,
         "county": county_clean,
+        "state": state,
         "lat": location.get("lat"),
         "lng": location.get("lng"),
         "accuracy": top.get("accuracy"),  # numeric score (0-1)

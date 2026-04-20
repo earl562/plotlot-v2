@@ -21,5 +21,6 @@ class PalmBeachProvider(PropertyProvider):
         *,
         lat: float | None = None,
         lng: float | None = None,
+        state: str = "",
     ) -> PropertyRecord | None:
         return await _lookup_palm_beach(address, lat, lng)

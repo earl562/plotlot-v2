@@ -72,9 +72,18 @@ class TestRegistry:
         assert get_provider("BROWARD") is not None
         assert get_provider("Palm Beach") is not None
 
-    def test_get_provider_unknown(self):
-        assert get_provider("Monroe") is None
-        assert get_provider("") is None
+    def test_get_provider_unknown_falls_back_to_universal(self):
+        """Unknown counties now return UniversalProvider fallback."""
+        from plotlot.property.universal import UniversalProvider
+
+        provider = get_provider("Monroe")
+        assert isinstance(provider, UniversalProvider)
+
+    def test_get_provider_empty_falls_back_to_universal(self):
+        from plotlot.property.universal import UniversalProvider
+
+        provider = get_provider("")
+        assert isinstance(provider, UniversalProvider)
 
     def test_register_and_retrieve_custom(self):
         """Register a custom provider and retrieve it."""
@@ -177,11 +186,17 @@ class TestPropertyPackageLookup:
         assert result.folio == "TEST-001"
 
     @pytest.mark.asyncio
-    async def test_returns_none_for_unknown_county(self):
+    async def test_unknown_county_uses_universal_provider(self):
+        """Unknown counties now route to UniversalProvider (may return None if no Hub data)."""
         from plotlot.property import lookup_property
 
-        result = await lookup_property("123 Main St", "Monroe", lat=24.5, lng=-81.8)
-        assert result is None
+        with patch(
+            "plotlot.property.universal.discover_datasets",
+            new_callable=AsyncMock,
+            return_value=(None, None),
+        ):
+            result = await lookup_property("123 Main St", "Monroe", lat=24.5, lng=-81.8)
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_catches_provider_exceptions(self):

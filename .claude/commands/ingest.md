@@ -1,3 +1,8 @@
+---
+model: sonnet
+argument-hint: [municipality]
+allowed-tools: Bash, Read
+---
 Ingest a municipality's zoning ordinances into PlotLot's vector database.
 
 ## Usage

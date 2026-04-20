@@ -61,7 +61,13 @@ export default function AnalysisStream({ steps, error, onWrongProperty, thinking
   const propertyStep = stepMap.get("property");
 
   return (
-    <div className="py-2" role="status" aria-live="polite" aria-label="Analysis progress">
+    <div
+      className="py-2"
+      role="status"
+      aria-live="polite"
+      aria-label="Analysis progress"
+      data-testid="pipeline-stepper"
+    >
       {/* Progress bar + step counter */}
       <div className="mb-4">
         <div className="mb-1.5 flex items-center justify-between">
@@ -168,9 +174,15 @@ export default function AnalysisStream({ steps, error, onWrongProperty, thinking
           const isLast = idx === STEP_ORDER.length - 1;
           const stepNum = idx + 1;
           const narrative = isComplete && step && STEP_NARRATIVES[stepKey] ? STEP_NARRATIVES[stepKey]!(step) : null;
+          const currentStepTestId = isActive ? "pipeline-step-current" : undefined;
 
           return (
-            <div key={stepKey} className="relative flex items-start gap-3 pb-4">
+            <div
+              key={stepKey}
+              className="relative flex items-start gap-3 pb-4"
+              data-testid={`pipeline-step-${stepKey}`}
+              {...(currentStepTestId ? { "data-current-step": "true" } : {})}
+            >
               {/* Connecting line */}
               {!isLast && (
                 <div className="absolute left-[11px] top-6 h-full w-px bg-[var(--border)]" />
@@ -218,6 +230,7 @@ export default function AnalysisStream({ steps, error, onWrongProperty, thinking
               {/* Step content */}
               <div className="min-w-0 flex-1 -mt-0.5">
                 <span
+                  data-testid={currentStepTestId}
                   className={`text-sm ${
                     isComplete
                       ? "text-[var(--text-muted)]"

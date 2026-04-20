@@ -52,6 +52,34 @@ class OrdinanceChunk(Base):
     )
 
 
+class IngestionCheckpoint(Base):
+    """Tracks per-municipality ingestion progress for resumable batch jobs.
+
+    DDIA pattern: idempotent writes with checkpointing. Each municipality
+    is a partition — failures are isolated, progress is persistent, and
+    the pipeline resumes from where it left off.
+    """
+
+    __tablename__ = "ingestion_checkpoints"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    batch_id = Column(String(50), nullable=False, index=True)
+    municipality_key = Column(String(100), nullable=False)
+    state = Column(String(2), nullable=False)
+    status = Column(
+        String(20), nullable=False, default="pending"
+    )  # pending|running|complete|failed
+    chunks_stored = Column(Integer, default=0)
+    error_message = Column(Text, nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("batch_id", "municipality_key", name="uq_checkpoint_batch_muni"),
+    )
+
+
 class PortfolioEntry(Base):
     """A saved zoning analysis in the user's portfolio.
 
@@ -94,3 +122,27 @@ class ReportCache(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     expires_at = Column(DateTime(timezone=True), nullable=False)  # TTL
     hit_count = Column(Integer, default=0)
+
+
+class UserSubscription(Base):
+    """Tracks each user's plan tier and monthly analysis usage.
+
+    Created on first authenticated request.  ``analyses_used`` resets monthly
+    via Stripe ``invoice.paid`` webhook or when ``period_end`` has passed.
+    """
+
+    __tablename__ = "user_subscriptions"
+
+    user_id = Column(String, primary_key=True)  # Clerk user ID (sub claim)
+    plan = Column(String, default="free", nullable=False)  # "free" | "pro"
+    stripe_customer_id = Column(String, nullable=True, unique=True)
+    stripe_subscription_id = Column(String, nullable=True)
+    analyses_used = Column(Integer, default=0, nullable=False)
+    period_start = Column(DateTime(timezone=True), nullable=True)
+    period_end = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

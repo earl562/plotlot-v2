@@ -9,9 +9,10 @@ import json
 import logging
 from dataclasses import asdict
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
+from plotlot.api.billing import check_analysis_limit
 from plotlot.api.cache import cache_report, get_cached_report
 from plotlot.api.schemas import AnalyzeRequest, ErrorResponse, ZoningReportResponse
 from plotlot.pipeline.lookup import lookup_address
@@ -53,16 +54,35 @@ def _apply_confidence_metadata(response: ZoningReportResponse) -> None:
         ]
 
 
+def _describe_pipeline_error(exc: Exception) -> tuple[str, str]:
+    """Map low-level pipeline failures into user-facing, actionable errors."""
+    message = str(exc)
+    lower = message.lower()
+    if (
+        "connection refused" in lower
+        or "connect call failed" in lower
+        or "errno 61" in lower
+        or "database" in lower
+    ):
+        return (
+            "Analysis is temporarily unavailable because the data backend is offline. "
+            "Please try again shortly.",
+            "backend_unavailable",
+        )
+    return (message, "pipeline_error")
+
+
 @router.post(
     "/analyze",
     response_model=ZoningReportResponse,
     responses={
+        402: {"description": "Free tier usage limit exceeded"},
         422: {"model": ErrorResponse, "description": "Geocoding failed or invalid input"},
         502: {"model": ErrorResponse, "description": "Pipeline error"},
         504: {"model": ErrorResponse, "description": "Pipeline timeout"},
     },
 )
-async def analyze(request: AnalyzeRequest):
+async def analyze(request: AnalyzeRequest, _: None = Depends(check_analysis_limit)):
     """Run the full zoning analysis pipeline for an address."""
     try:
         report = await asyncio.wait_for(
@@ -78,7 +98,8 @@ async def analyze(request: AnalyzeRequest):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.exception("Pipeline error for address: %s", request.address)
-        raise HTTPException(status_code=502, detail=str(e))
+        detail, _ = _describe_pipeline_error(e)
+        raise HTTPException(status_code=502, detail=detail)
 
     if report is None:
         raise HTTPException(
@@ -524,11 +545,12 @@ async def analyze_stream(request: AnalyzeRequest):
 
         except Exception as e:
             logger.exception("Stream pipeline error for: %s", request.address)
+            detail, error_type = _describe_pipeline_error(e)
             yield _sse_event(
                 "error",
                 {
-                    "detail": str(e),
-                    "error_type": "pipeline_error",
+                    "detail": detail,
+                    "error_type": error_type,
                 },
             )
 
@@ -854,8 +876,16 @@ async def batch_status():
 
 @router.get("/admin/data-quality")
 async def data_quality():
-    """Data quality dashboard -- coverage, freshness, chunk counts per municipality."""
+    """Data quality dashboard for ordinance coverage.
+
+    Primary contract is the legacy municipality summary used by tests and local
+    tooling. The response also includes a normalized `coverage` field so newer
+    dashboards can consume the same payload.
+    """
     from sqlalchemy import text
+
+    def _serialize_dt(value):
+        return value.isoformat() if hasattr(value, "isoformat") else value
 
     session = await get_session()
     try:
@@ -864,45 +894,88 @@ async def data_quality():
                 SELECT
                     municipality,
                     county,
-                    COUNT(*) as chunk_count,
-                    COUNT(DISTINCT section) as section_count,
-                    MIN(created_at) as first_ingested,
-                    MAX(created_at) as last_ingested,
-                    AVG(LENGTH(chunk_text))::int as avg_chunk_length,
-                    MIN(LENGTH(chunk_text)) as min_chunk_length,
-                    MAX(LENGTH(chunk_text)) as max_chunk_length
+                    COUNT(*) AS chunk_count,
+                    COUNT(DISTINCT municode_node_id) AS section_count,
+                    MIN(created_at) AS first_ingested,
+                    MAX(created_at) AS last_ingested,
+                    AVG(LENGTH(chunk_text)) AS avg_chunk_length,
+                    MIN(LENGTH(chunk_text)) AS min_chunk_length,
+                    MAX(LENGTH(chunk_text)) AS max_chunk_length
                 FROM ordinance_chunks
                 GROUP BY municipality, county
-                ORDER BY municipality
+                ORDER BY chunk_count DESC
             """)
         )
         rows = result.fetchall()
 
-        municipalities = []
-        total_chunks = 0
-        for row in rows:
-            muni = {
-                "municipality": row[0],
-                "county": row[1],
-                "chunk_count": row[2],
-                "section_count": row[3],
-                "first_ingested": row[4].isoformat() if row[4] else None,
-                "last_ingested": row[5].isoformat() if row[5] else None,
-                "avg_chunk_length": row[6] or 0,
-                "min_chunk_length": row[7] or 0,
-                "max_chunk_length": row[8] or 0,
+        municipalities = [
+            {
+                "municipality": municipality,
+                "county": county,
+                "chunk_count": chunk_count,
+                "section_count": section_count,
+                "first_ingested": _serialize_dt(first_ingested),
+                "last_ingested": _serialize_dt(last_ingested),
+                "avg_chunk_length": int(avg_chunk_length) if avg_chunk_length is not None else 0,
+                "min_chunk_length": min_chunk_length or 0,
+                "max_chunk_length": max_chunk_length or 0,
             }
-            municipalities.append(muni)
-            total_chunks += row[2]
+            for (
+                municipality,
+                county,
+                chunk_count,
+                section_count,
+                first_ingested,
+                last_ingested,
+                avg_chunk_length,
+                min_chunk_length,
+                max_chunk_length,
+            ) in rows
+        ]
+
+        coverage = [
+            {
+                "municipality": row["municipality"],
+                "county": row["county"],
+                "state": None,
+                "chunk_count": row["chunk_count"],
+                "section_count": row["section_count"],
+                "last_scraped_at": row["last_ingested"],
+                "days_since_ingest": None,
+                "total_analyses_run": 0,
+                "avg_confidence_score": None,
+                "coverage_tier": "seeded" if row["chunk_count"] else "gap",
+                "is_stale": False,
+                "is_gap": row["chunk_count"] == 0,
+            }
+            for row in municipalities
+        ]
 
         return {
-            "total_municipalities": len(municipalities),
-            "total_chunks": total_chunks,
             "municipalities": municipalities,
+            "coverage": coverage,
+            "quality_trend": [],
+            "gap_count": sum(1 for row in coverage if row["is_gap"]),
+            "discoverable_total": max(88, len(coverage)),
+            "ingested_total": sum(1 for row in coverage if not row["is_gap"]),
+            "usage_by_plan": [],
+            "total_municipalities": len(municipalities),
+            "total_chunks": sum(row["chunk_count"] for row in municipalities),
         }
     except Exception as e:
         logger.exception("Data quality query failed")
-        return {"error": str(e), "municipalities": []}
+        return {
+            "error": str(e),
+            "municipalities": [],
+            "coverage": [],
+            "quality_trend": [],
+            "gap_count": 0,
+            "discoverable_total": 88,
+            "ingested_total": 0,
+            "usage_by_plan": [],
+            "total_municipalities": 0,
+            "total_chunks": 0,
+        }
     finally:
         await session.close()
 
