@@ -36,7 +36,7 @@ Recommended branch prefixes:
 From repo code and workflows:
 
 - CI runs on pushes to `codex/*`, `dev/*`, `feat/*`, `fix/*`, and `hotfix/*`
-- draft PRs to `main` are auto-opened for those branches
+- draft PRs to `main` are auto-opened for those branches when repository settings allow GitHub Actions to create pull requests
 - CODEOWNERS points review at `@earl562`
 - PR templates reinforce the approval checklist
 - repo hygiene blocks generated media and Playwright outputs from being committed
@@ -45,6 +45,7 @@ From repo code and workflows:
 
 GitHub branch protection / rulesets are not fully stored in the repository, so enable these in the GitHub UI for `main`:
 
+- enable `Allow GitHub Actions to create and approve pull requests`
 - require pull requests before merging
 - require at least one approval
 - require status checks to pass before merging
