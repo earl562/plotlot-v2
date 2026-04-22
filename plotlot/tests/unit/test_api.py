@@ -254,6 +254,7 @@ async def test_chat_reports_actionable_error_when_llm_unavailable(client):
         patch("plotlot.api.chat.call_llm", new_callable=AsyncMock, return_value=None),
         patch("plotlot.api.chat.settings") as mock_settings,
     ):
+        mock_settings.nvidia_api_key = ""
         mock_settings.openai_api_key = ""
         mock_settings.openai_access_token = ""
         mock_settings.openrouter_api_key = ""
@@ -271,6 +272,7 @@ async def test_chat_reports_actionable_error_when_llm_unavailable(client):
     assert resp.status_code == 200
     body = resp.text
     assert "no LLM credentials are configured" in body
+    assert "NVIDIA_API_KEY" in body
     assert "OPENAI_API_KEY" in body
     assert "OPENROUTER_API_KEY" in body
 

@@ -213,7 +213,22 @@ def _has_openai_credentials() -> bool:
         from pathlib import Path
 
         return has_saved_tokens(Path(settings.codex_auth_file).expanduser())
+    if settings.nvidia_api_key:
+        return True
     return False
+
+
+def _using_nvidia_mainline() -> bool:
+    if not settings.nvidia_api_key:
+        return False
+    if settings.openai_api_key or settings.openai_access_token:
+        return False
+    if settings.use_codex_oauth:
+        from pathlib import Path
+
+        if has_saved_tokens(Path(settings.codex_auth_file).expanduser()):
+            return False
+    return True
 
 
 async def _get_codex_oauth_token() -> str:
@@ -231,6 +246,8 @@ async def _get_codex_oauth_token() -> str:
 
 
 def _get_openai_model() -> str:
+    if _using_nvidia_mainline():
+        return settings.nvidia_model or "nvidia/llama-3.3-nemotron-super-49b-v1.5"
     return settings.openai_model or DEFAULT_OPENAI_MODEL
 
 
@@ -259,6 +276,8 @@ def _get_openai_client() -> AsyncOpenAI:
         api_key: str | Any = settings.openai_api_key
     elif settings.use_codex_oauth:
         api_key = _get_codex_oauth_token
+    elif settings.nvidia_api_key:
+        api_key = settings.nvidia_api_key
     else:
         api_key = settings.openai_access_token
 
@@ -266,13 +285,41 @@ def _get_openai_client() -> AsyncOpenAI:
         "api_key": api_key,
         "timeout": OPENAI_TIMEOUT_SECONDS,
     }
-    if settings.openai_base_url:
+    if _using_nvidia_mainline():
+        kwargs["base_url"] = settings.nvidia_base_url
+    elif settings.openai_base_url:
         kwargs["base_url"] = settings.openai_base_url
-    if settings.openai_organization:
+    if settings.openai_organization and not _using_nvidia_mainline():
         kwargs["organization"] = settings.openai_organization
-    if settings.openai_project:
+    if settings.openai_project and not _using_nvidia_mainline():
         kwargs["project"] = settings.openai_project
     return AsyncOpenAI(**kwargs)
+
+
+def _prepare_primary_messages(messages: list[dict]) -> list[dict]:
+    if not _using_nvidia_mainline():
+        return messages
+
+    prepared = [dict(msg) for msg in messages]
+    if prepared and prepared[0].get("role") == "system":
+        content = (prepared[0].get("content") or "").strip()
+        if "/no_think" not in content:
+            prepared[0]["content"] = f"/no_think\n\n{content}" if content else "/no_think"
+        return prepared
+
+    prepared.insert(0, {"role": "system", "content": "/no_think"})
+    return prepared
+
+
+def _sanitize_primary_content(content: str | None) -> str:
+    text = (content or "").strip()
+    if not _using_nvidia_mainline():
+        return text
+    if text.startswith("<think>"):
+        if "</think>" in text:
+            return text.split("</think>", 1)[1].strip()
+        return ""
+    return text
 
 
 def _get_openrouter_client() -> AsyncOpenAI:
@@ -347,80 +394,108 @@ async def _call_openai(
     if not _has_openai_credentials():
         return None
 
-    breaker = _get_breaker(provider_name)
-    if not breaker.allow_request():
-        logger.info("Circuit breaker OPEN for %s — skipping", provider_name)
-        return None
+    async def _call_model(model: str, active_provider_name: str) -> dict | None:
+        breaker = _get_breaker(active_provider_name)
+        if not breaker.allow_request():
+            logger.info("Circuit breaker OPEN for %s — skipping", active_provider_name)
+            return None
 
-    with start_span(name=f"llm_provider_{provider_name.lower()}", span_type="CHAT_MODEL") as span:
-        model = _get_openai_model()
-        span.set_inputs(
-            {
-                "provider": provider_name,
-                "model": model,
-                "message_count": len(messages),
-            }
-        )
-        retries_used = 0
-
-        for attempt in range(MAX_RETRIES):
-            try:
-                client = _get_openai_client()
-                kwargs: dict = {
-                    "model": cast(Any, model),
-                    "messages": cast(Any, messages),
-                    "temperature": temperature,
-                    "max_completion_tokens": max_completion_tokens,
-                    "reasoning_effort": cast(Any, settings.openai_reasoning_effort),
-                    "parallel_tool_calls": False,
+        prepared_messages = _prepare_primary_messages(messages)
+        with start_span(
+            name=f"llm_provider_{active_provider_name.lower()}",
+            span_type="CHAT_MODEL",
+        ) as span:
+            span.set_inputs(
+                {
+                    "provider": active_provider_name,
+                    "model": model,
+                    "message_count": len(prepared_messages),
                 }
-                if tools:
-                    kwargs["tools"] = tools
-                    kwargs["tool_choice"] = "auto"
-                if response_format:
-                    kwargs["response_format"] = response_format
+            )
+            retries_used = 0
 
-                response = await client.chat.completions.create(**kwargs)
-                message = response.choices[0].message
-                tool_calls = _message_to_tool_calls(message)
-                prompt_tokens, completion_tokens = _log_usage("openai", response.usage)
-
-                span.set_outputs(
-                    {
-                        "has_content": bool(message.content),
-                        "has_tool_calls": bool(tool_calls),
-                        "retries": retries_used,
-                        "prompt_tokens": prompt_tokens,
-                        "completion_tokens": completion_tokens,
+            for attempt in range(MAX_RETRIES):
+                try:
+                    client = _get_openai_client()
+                    kwargs: dict = {
+                        "model": cast(Any, model),
+                        "messages": cast(Any, prepared_messages),
+                        "temperature": temperature,
+                        "max_completion_tokens": max_completion_tokens,
+                        "parallel_tool_calls": False,
                     }
-                )
+                    if not _using_nvidia_mainline():
+                        kwargs["reasoning_effort"] = cast(Any, settings.openai_reasoning_effort)
+                    if tools:
+                        kwargs["tools"] = tools
+                        kwargs["tool_choice"] = "auto"
+                    if response_format:
+                        kwargs["response_format"] = response_format
 
-                breaker.record_success()
-                return {
-                    "content": message.content or "",
-                    "tool_calls": tool_calls,
-                }
-            except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
-                retries_used += 1
-                delay = BASE_DELAY * (2**attempt)
-                logger.warning(
-                    "%s transient error %s (attempt %d/%d), retrying in %.1fs",
-                    provider_name,
-                    type(exc).__name__,
-                    attempt + 1,
-                    MAX_RETRIES,
-                    delay,
-                )
-                await asyncio.sleep(delay)
-            except Exception as exc:
-                logger.error("%s failed: %s: %s", provider_name, type(exc).__name__, exc)
-                breaker.record_failure()
-                span.set_outputs({"error": f"{type(exc).__name__}: {exc}", "retries": retries_used})
-                return None
+                    response = await client.chat.completions.create(**kwargs)
+                    message = response.choices[0].message
+                    tool_calls = _message_to_tool_calls(message)
+                    content = _sanitize_primary_content(message.content)
+                    prompt_tokens, completion_tokens = _log_usage(
+                        "nvidia" if _using_nvidia_mainline() else "openai",
+                        response.usage,
+                    )
 
-        breaker.record_failure()
-        span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
-        return None
+                    span.set_outputs(
+                        {
+                            "has_content": bool(content),
+                            "has_tool_calls": bool(tool_calls),
+                            "retries": retries_used,
+                            "prompt_tokens": prompt_tokens,
+                            "completion_tokens": completion_tokens,
+                        }
+                    )
+
+                    breaker.record_success()
+                    return {
+                        "content": content,
+                        "tool_calls": tool_calls,
+                    }
+                except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
+                    retries_used += 1
+                    delay = BASE_DELAY * (2**attempt)
+                    logger.warning(
+                        "%s transient error %s (attempt %d/%d), retrying in %.1fs",
+                        active_provider_name,
+                        type(exc).__name__,
+                        attempt + 1,
+                        MAX_RETRIES,
+                        delay,
+                    )
+                    await asyncio.sleep(delay)
+                except Exception as exc:
+                    logger.error("%s failed: %s: %s", active_provider_name, type(exc).__name__, exc)
+                    breaker.record_failure()
+                    span.set_outputs({"error": f"{type(exc).__name__}: {exc}", "retries": retries_used})
+                    return None
+
+            breaker.record_failure()
+            span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
+            return None
+
+    primary_model = _get_openai_model()
+    primary_result = await _call_model(primary_model, provider_name)
+    if primary_result and (primary_result.get("content") or primary_result.get("tool_calls")):
+        return primary_result
+
+    if _using_nvidia_mainline() and settings.nvidia_fallback_model:
+        fallback_model = settings.nvidia_fallback_model
+        if fallback_model != primary_model:
+            logger.warning(
+                "Primary NVIDIA model %s returned no usable response; retrying %s",
+                primary_model,
+                fallback_model,
+            )
+            fallback_result = await _call_model(fallback_model, f"NVIDIA/{fallback_model}")
+            if fallback_result and (fallback_result.get("content") or fallback_result.get("tool_calls")):
+                return fallback_result
+
+    return primary_result
 
 
 async def _call_openrouter(
@@ -566,14 +641,14 @@ async def call_llm(
         tools=tools,
         max_completion_tokens=4000,
         temperature=0.1,
-        openai_provider_name=f"OpenAI/{_get_openai_model()}",
+        openai_provider_name=f"{'NVIDIA' if _using_nvidia_mainline() else 'OpenAI'}/{_get_openai_model()}",
         openrouter_provider_name=f"OpenRouter/{_get_openrouter_model()}",
     )
 
 
 async def call_llm_stream(messages: list[dict]):
     """Stream LLM response tokens for conversational chat."""
-    clean_messages = _clean_messages_for_api(messages)
+    clean_messages = _prepare_primary_messages(_clean_messages_for_api(messages))
 
     async def _stream_with_client(client: AsyncOpenAI, *, model: str) -> Any:
         stream = await client.chat.completions.create(
@@ -598,20 +673,21 @@ async def call_llm_stream(messages: list[dict]):
 
     # Primary: OpenAI
     if _has_openai_credentials():
-        provider_name = f"OpenAI/{_get_openai_model()}"
+        provider_name = f"{'NVIDIA' if _using_nvidia_mainline() else 'OpenAI'}/{_get_openai_model()}"
         breaker = _get_breaker(provider_name)
         if breaker.allow_request():
             try:
                 client = _get_openai_client()
-                # OpenAI supports reasoning_effort; include it only here.
-                stream = await client.chat.completions.create(
-                    model=cast(Any, _get_openai_model()),
-                    messages=cast(Any, clean_messages),
-                    temperature=0.3,
-                    max_completion_tokens=2000,
-                    reasoning_effort=cast(Any, settings.openai_reasoning_effort),
-                    stream=True,
-                )
+                kwargs: dict[str, Any] = {
+                    "model": cast(Any, _get_openai_model()),
+                    "messages": cast(Any, clean_messages),
+                    "temperature": 0.3,
+                    "max_completion_tokens": 2000,
+                    "stream": True,
+                }
+                if not _using_nvidia_mainline():
+                    kwargs["reasoning_effort"] = cast(Any, settings.openai_reasoning_effort)
+                stream = await client.chat.completions.create(**kwargs)
                 async for chunk in stream:
                     for choice in chunk.choices:
                         delta = choice.delta.content
@@ -769,11 +845,11 @@ async def analyze_zoning(
         response_format={"type": "json_object"},
         max_completion_tokens=2000,
         temperature=0.1,
-        openai_provider_name=f"OpenAI/{_get_openai_model()}",
+        openai_provider_name=f"{'NVIDIA' if _using_nvidia_mainline() else 'OpenAI'}/{_get_openai_model()}",
         openrouter_provider_name=f"OpenRouter/{_get_openrouter_model()}",
     )
     if not result or not result.get("content"):
-        logger.error("LLM failed for analyze_zoning (OpenAI + OpenRouter)")
+        logger.error("LLM failed for analyze_zoning (primary provider + fallback)")
         return {}
 
     try:
