@@ -219,16 +219,7 @@ def _has_openai_credentials() -> bool:
 
 
 def _using_nvidia_mainline() -> bool:
-    if not settings.nvidia_api_key:
-        return False
-    if settings.openai_api_key or settings.openai_access_token:
-        return False
-    if settings.use_codex_oauth:
-        from pathlib import Path
-
-        if has_saved_tokens(Path(settings.codex_auth_file).expanduser()):
-            return False
-    return True
+    return bool(settings.nvidia_api_key)
 
 
 async def _get_codex_oauth_token() -> str:
@@ -272,12 +263,12 @@ def _get_openrouter_model() -> str:
 
 
 def _get_openai_client() -> AsyncOpenAI:
-    if settings.openai_api_key:
+    if _using_nvidia_mainline():
+        api_key: str | Any = settings.nvidia_api_key
+    elif settings.openai_api_key:
         api_key: str | Any = settings.openai_api_key
     elif settings.use_codex_oauth:
         api_key = _get_codex_oauth_token
-    elif settings.nvidia_api_key:
-        api_key = settings.nvidia_api_key
     else:
         api_key = settings.openai_access_token
 

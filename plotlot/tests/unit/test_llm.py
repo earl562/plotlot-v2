@@ -341,6 +341,48 @@ class TestAnalyzeZoning:
         assert kwargs["messages"][0]["content"] == "/no_think"
 
     @pytest.mark.asyncio
+    async def test_nvidia_preempts_stale_openai_access_token(self):
+        mock_response = MagicMock()
+        mock_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content="ok",
+                    tool_calls=[],
+                ),
+            )
+        ]
+        mock_response.usage = MagicMock(prompt_tokens=10, completion_tokens=2)
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+
+        with (
+            patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client) as async_openai_ctor,
+            patch("plotlot.retrieval.llm.settings") as mock_settings,
+        ):
+            mock_settings.nvidia_api_key = "nv-key"
+            mock_settings.nvidia_base_url = "https://integrate.api.nvidia.com/v1"
+            mock_settings.nvidia_model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+            mock_settings.nvidia_fallback_model = "minimaxai/minimax-m2.5"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = "stale-openai-token"
+            mock_settings.use_codex_oauth = False
+            mock_settings.openai_base_url = "https://api.openai.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
+
+            result = await call_llm([{"role": "user", "content": "Reply with exactly ok"}])
+
+        assert result == {"content": "ok", "tool_calls": []}
+        _, client_kwargs = async_openai_ctor.call_args
+        assert client_kwargs["api_key"] == "nv-key"
+        assert client_kwargs["base_url"] == "https://integrate.api.nvidia.com/v1"
+        _, kwargs = mock_client.chat.completions.create.await_args
+        assert kwargs["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+        assert "reasoning_effort" not in kwargs
+        assert kwargs["messages"][0]["content"] == "/no_think"
+
+    @pytest.mark.asyncio
     async def test_nvidia_falls_back_to_minimax_when_primary_returns_no_visible_content(self):
         primary_response = MagicMock()
         primary_response.choices = [

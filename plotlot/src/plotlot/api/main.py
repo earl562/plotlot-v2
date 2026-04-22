@@ -394,9 +394,7 @@ async def debug_llm():
 
     diag: dict = {"providers": {}}
 
-    using_nvidia = bool(
-        _s.nvidia_api_key and not (_s.openai_access_token or _s.openai_api_key)
-    )
+    using_nvidia = bool(_s.nvidia_api_key)
     token = _s.nvidia_api_key if using_nvidia else (_s.openai_access_token or _s.openai_api_key)
     if token:
         t0 = time.monotonic()

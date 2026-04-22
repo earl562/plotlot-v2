@@ -156,9 +156,7 @@ AGENT_SYSTEM_PROMPT = get_active_prompt("chat_agent")
 
 
 def _llm_unavailable_detail() -> str:
-    using_nvidia = bool(
-        settings.nvidia_api_key and not (settings.openai_access_token or settings.openai_api_key)
-    )
+    using_nvidia = bool(settings.nvidia_api_key)
     if not (
         settings.openai_access_token
         or settings.openai_api_key
