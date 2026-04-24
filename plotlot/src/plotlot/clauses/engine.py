@@ -253,19 +253,17 @@ def assemble_clauses(
     return rendered
 
 
-def assemble_document(
+async def assemble_document(
     config: AssemblyConfig,
     context: DealContext,
     registry: ClauseRegistry,
-) -> GeneratedDocument:
+) -> GeneratedDocument | SheetsProFormaResult:
     """Assemble a complete document from clauses.
 
     Delegates to the appropriate renderer based on config.output_format.
-
-    Returns:
-        GeneratedDocument with bytes, filename, and content_type.
+    Returns GeneratedDocument for file-based formats (docx, xlsx) or
+    SheetsProFormaResult for google_sheets (contains shareable URL, no bytes).
     """
-    # Set generated timestamp
     if not context.generated_at:
         context.generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
@@ -280,6 +278,8 @@ def assemble_document(
 
         return render_xlsx(rendered, config, context)
     elif config.output_format == "google_sheets":
-        raise NotImplementedError("Google Sheets rendering — use sheets_renderer directly")
+        from plotlot.clauses.renderers.sheets_renderer import render_google_sheets
+
+        return await render_google_sheets(rendered, config, context)
     else:
         raise ValueError(f"Unsupported output format: {config.output_format}")
