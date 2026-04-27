@@ -148,7 +148,7 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
       {/* Pipeline progress */}
       {steps.length > 0 && (
         <div className="mx-auto max-w-xl">
-          <AnalysisStream steps={steps} error={error} />
+          <AnalysisStream steps={steps} error={error?.detail ?? null} />
         </div>
       )}
 
