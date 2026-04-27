@@ -1,26 +1,14 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-const loadConfig = async (subpath) => {
-  try {
-    return (await import(`eslint-config-next/${subpath}`)).default;
-  } catch {
-    return (await import(`eslint-config-next/${subpath}.js`)).default;
-  }
-};
+import { FlatCompat } from "@eslint/eslintrc";
+import { fileURLToPath } from "url";
+import path from "path";
 
-const nextVitals = await loadConfig("core-web-vitals");
-const nextTs = await loadConfig("typescript");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
-]);
+const compat = new FlatCompat({ baseDirectory: __dirname });
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
 
 export default eslintConfig;

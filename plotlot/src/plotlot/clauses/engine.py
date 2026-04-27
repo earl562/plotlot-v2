@@ -11,6 +11,10 @@ import logging
 import operator
 import re
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from plotlot.clauses.renderers.sheets_renderer import SheetsProFormaResult
 
 import jinja2
 
