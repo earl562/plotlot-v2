@@ -301,7 +301,7 @@ async def analyze_stream(request: AnalyzeRequest):
                 )
 
                 report = None
-                for _tick in range(6):  # 6 × 15s = 90s max
+                for _tick in range(3):  # 3 × 15s = 45s max; leave room before client timeout
                     done, _ = await asyncio.wait({analysis_task}, timeout=15)
                     if done:
                         try:
@@ -322,6 +322,14 @@ async def analyze_stream(request: AnalyzeRequest):
                     if not analysis_task.done():
                         analysis_task.cancel()
                     logger.error("LLM analysis timed out for: %s", request.address)
+                    yield _sse_event(
+                        "status",
+                        {
+                            "step": "analysis",
+                            "message": "Using estimated zoning report",
+                            "complete": True,
+                        },
+                    )
                     from plotlot.pipeline.lookup import _build_fallback_report
 
                     report = _build_fallback_report(
