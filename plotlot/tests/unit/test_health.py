@@ -25,6 +25,7 @@ class TestHealthEndpoint:
                 "postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot"
             )
             mock_settings.database_require_ssl = False
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = ""
             mock_settings.openrouter_api_key = ""
@@ -104,6 +105,7 @@ class TestHealthEndpoint:
                 "postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot"
             )
             mock_settings.database_require_ssl = False
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = "test-key"
             mock_settings.openai_access_token = ""
             mock_settings.openrouter_api_key = ""
@@ -139,6 +141,7 @@ class TestHealthEndpoint:
                 "postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot"
             )
             mock_settings.database_require_ssl = False
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = ""
             mock_settings.openrouter_api_key = "or-key"
@@ -171,6 +174,7 @@ class TestHealthEndpoint:
                 "postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot"
             )
             mock_settings.database_require_ssl = False
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = ""
             mock_settings.openrouter_api_key = ""
@@ -179,3 +183,35 @@ class TestHealthEndpoint:
             result = await health()
 
         assert result["capabilities"]["agent_chat_ready"] is True
+
+    async def test_health_reports_agent_chat_ready_with_nvidia_only(self):
+        """Health should report chat readiness when NVIDIA NIM credentials exist."""
+        from plotlot.api.main import _runtime_health, health
+
+        mock_session = AsyncMock()
+        mock_result = MagicMock()
+        mock_result.scalar.return_value = None
+        mock_session.execute.return_value = mock_result
+
+        _runtime_health["startup_mode"] = "healthy"
+        _runtime_health["startup_warnings"] = []
+        with (
+            patch("plotlot.api.main.get_session", return_value=mock_session),
+            patch("mlflow.search_experiments", return_value=[]),
+            patch("plotlot.api.main.settings") as mock_settings,
+        ):
+            mock_settings.database_url = (
+                "postgresql+asyncpg://plotlot:plotlot@localhost:5433/plotlot"
+            )
+            mock_settings.database_require_ssl = False
+            mock_settings.nvidia_api_key = "nv-key"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = ""
+            mock_settings.openrouter_api_key = ""
+            mock_settings.use_codex_oauth = False
+            result = await health()
+
+        assert result["capabilities"]["agent_chat_ready"] is True
+        assert (
+            result["capability_details"]["agent_chat_ready"]["reason"] == "llm_credentials_present"
+        )

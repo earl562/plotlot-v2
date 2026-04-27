@@ -13,6 +13,7 @@ from plotlot.retrieval.llm import (
     _convert_tools_to_anthropic,
     _parse_llm_content,
     analyze_zoning,
+    call_llm,
     llm_response_to_report,
 )
 
@@ -168,6 +169,7 @@ class TestAnalyzeZoning:
             patch("plotlot.retrieval.llm.settings") as mock_settings,
             patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client),
         ):
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = "test_key"
             mock_settings.openai_access_token = ""
             mock_settings.use_codex_oauth = False
@@ -187,6 +189,7 @@ class TestAnalyzeZoning:
     @pytest.mark.asyncio
     async def test_no_api_keys(self):
         with patch("plotlot.retrieval.llm.settings") as mock_settings:
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = ""
             mock_settings.use_codex_oauth = False
@@ -226,6 +229,7 @@ class TestAnalyzeZoning:
             patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client),
             patch("plotlot.retrieval.llm.settings") as mock_settings,
         ):
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = "oauth-access-token"
             mock_settings.use_codex_oauth = False
@@ -271,6 +275,7 @@ class TestAnalyzeZoning:
             patch("plotlot.retrieval.llm.has_saved_tokens", return_value=True),
             patch("plotlot.retrieval.llm.settings") as mock_settings,
         ):
+            mock_settings.nvidia_api_key = ""
             mock_settings.openai_api_key = ""
             mock_settings.openai_access_token = ""
             mock_settings.use_codex_oauth = True
@@ -293,6 +298,147 @@ class TestAnalyzeZoning:
         assert callable(client_kwargs["api_key"])
         _, kwargs = mock_client.chat.completions.create.await_args
         assert kwargs["model"] == "gpt-4.1"
+
+    @pytest.mark.asyncio
+    async def test_nvidia_nim_primary_uses_no_think_and_skips_reasoning_effort(self):
+        mock_response = MagicMock()
+        mock_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content="ok",
+                    tool_calls=[],
+                ),
+            )
+        ]
+        mock_response.usage = MagicMock(prompt_tokens=10, completion_tokens=2)
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+
+        with (
+            patch(
+                "plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client
+            ) as async_openai_ctor,
+            patch("plotlot.retrieval.llm.settings") as mock_settings,
+        ):
+            mock_settings.nvidia_api_key = "nv-key"
+            mock_settings.nvidia_base_url = "https://integrate.api.nvidia.com/v1"
+            mock_settings.nvidia_model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+            mock_settings.nvidia_fallback_model = "minimaxai/minimax-m2.5"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = ""
+            mock_settings.use_codex_oauth = False
+            mock_settings.openai_base_url = "https://api.openai.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
+
+            result = await call_llm([{"role": "user", "content": "Reply with exactly ok"}])
+
+        assert result == {"content": "ok", "tool_calls": []}
+        _, client_kwargs = async_openai_ctor.call_args
+        assert client_kwargs["api_key"] == "nv-key"
+        assert client_kwargs["base_url"] == "https://integrate.api.nvidia.com/v1"
+        _, kwargs = mock_client.chat.completions.create.await_args
+        assert kwargs["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+        assert "reasoning_effort" not in kwargs
+        assert kwargs["messages"][0]["role"] == "system"
+        assert kwargs["messages"][0]["content"] == "/no_think"
+
+    @pytest.mark.asyncio
+    async def test_nvidia_preempts_stale_openai_access_token(self):
+        mock_response = MagicMock()
+        mock_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content="ok",
+                    tool_calls=[],
+                ),
+            )
+        ]
+        mock_response.usage = MagicMock(prompt_tokens=10, completion_tokens=2)
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+
+        with (
+            patch(
+                "plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client
+            ) as async_openai_ctor,
+            patch("plotlot.retrieval.llm.settings") as mock_settings,
+        ):
+            mock_settings.nvidia_api_key = "nv-key"
+            mock_settings.nvidia_base_url = "https://integrate.api.nvidia.com/v1"
+            mock_settings.nvidia_model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+            mock_settings.nvidia_fallback_model = "minimaxai/minimax-m2.5"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = "stale-openai-token"
+            mock_settings.use_codex_oauth = False
+            mock_settings.openai_base_url = "https://api.openai.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
+
+            result = await call_llm([{"role": "user", "content": "Reply with exactly ok"}])
+
+        assert result == {"content": "ok", "tool_calls": []}
+        _, client_kwargs = async_openai_ctor.call_args
+        assert client_kwargs["api_key"] == "nv-key"
+        assert client_kwargs["base_url"] == "https://integrate.api.nvidia.com/v1"
+        _, kwargs = mock_client.chat.completions.create.await_args
+        assert kwargs["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+        assert "reasoning_effort" not in kwargs
+        assert kwargs["messages"][0]["content"] == "/no_think"
+
+    @pytest.mark.asyncio
+    async def test_nvidia_falls_back_to_minimax_when_primary_returns_no_visible_content(self):
+        primary_response = MagicMock()
+        primary_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content="",
+                    tool_calls=[],
+                ),
+            )
+        ]
+        primary_response.usage = MagicMock(prompt_tokens=10, completion_tokens=64)
+
+        fallback_response = MagicMock()
+        fallback_response.choices = [
+            MagicMock(
+                message=MagicMock(
+                    content="fallback ok",
+                    tool_calls=[],
+                ),
+            )
+        ]
+        fallback_response.usage = MagicMock(prompt_tokens=8, completion_tokens=2)
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create = AsyncMock(
+            side_effect=[primary_response, fallback_response]
+        )
+
+        with (
+            patch("plotlot.retrieval.llm.AsyncOpenAI", return_value=mock_client),
+            patch("plotlot.retrieval.llm.settings") as mock_settings,
+        ):
+            mock_settings.nvidia_api_key = "nv-key"
+            mock_settings.nvidia_base_url = "https://integrate.api.nvidia.com/v1"
+            mock_settings.nvidia_model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+            mock_settings.nvidia_fallback_model = "minimaxai/minimax-m2.5"
+            mock_settings.openai_api_key = ""
+            mock_settings.openai_access_token = ""
+            mock_settings.use_codex_oauth = False
+            mock_settings.openai_base_url = "https://api.openai.com/v1"
+            mock_settings.openai_model = "gpt-4.1"
+            mock_settings.openai_reasoning_effort = "medium"
+
+            result = await call_llm([{"role": "user", "content": "Reply with exactly ok"}])
+
+        assert result == {"content": "fallback ok", "tool_calls": []}
+        calls = mock_client.chat.completions.create.await_args_list
+        assert len(calls) == 2
+        assert calls[0].kwargs["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+        assert calls[1].kwargs["model"] == "minimaxai/minimax-m2.5"
 
 
 class TestLlmResponseToReport:
