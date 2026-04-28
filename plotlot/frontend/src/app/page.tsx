@@ -1045,7 +1045,7 @@ export default function Home() {
                   ? "Enter a property address..."
                   : hasReport
                     ? "Ask about this property's zoning..."
-                    : "Ask about zoning, density, or property data..."
+                    : "Ask about land sourcing, zoning, or this site's upside..."
                 }
                 disabled={isProcessing || !!pendingAddress || awaitingApproval}
                 isProcessing={isProcessing}
