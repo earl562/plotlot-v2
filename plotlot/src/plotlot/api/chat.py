@@ -802,7 +802,9 @@ def _classify_intent(message: str) -> IntentClassification:
     msg_lower = message.lower()
     msg_clean = msg_lower.strip().rstrip("!?.")
 
-    if msg_clean in _GREETING_KEYWORDS or any(msg_clean.startswith(greet) for greet in _GREETING_KEYWORDS):
+    if msg_clean in _GREETING_KEYWORDS or any(
+        msg_clean.startswith(greet) for greet in _GREETING_KEYWORDS
+    ):
         return IntentClassification(intent="greeting", confidence=0.9)
 
     # Score each intent category

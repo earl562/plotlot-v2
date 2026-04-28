@@ -159,8 +159,12 @@ def _score_address_match(candidate: str, target: str) -> tuple[int, int, int, in
     candidate_tokens = normalized.split()
 
     exact = 1 if normalized == target else 0
-    same_number = 1 if target_tokens and candidate_tokens and target_tokens[0] == candidate_tokens[0] else 0
-    same_suffix = 1 if target_tokens and candidate_tokens and target_tokens[-1] == candidate_tokens[-1] else 0
+    same_number = (
+        1 if target_tokens and candidate_tokens and target_tokens[0] == candidate_tokens[0] else 0
+    )
+    same_suffix = (
+        1 if target_tokens and candidate_tokens and target_tokens[-1] == candidate_tokens[-1] else 0
+    )
     overlap = len(set(target_tokens) & set(candidate_tokens))
     return (exact, same_number, same_suffix, overlap)
 

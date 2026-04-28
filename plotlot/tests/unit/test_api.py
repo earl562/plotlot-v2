@@ -188,19 +188,22 @@ async def test_analyze_backend_unavailable_error_is_actionable(client):
 @pytest.mark.asyncio
 async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
     """Streaming analyze should emit actionable backend-unavailable SSE errors."""
-    with patch(
-        "plotlot.api.routes.geocode_address",
-        new_callable=AsyncMock,
-        return_value={
-            "municipality": "Miami Gardens",
-            "county": "Miami-Dade",
-            "lat": 25.957,
-            "lng": -80.199,
-        },
-    ), patch(
-        "plotlot.api.routes.lookup_property",
-        new_callable=AsyncMock,
-        side_effect=OSError("[Errno 61] Connection refused"),
+    with (
+        patch(
+            "plotlot.api.routes.geocode_address",
+            new_callable=AsyncMock,
+            return_value={
+                "municipality": "Miami Gardens",
+                "county": "Miami-Dade",
+                "lat": 25.957,
+                "lng": -80.199,
+            },
+        ),
+        patch(
+            "plotlot.api.routes.lookup_property",
+            new_callable=AsyncMock,
+            side_effect=OSError("[Errno 61] Connection refused"),
+        ),
     ):
         resp = await client.post(
             "/api/v1/analyze/stream",
@@ -226,11 +229,17 @@ async def test_analyze_stream_passes_state_to_property_lookup(client):
 
     with (
         patch("plotlot.api.routes.geocode_address", new_callable=AsyncMock, return_value=geo),
-        patch("plotlot.api.routes.lookup_property", new_callable=AsyncMock, return_value=None) as mock_lookup,
+        patch(
+            "plotlot.api.routes.lookup_property", new_callable=AsyncMock, return_value=None
+        ) as mock_lookup,
         patch("plotlot.api.routes.get_cached_report", new_callable=AsyncMock, return_value=None),
         patch("plotlot.api.routes.get_session", new_callable=AsyncMock, return_value=mock_session),
         patch("plotlot.api.routes.hybrid_search", new_callable=AsyncMock, return_value=[]),
-        patch("plotlot.api.routes._agentic_analysis", new_callable=AsyncMock, side_effect=AssertionError("stop after property lookup")),
+        patch(
+            "plotlot.api.routes._agentic_analysis",
+            new_callable=AsyncMock,
+            side_effect=AssertionError("stop after property lookup"),
+        ),
         patch("plotlot.api.routes.start_run"),
         patch("plotlot.api.routes.log_params"),
         patch("plotlot.api.routes.log_metrics"),

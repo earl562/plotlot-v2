@@ -35,6 +35,7 @@ from plotlot.storage.db import get_session, init_db
 
 logger = logging.getLogger(__name__)
 
+
 class _RuntimeHealth(TypedDict):
     startup_mode: str
     startup_warnings: list[str]
