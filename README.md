@@ -1,5 +1,9 @@
 # PlotLot
 
+<p align="center">
+  <img src="docs/assets/plotlot-house-motion.svg" alt="Animated PlotLot house on a surveyed lot" width="720" />
+</p>
+
 PlotLot is an AI-assisted land feasibility platform for acquisition-minded builders, developers, and investors.
 
 Give it a property address and PlotLot helps answer the first question that matters in land: "What can I actually build here?" It resolves the parcel, identifies the governing municipality and zoning context, extracts setbacks and dimensional standards, and calculates the maximum allowable units for the lot. From there, users can move into comps, pro forma, and document workflows.
@@ -117,6 +121,18 @@ The repository is set up around three quality lanes:
 - Manual eval workflows for deterministic and optional deeper evaluation runs
 
 Generated screenshots, Playwright reports, and other large test artifacts are intentionally excluded from git. They should live in ignored local directories or GitHub Actions artifacts instead of repository history.
+
+## Branch Workflow
+
+PlotLot should use separate development branches for ongoing work and reserve `main` for approved changes.
+
+- push continuously to `codex/*`, `dev/*`, `feat/*`, `fix/*`, or `hotfix/*` branches
+- CI runs on every branch push
+- GitHub auto-opens a draft PR from those branches into `main`
+- when the work is ready, mark the PR ready for review and collect approval
+- merge to `main` only after approval
+
+Branch-flow details and the matching GitHub settings are in [BRANCH_DELIVERY_WORKFLOW.md](/Users/earlperry/Desktop/Projects/EP/docs/BRANCH_DELIVERY_WORKFLOW.md).
 
 ## Roadmap Direction
 
