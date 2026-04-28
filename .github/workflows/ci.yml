@@ -37,7 +37,7 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-          working-directory: plotlot
+          cache-dependency-glob: plotlot/uv.lock
       - run: uv sync --frozen --dev --extra eval
       - run: uv run ruff check src/ tests/
       - run: uv run ruff format --check src/ tests/
@@ -73,7 +73,7 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-          working-directory: plotlot
+          cache-dependency-glob: plotlot/uv.lock
       - run: uv sync --frozen --dev --extra eval
       - run: uv run python -m pytest tests/unit/ -v --tb=short
 
@@ -169,7 +169,7 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-          working-directory: plotlot
+          cache-dependency-glob: plotlot/uv.lock
       - run: uv sync --frozen --dev --extra eval
         working-directory: plotlot
       - run: uv run uvicorn plotlot.api.main:app --host 127.0.0.1 --port 8000 > /tmp/plotlot-api.log 2>&1 &
