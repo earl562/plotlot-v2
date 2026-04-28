@@ -2,13 +2,12 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { ZoningReportData, SourceRefData } from "@/lib/api";
+import type { ZoningReportData } from "@/lib/api";
 import { springGentle } from "@/lib/motion";
 import type { DealType } from "./DealTypeSelector";
 import DealHeroCard from "./DealHeroCard";
 import ParcelViewer from "./ParcelViewer";
 import DensityBreakdown from "./DensityBreakdown";
-import BuildingRenderViewer from "./BuildingRenderViewer";
 import DocumentGenerator from "./DocumentGenerator";
 import FloorPlanViewer from "./FloorPlanViewer";
 import SetbackDiagram from "./SetbackDiagram";
@@ -27,7 +26,6 @@ interface TabbedReportProps {
   report: ZoningReportData;
   dealType: DealType;
 }
-
 
 const TABS: { id: ReportTab; label: string; icon: React.ReactNode }[] = [
   {
@@ -207,7 +205,7 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
         {activeTab === "zoning" && (
           <motion.div key="zoning" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={springGentle} className="space-y-6" data-testid="report-section-zoning">
             {/* Partial coverage callout */}
-            {getCoverageLevel(report.municipality) === "partial" && !report.zoning_district && (
+              {getCoverageLevel(report.municipality) === "partial" && !report.zoning_district && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-300">
                 Zoning ordinance data isn&apos;t indexed for {report.municipality} yet.
                 Property record and comparable sales data are still available.
@@ -326,26 +324,6 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
                 </div>
               );
             })()}
-
-            {/* AI Architectural Render */}
-            {lotWidth > 0 && lotDepth > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">AI Architectural Render</h3>
-                <ErrorBoundary><BuildingRenderViewer
-                  lotWidthFt={lotWidth}
-                  lotDepthFt={lotDepth}
-                  setbackFrontFt={setbackFront}
-                  setbackSideFt={setbackSide}
-                  setbackRearFt={setbackRear}
-                  maxHeightFt={report.numeric_params?.max_height_ft || 35}
-                  maxStories={report.numeric_params?.max_stories ?? undefined}
-                  propertyType={report.numeric_params?.property_type ?? undefined}
-                  maxUnits={report.density_analysis?.max_units ?? undefined}
-                  zoningDistrict={report.zoning_district}
-                  municipality={report.municipality}
-                /></ErrorBoundary>
-              </div>
-            )}
 
             {/* Property Intelligence */}
             <div className="space-y-2">

@@ -156,9 +156,11 @@ AGENT_SYSTEM_PROMPT = get_active_prompt("chat_agent")
 
 
 def _llm_unavailable_detail() -> str:
+    using_nvidia = bool(settings.nvidia_api_key)
     if not (
         settings.openai_access_token
         or settings.openai_api_key
+        or settings.nvidia_api_key
         or settings.openrouter_api_key
         or (
             settings.use_codex_oauth
@@ -167,7 +169,12 @@ def _llm_unavailable_detail() -> str:
     ):
         return (
             "Chat is temporarily unavailable because no LLM credentials are configured. "
-            "Set OPENAI_API_KEY, OPENAI_ACCESS_TOKEN, OPENROUTER_API_KEY, or enable PLOTLOT_USE_CODEX_OAUTH to enable agent responses."
+            "Set NVIDIA_API_KEY, OPENAI_API_KEY, OPENAI_ACCESS_TOKEN, OPENROUTER_API_KEY, or enable PLOTLOT_USE_CODEX_OAUTH to enable agent responses."
+        )
+    if using_nvidia:
+        return (
+            "Chat is temporarily unavailable because the configured NVIDIA NIM model "
+            "returned no usable response. Verify the model slug or try the fallback model."
         )
     return "Chat is temporarily unavailable because the LLM returned an empty response."
 

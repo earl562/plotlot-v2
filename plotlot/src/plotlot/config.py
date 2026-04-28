@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     geocodio_api_key: str = ""
     hf_token: str = ""
     nvidia_api_key: str = ""
+    nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
+    nvidia_model: str = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+    nvidia_fallback_model: str = "minimaxai/minimax-m2.5"
     anthropic_api_key: str = ""
     google_api_key: str = ""
     openai_api_key: str = ""
@@ -127,6 +130,9 @@ class Settings(BaseSettings):
             "geocodio_api_key",
             "hf_token",
             "nvidia_api_key",
+            "nvidia_base_url",
+            "nvidia_model",
+            "nvidia_fallback_model",
             "anthropic_api_key",
             "google_api_key",
             "openai_api_key",
@@ -209,6 +215,10 @@ class Settings(BaseSettings):
         "http://localhost:3001",
         "http://localhost:3002",
         "http://localhost:3003",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:3002",
+        "http://127.0.0.1:3003",
         "https://plotlot-api-production.up.railway.app",
     ]
 

@@ -297,6 +297,7 @@ async def health():
     agent_chat_ready = bool(
         settings.openai_access_token
         or settings.openai_api_key
+        or settings.nvidia_api_key
         or settings.openrouter_api_key
         or (
             settings.use_codex_oauth
@@ -394,44 +395,55 @@ async def debug_llm():
 
     diag: dict = {"providers": {}}
 
-    token = _s.openai_access_token or _s.openai_api_key
+    using_nvidia = bool(_s.nvidia_api_key)
+    token = _s.nvidia_api_key if using_nvidia else (_s.openai_access_token or _s.openai_api_key)
     if token:
         t0 = time.monotonic()
         try:
             client_kwargs = {"api_key": token, "timeout": 15.0}
-            if _s.openai_base_url:
-                client_kwargs["base_url"] = _s.openai_base_url
-            if _s.openai_organization:
+            base_url = _s.nvidia_base_url if using_nvidia else _s.openai_base_url
+            if base_url:
+                client_kwargs["base_url"] = base_url
+            if _s.openai_organization and not using_nvidia:
                 client_kwargs["organization"] = _s.openai_organization
-            if _s.openai_project:
+            if _s.openai_project and not using_nvidia:
                 client_kwargs["project"] = _s.openai_project
             client = AsyncOpenAI(**client_kwargs)
-            resp = await client.chat.completions.create(
-                model=_s.openai_model or "gpt-4.1",
-                messages=[{"role": "user", "content": "Say 'ok' in one word."}],
-                max_completion_tokens=8,
-                temperature=0,
-                reasoning_effort=_s.openai_reasoning_effort,
-            )
+            kwargs = {
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
+                "messages": (
+                    [
+                        {"role": "system", "content": "/no_think"},
+                        {"role": "user", "content": "Say 'ok' in one word."},
+                    ]
+                    if using_nvidia
+                    else [{"role": "user", "content": "Say 'ok' in one word."}]
+                ),
+                "max_completion_tokens": 8,
+                "temperature": 0,
+            }
+            if not using_nvidia:
+                kwargs["reasoning_effort"] = _s.openai_reasoning_effort
+            resp = await client.chat.completions.create(**kwargs)
             elapsed = round(time.monotonic() - t0, 2)
             text = resp.choices[0].message.content or ""
-            diag["providers"]["openai"] = {
+            diag["providers"]["nvidia" if using_nvidia else "openai"] = {
                 "status": "ok",
-                "model": _s.openai_model or "gpt-4.1",
-                "base_url": _s.openai_base_url,
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
+                "base_url": base_url,
                 "latency_s": elapsed,
                 "response": text[:100],
             }
         except Exception as e:
             elapsed = round(time.monotonic() - t0, 2)
-            diag["providers"]["openai"] = {
+            diag["providers"]["nvidia" if using_nvidia else "openai"] = {
                 "status": "error",
-                "model": _s.openai_model or "gpt-4.1",
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
                 "error": f"{type(e).__name__}: {e}",
                 "elapsed_s": elapsed,
             }
     else:
-        diag["providers"]["openai"] = {"status": "no_credentials"}
+        diag["providers"]["nvidia" if using_nvidia else "openai"] = {"status": "no_credentials"}
 
     # --- OpenRouter (fallback) ---
     if _s.openrouter_api_key:

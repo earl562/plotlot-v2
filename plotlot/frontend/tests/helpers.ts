@@ -16,8 +16,8 @@ const HEALTH_URL = "http://127.0.0.1:8000/health";
 async function parseHealthResponse(
   health: Response | { ok(): boolean; status(): number; json(): Promise<unknown> },
 ): Promise<BackendPreflight> {
-  const ok = health instanceof Response ? health.ok : health.ok();
-  const statusCode = health instanceof Response ? health.status : health.status();
+  const ok = typeof health.ok === "function" ? health.ok() : health.ok;
+  const statusCode = typeof health.status === "function" ? health.status() : health.status;
 
   if (!ok) {
     return {
