@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **100**
-Reviewed: **20**
-Stub: **80**
+Reviewed: **21**
+Stub: **79**
 
 ## Reviewed
 
@@ -14,6 +14,7 @@ Stub: **80**
 - [2602.12430v3](docs/research/arxiv-notes/2602.12430v3.md) — Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward
 - [2602.16069v2](docs/research/arxiv-notes/2602.16069v2.md) — The Limits of Long-Context Reasoning in Automated Bug Fixing
 - [2602.20867v1](docs/research/arxiv-notes/2602.20867v1.md) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents
+- [2603.07670v1](docs/research/arxiv-notes/2603.07670v1.md) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers
 - [2603.18829v9](docs/research/arxiv-notes/2603.18829v9.md) — Agent Control Protocol: Admission Control for Agent Actions
 - [2603.20380v1](docs/research/arxiv-notes/2603.20380v1.md) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams
 - [2603.21019v1](docs/research/arxiv-notes/2603.21019v1.md) — SkillProbe: Security Auditing for Emerging Agent Skill Marketplaces via Multi-Agent Collaboration
@@ -73,7 +74,6 @@ Stub: **80**
 - [2603.03329v1](docs/research/arxiv-notes/2603.03329v1.md) — AutoHarness: improving LLM agents by automatically synthesizing a code harness
 - [2603.05344v3](docs/research/arxiv-notes/2603.05344v3.md) — Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned
 - [2603.07379v1](docs/research/arxiv-notes/2603.07379v1.md) — SoK: Agentic Retrieval-Augmented Generation (RAG): Taxonomy, Architectures, Evaluation, and Research Directions
-- [2603.07670v1](docs/research/arxiv-notes/2603.07670v1.md) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers
 - [2603.08616v1](docs/research/arxiv-notes/2603.08616v1.md) — Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing
 - [2603.10664v1](docs/research/arxiv-notes/2603.10664v1.md) — Terminal Is All You Need: Design Properties for Human-AI Agent Collaboration
 - [2603.12658v1](docs/research/arxiv-notes/2603.12658v1.md) — Continual Learning in Large Language Models: Methods, Challenges, and Opportunities

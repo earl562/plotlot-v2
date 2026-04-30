@@ -3,8 +3,8 @@
 Generated from: `arxiv-abstracts.json`
 Total papers: **100**
 Duplicates dropped: **3**
-Reviewed: **20**
-Remaining: **80**
+Reviewed: **21**
+Remaining: **79**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -15,7 +15,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (50) [2603.07670v1](https://arxiv.org/abs/2603.07670v1) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers  — [note](docs/research/arxiv-notes/2603.07670v1.md) — _stub_
 - **P0** (35) [2604.03610v1](https://arxiv.org/abs/2604.03610v1) — DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair  — [note](docs/research/arxiv-notes/2604.03610v1.md) — _stub_
 - **P0** (32) [2604.13346v1](https://arxiv.org/abs/2604.13346v1) — AgentSPEX: An Agent SPecification and EXecution Language  — [note](docs/research/arxiv-notes/2604.13346v1.md) — _stub_
 - **P0** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _stub_
@@ -75,6 +74,7 @@ Priority tiers:
 - **P2** (34) [2604.12064v1](https://arxiv.org/abs/2604.12064v1) — LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests  — [note](docs/research/arxiv-notes/2604.12064v1.md) — _stub_
 - **P2** (29) [2603.19347v3](https://arxiv.org/abs/2603.19347v3) — Exploring the Agentic Frontier of Verilog Code Generation  — [note](docs/research/arxiv-notes/2603.19347v3.md) — _stub_
 - **P2** (19) [2602.11304v1](https://arxiv.org/abs/2602.11304v1) — CryptoAnalystBench: Failures in Multi-Tool Long-Form LLM Analysis  — [note](docs/research/arxiv-notes/2602.11304v1.md) — _stub_
+- **P2** (19) [2603.20075v1](https://arxiv.org/abs/2603.20075v1) — Agentic Harness for Real-World Compilers  — [note](docs/research/arxiv-notes/2603.20075v1.md) — _stub_
 
 ## Already reviewed
 
@@ -86,6 +86,7 @@ Priority tiers:
 - **✅** (61) [2602.12430v3](https://arxiv.org/abs/2602.12430v3) — Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward  — [note](docs/research/arxiv-notes/2602.12430v3.md) — _reviewed_
 - **✅** (14) [2602.16069v2](https://arxiv.org/abs/2602.16069v2) — The Limits of Long-Context Reasoning in Automated Bug Fixing  — [note](docs/research/arxiv-notes/2602.16069v2.md) — _reviewed_
 - **✅** (50) [2602.20867v1](https://arxiv.org/abs/2602.20867v1) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents  — [note](docs/research/arxiv-notes/2602.20867v1.md) — _reviewed_
+- **✅** (50) [2603.07670v1](https://arxiv.org/abs/2603.07670v1) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers  — [note](docs/research/arxiv-notes/2603.07670v1.md) — _reviewed_
 - **✅** (56) [2603.18829v9](https://arxiv.org/abs/2603.18829v9) — Agent Control Protocol: Admission Control for Agent Actions  — [note](docs/research/arxiv-notes/2603.18829v9.md) — _reviewed_
 - **✅** (51) [2603.20380v1](https://arxiv.org/abs/2603.20380v1) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams  — [note](docs/research/arxiv-notes/2603.20380v1.md) — _reviewed_
 - **✅** (41) [2603.21019v1](https://arxiv.org/abs/2603.21019v1) — SkillProbe: Security Auditing for Emerging Agent Skill Marketplaces via Multi-Agent Collaboration  — [note](docs/research/arxiv-notes/2603.21019v1.md) — _reviewed_
