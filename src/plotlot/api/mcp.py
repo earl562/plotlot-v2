@@ -8,6 +8,7 @@ the full MCP transport layer is stabilized.
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter
@@ -42,10 +43,16 @@ async def _validated_approved_ids(*, approval_ids: set[str], workspace_id: str) 
 
     session = await get_session()
     try:
+        now = datetime.now(timezone.utc)
         approved: set[str] = set()
         for approval_id in approval_ids:
             row = await session.get(ApprovalRequest, approval_id)
-            if row and row.workspace_id == workspace_id and row.status == "approved":
+            if (
+                row
+                and row.workspace_id == workspace_id
+                and row.status == "approved"
+                and (row.expires_at is None or row.expires_at > now)
+            ):
                 approved.add(approval_id)
         return approved
     except Exception:

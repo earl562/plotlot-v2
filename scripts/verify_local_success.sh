@@ -46,6 +46,22 @@ require_cli() {
   fi
 }
 
+run_ruff() {
+  if [[ -x "$ROOT_DIR/.venv/bin/ruff" ]]; then
+    run "$ROOT_DIR/.venv/bin/ruff" "$@"
+    return
+  fi
+  run uv run ruff "$@"
+}
+
+run_pytest() {
+  if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+    run env MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns "$ROOT_DIR/.venv/bin/python" -m pytest "$@"
+    return
+  fi
+  run env MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns uv run pytest "$@"
+}
+
 clean_playwright_artifacts() {
   rm -rf frontend/test-results frontend/playwright-report
 }
@@ -102,10 +118,10 @@ if [[ "$RUN_BACKEND" -eq 1 ]]; then
   fi
 
   log "Backend/static lint"
-  run uv run ruff check src/ tests/ scripts/
+  run_ruff check src/ tests/ scripts/
 
   log "Backend unit tests"
-  run env MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns uv run pytest tests/unit -q
+  run_pytest tests/unit -q
 fi
 
 if [[ "$RUN_FRONTEND" -eq 1 ]]; then
