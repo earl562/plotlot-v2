@@ -1,12 +1,16 @@
-"""Regression tests for PlotLot runtime health scripts."""
+"""Regression tests for PlotLot runtime health scripts.
+
+These scripts are invoked via subprocess and normally `curl` HTTP endpoints on
+127.0.0.1. The Codex sandbox used for these tests disallows binding TCP
+listeners, so `scripts/status/healthcheck.sh` supports fixture override env vars
+that bypass curl and keep the logic testable.
+"""
 
 from __future__ import annotations
 
 import json
 import os
 import subprocess
-import threading
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
@@ -15,49 +19,17 @@ HEALTHCHECK_SCRIPT = REPO_ROOT / "scripts/status/healthcheck.sh"
 WATCHDOG_SCRIPT = REPO_ROOT / "scripts/status/watchdog.sh"
 
 
-def _start_server(routes: dict[tuple[str, str], tuple[int, dict | str]]):
-    class Handler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            self._respond()
-
-        def do_POST(self):
-            length = int(self.headers.get("content-length", "0"))
-            if length:
-                self.rfile.read(length)
-            self._respond()
-
-        def _respond(self):
-            status, body = routes.get((self.command, self.path), (404, {"detail": "not found"}))
-            if isinstance(body, dict):
-                payload = json.dumps(body).encode("utf-8")
-                content_type = "application/json"
-            else:
-                payload = str(body).encode("utf-8")
-                content_type = "text/plain; charset=utf-8"
-            self.send_response(status)
-            self.send_header("Content-Type", content_type)
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-
-        def log_message(self, format, *args):  # noqa: A003
-            return
-
-    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    return server
-
-
-def _script_env(tmp_path: Path, *, frontend_url: str, backend_url: str) -> dict[str, str]:
+def _script_env(tmp_path: Path) -> dict[str, str]:
     status_json = tmp_path / "docs/status/runtime-status.json"
     state_md = tmp_path / "docs/status/CURRENT_STATE.md"
     health_log_dir = tmp_path / "logs/health"
     runner_log_dir = tmp_path / "logs/runner"
     return {
         **os.environ,
-        "FRONTEND_URL": frontend_url,
-        "BACKEND_URL": backend_url,
+        # URLs are still recorded into status JSON/logs, but fixture overrides
+        # below bypass all network IO.
+        "FRONTEND_URL": "http://127.0.0.1:3000",
+        "BACKEND_URL": "http://127.0.0.1:8000",
         "STATUS_JSON": str(status_json),
         "STATE_MD": str(state_md),
         "HEALTH_LOG_DIR": str(health_log_dir),
@@ -76,91 +48,103 @@ def _script_env(tmp_path: Path, *, frontend_url: str, backend_url: str) -> dict[
     }
 
 
+def _with_fixtures(
+    env: dict[str, str],
+    *,
+    backend_health: dict,
+    frontend_http_code: str,
+    analyze_http_code: str,
+    analyze_body: str,
+    chat_http_code: str,
+    chat_body: str,
+    portfolio_http_code: str,
+    portfolio_body: str,
+) -> dict[str, str]:
+    return {
+        **env,
+        "BACKEND_HEALTH_RAW_OVERRIDE": json.dumps(backend_health),
+        "FRONTEND_HTTP_CODE_OVERRIDE": frontend_http_code,
+        "ANALYZE_SMOKE_HTTP_CODE_OVERRIDE": analyze_http_code,
+        "ANALYZE_SMOKE_BODY_OVERRIDE": analyze_body,
+        "CHAT_SMOKE_HTTP_CODE_OVERRIDE": chat_http_code,
+        "CHAT_SMOKE_BODY_OVERRIDE": chat_body,
+        "PORTFOLIO_SMOKE_HTTP_CODE_OVERRIDE": portfolio_http_code,
+        "PORTFOLIO_SMOKE_BODY_OVERRIDE": portfolio_body,
+    }
+
+
 def test_healthcheck_writes_runtime_status_with_successful_smoke_test(tmp_path):
-    backend = _start_server(
-        {
-            (
-                "GET",
-                "/health",
-            ): (
-                200,
-                {
-                    "status": "healthy",
-                    "checks": {
-                        "database": "ok",
-                        "mlflow": "ok",
-                        "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
-                    },
-                    "capabilities": {
-                        "db_backed_analysis_ready": True,
-                        "portfolio_ready": True,
-                        "agent_chat_ready": False,
-                    },
-                    "database_target": {
-                        "host": "localhost",
-                        "port": 5433,
-                        "database": "plotlot",
-                        "ssl_required": False,
-                    },
-                    "capability_details": {
-                        "db_backed_analysis_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "portfolio_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "agent_chat_ready": {"ready": False, "reason": "llm_credentials_missing", "blocked_by": ["llm_credentials"], "dependencies": ["llm_credentials"]},
-                    },
-                    "runtime": {
-                        "startup_mode": "healthy",
-                        "startup_warnings": [],
-                    },
-                },
-            ),
-            (
-                "POST",
-                "/api/v1/analyze",
-            ): (
-                200,
-                {
-                    "address": "171 NE 209th Ter, Miami, FL 33179",
-                    "formatted_address": "171 NE 209th Ter, Miami Gardens, FL 33179",
-                    "municipality": "Miami Gardens",
-                    "confidence": "high",
-                },
-            ),
-            (
-                "POST",
-                "/api/v1/chat",
-            ): (
-                200,
-                'event: session\ndata: {"session_id":"abc"}\n\nevent: done\ndata: {"full_content":"ok"}\n\n',
-            ),
-            (
-                "GET",
-                "/api/v1/portfolio",
-            ): (
-                200,
-                [],
-            ),
-        }
+    backend_health = {
+        "status": "healthy",
+        "checks": {
+            "database": "ok",
+            "mlflow": "ok",
+            "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+        },
+        "capabilities": {
+            "db_backed_analysis_ready": True,
+            "portfolio_ready": True,
+            "agent_chat_ready": False,
+        },
+        "database_target": {
+            "host": "localhost",
+            "port": 5433,
+            "database": "plotlot",
+            "ssl_required": False,
+        },
+        "capability_details": {
+            "db_backed_analysis_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "portfolio_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "agent_chat_ready": {
+                "ready": False,
+                "reason": "llm_credentials_missing",
+                "blocked_by": ["llm_credentials"],
+                "dependencies": ["llm_credentials"],
+            },
+        },
+        "runtime": {
+            "startup_mode": "healthy",
+            "startup_warnings": [],
+        },
+    }
+
+    env = _with_fixtures(
+        _script_env(tmp_path),
+        backend_health=backend_health,
+        frontend_http_code="200",
+        analyze_http_code="200",
+        analyze_body=json.dumps(
+            {
+                "address": "171 NE 209th Ter, Miami, FL 33179",
+                "formatted_address": "171 NE 209th Ter, Miami Gardens, FL 33179",
+                "municipality": "Miami Gardens",
+                "confidence": "high",
+            }
+        ),
+        chat_http_code="200",
+        chat_body='event: session\ndata: {"session_id":"abc"}\n\nevent: done\ndata: {"full_content":"ok"}\n\n',
+        portfolio_http_code="200",
+        portfolio_body=json.dumps([]),
     )
-    frontend = _start_server({("GET", "/"): (200, "ok")})
-    try:
-        env = _script_env(
-            tmp_path,
-            frontend_url=f"http://127.0.0.1:{frontend.server_port}",
-            backend_url=f"http://127.0.0.1:{backend.server_port}",
-        )
-        result = subprocess.run(
-            ["bash", str(HEALTHCHECK_SCRIPT)],
-            cwd=REPO_ROOT,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    finally:
-        backend.shutdown()
-        backend.server_close()
-        frontend.shutdown()
-        frontend.server_close()
+
+    result = subprocess.run(
+        ["bash", str(HEALTHCHECK_SCRIPT)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     assert result.returncode == 0, result.stderr or result.stdout
 
@@ -202,67 +186,70 @@ def test_healthcheck_writes_runtime_status_with_successful_smoke_test(tmp_path):
 
 
 def test_watchdog_fails_when_analyze_smoke_fails(tmp_path):
-    backend = _start_server(
-        {
-            (
-                "GET",
-                "/health",
-            ): (
-                200,
-                {
-                    "status": "healthy",
-                    "checks": {
-                        "database": "ok",
-                        "mlflow": "ok",
-                        "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
-                    },
-                    "capabilities": {
-                        "db_backed_analysis_ready": False,
-                        "portfolio_ready": False,
-                        "agent_chat_ready": False,
-                    },
-                    "database_target": {
-                        "host": "localhost",
-                        "port": 5433,
-                        "database": "plotlot",
-                        "ssl_required": False,
-                    },
-                    "capability_details": {
-                        "db_backed_analysis_ready": {"ready": False, "reason": "database_unavailable", "blocked_by": ["database"], "dependencies": ["database"]},
-                        "portfolio_ready": {"ready": False, "reason": "database_unavailable", "blocked_by": ["database"], "dependencies": ["database"]},
-                        "agent_chat_ready": {"ready": False, "reason": "llm_credentials_missing", "blocked_by": ["llm_credentials"], "dependencies": ["llm_credentials"]},
-                    },
-                    "runtime": {
-                        "startup_mode": "degraded",
-                        "startup_warnings": ["database_unavailable"],
-                    },
-                },
-            ),
-            ("POST", "/api/v1/analyze"): (500, {"detail": "pipeline unavailable"}),
-            ("POST", "/api/v1/chat"): (200, 'event: error\ndata: {"detail":"Chat unavailable"}\n\n'),
-            ("GET", "/api/v1/portfolio"): (500, {"detail": "portfolio unavailable"}),
-        }
+    backend_health = {
+        "status": "healthy",
+        "checks": {
+            "database": "ok",
+            "mlflow": "ok",
+            "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+        },
+        "capabilities": {
+            "db_backed_analysis_ready": False,
+            "portfolio_ready": False,
+            "agent_chat_ready": False,
+        },
+        "database_target": {
+            "host": "localhost",
+            "port": 5433,
+            "database": "plotlot",
+            "ssl_required": False,
+        },
+        "capability_details": {
+            "db_backed_analysis_ready": {
+                "ready": False,
+                "reason": "database_unavailable",
+                "blocked_by": ["database"],
+                "dependencies": ["database"],
+            },
+            "portfolio_ready": {
+                "ready": False,
+                "reason": "database_unavailable",
+                "blocked_by": ["database"],
+                "dependencies": ["database"],
+            },
+            "agent_chat_ready": {
+                "ready": False,
+                "reason": "llm_credentials_missing",
+                "blocked_by": ["llm_credentials"],
+                "dependencies": ["llm_credentials"],
+            },
+        },
+        "runtime": {
+            "startup_mode": "degraded",
+            "startup_warnings": ["database_unavailable"],
+        },
+    }
+
+    env = _with_fixtures(
+        _script_env(tmp_path),
+        backend_health=backend_health,
+        frontend_http_code="200",
+        analyze_http_code="500",
+        analyze_body=json.dumps({"detail": "pipeline unavailable"}),
+        chat_http_code="200",
+        chat_body='event: error\ndata: {"detail":"Chat unavailable"}\n\n',
+        portfolio_http_code="500",
+        portfolio_body=json.dumps({"detail": "portfolio unavailable"}),
     )
-    frontend = _start_server({("GET", "/"): (200, "ok")})
-    try:
-        env = _script_env(
-            tmp_path,
-            frontend_url=f"http://127.0.0.1:{frontend.server_port}",
-            backend_url=f"http://127.0.0.1:{backend.server_port}",
-        )
-        result = subprocess.run(
-            ["bash", str(WATCHDOG_SCRIPT)],
-            cwd=REPO_ROOT,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    finally:
-        backend.shutdown()
-        backend.server_close()
-        frontend.shutdown()
-        frontend.server_close()
+
+    result = subprocess.run(
+        ["bash", str(WATCHDOG_SCRIPT)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     assert result.returncode == 1
     assert "WATCHDOG_STATUS=fail" in result.stdout
@@ -309,67 +296,76 @@ def test_watchdog_fails_when_analyze_smoke_fails(tmp_path):
 
 
 def test_healthcheck_prioritizes_portfolio_smoke_when_only_portfolio_fails(tmp_path):
-    backend = _start_server(
-        {
-            (
-                "GET",
-                "/health",
-            ): (
-                200,
-                {
-                    "status": "healthy",
-                    "checks": {
-                        "database": "ok",
-                        "mlflow": "ok",
-                        "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
-                    },
-                    "capabilities": {
-                        "db_backed_analysis_ready": True,
-                        "portfolio_ready": True,
-                        "agent_chat_ready": True,
-                    },
-                    "database_target": {
-                        "host": "localhost",
-                        "port": 5433,
-                        "database": "plotlot",
-                        "ssl_required": False,
-                    },
-                    "capability_details": {
-                        "db_backed_analysis_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "portfolio_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "agent_chat_ready": {"ready": True, "reason": "llm_credentials_present", "blocked_by": [], "dependencies": ["llm_credentials"]},
-                    },
-                    "runtime": {
-                        "startup_mode": "healthy",
-                        "startup_warnings": [],
-                    },
-                },
-            ),
-            ("POST", "/api/v1/analyze"): (200, {"address": "171 NE 209th Ter", "municipality": "Miami Gardens", "confidence": "high"}),
-            ("POST", "/api/v1/chat"): (200, 'event: session\ndata: {"session_id":"abc"}\n\nevent: done\ndata: {"full_content":"ok"}\n\n'),
-            ("GET", "/api/v1/portfolio"): (500, {"detail": "portfolio unavailable"}),
-        }
+    backend_health = {
+        "status": "healthy",
+        "checks": {
+            "database": "ok",
+            "mlflow": "ok",
+            "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+        },
+        "capabilities": {
+            "db_backed_analysis_ready": True,
+            "portfolio_ready": True,
+            "agent_chat_ready": True,
+        },
+        "database_target": {
+            "host": "localhost",
+            "port": 5433,
+            "database": "plotlot",
+            "ssl_required": False,
+        },
+        "capability_details": {
+            "db_backed_analysis_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "portfolio_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "agent_chat_ready": {
+                "ready": True,
+                "reason": "llm_credentials_present",
+                "blocked_by": [],
+                "dependencies": ["llm_credentials"],
+            },
+        },
+        "runtime": {
+            "startup_mode": "healthy",
+            "startup_warnings": [],
+        },
+    }
+
+    env = _with_fixtures(
+        _script_env(tmp_path),
+        backend_health=backend_health,
+        frontend_http_code="200",
+        analyze_http_code="200",
+        analyze_body=json.dumps(
+            {
+                "address": "171 NE 209th Ter",
+                "municipality": "Miami Gardens",
+                "confidence": "high",
+            }
+        ),
+        chat_http_code="200",
+        chat_body='event: session\ndata: {"session_id":"abc"}\n\nevent: done\ndata: {"full_content":"ok"}\n\n',
+        portfolio_http_code="500",
+        portfolio_body=json.dumps({"detail": "portfolio unavailable"}),
     )
-    frontend = _start_server({("GET", "/"): (200, "ok")})
-    try:
-        env = _script_env(
-            tmp_path,
-            frontend_url=f"http://127.0.0.1:{frontend.server_port}",
-            backend_url=f"http://127.0.0.1:{backend.server_port}",
-        )
-        result = subprocess.run(
-            ["bash", str(HEALTHCHECK_SCRIPT)],
-            cwd=REPO_ROOT,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    finally:
-        backend.shutdown()
-        backend.server_close()
-        frontend.shutdown()
-        frontend.server_close()
+
+    result = subprocess.run(
+        ["bash", str(HEALTHCHECK_SCRIPT)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     assert result.returncode == 1
 
@@ -381,67 +377,76 @@ def test_healthcheck_prioritizes_portfolio_smoke_when_only_portfolio_fails(tmp_p
 
 
 def test_healthcheck_prioritizes_chat_smoke_when_only_chat_fails(tmp_path):
-    backend = _start_server(
-        {
-            (
-                "GET",
-                "/health",
-            ): (
-                200,
-                {
-                    "status": "healthy",
-                    "checks": {
-                        "database": "ok",
-                        "mlflow": "ok",
-                        "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
-                    },
-                    "capabilities": {
-                        "db_backed_analysis_ready": True,
-                        "portfolio_ready": True,
-                        "agent_chat_ready": True,
-                    },
-                    "database_target": {
-                        "host": "localhost",
-                        "port": 5433,
-                        "database": "plotlot",
-                        "ssl_required": False,
-                    },
-                    "capability_details": {
-                        "db_backed_analysis_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "portfolio_ready": {"ready": True, "reason": "database_ok", "blocked_by": [], "dependencies": ["database"]},
-                        "agent_chat_ready": {"ready": True, "reason": "llm_credentials_present", "blocked_by": [], "dependencies": ["llm_credentials"]},
-                    },
-                    "runtime": {
-                        "startup_mode": "healthy",
-                        "startup_warnings": [],
-                    },
-                },
-            ),
-            ("POST", "/api/v1/analyze"): (200, {"address": "171 NE 209th Ter", "municipality": "Miami Gardens", "confidence": "high"}),
-            ("POST", "/api/v1/chat"): (200, 'event: error\ndata: {"detail":"Chat unavailable"}\n\n'),
-            ("GET", "/api/v1/portfolio"): (200, []),
-        }
+    backend_health = {
+        "status": "healthy",
+        "checks": {
+            "database": "ok",
+            "mlflow": "ok",
+            "last_ingestion": "2026-04-10T00:11:08.832126+00:00",
+        },
+        "capabilities": {
+            "db_backed_analysis_ready": True,
+            "portfolio_ready": True,
+            "agent_chat_ready": True,
+        },
+        "database_target": {
+            "host": "localhost",
+            "port": 5433,
+            "database": "plotlot",
+            "ssl_required": False,
+        },
+        "capability_details": {
+            "db_backed_analysis_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "portfolio_ready": {
+                "ready": True,
+                "reason": "database_ok",
+                "blocked_by": [],
+                "dependencies": ["database"],
+            },
+            "agent_chat_ready": {
+                "ready": True,
+                "reason": "llm_credentials_present",
+                "blocked_by": [],
+                "dependencies": ["llm_credentials"],
+            },
+        },
+        "runtime": {
+            "startup_mode": "healthy",
+            "startup_warnings": [],
+        },
+    }
+
+    env = _with_fixtures(
+        _script_env(tmp_path),
+        backend_health=backend_health,
+        frontend_http_code="200",
+        analyze_http_code="200",
+        analyze_body=json.dumps(
+            {
+                "address": "171 NE 209th Ter",
+                "municipality": "Miami Gardens",
+                "confidence": "high",
+            }
+        ),
+        chat_http_code="200",
+        chat_body='event: error\ndata: {"detail":"Chat unavailable"}\n\n',
+        portfolio_http_code="200",
+        portfolio_body=json.dumps([]),
     )
-    frontend = _start_server({("GET", "/"): (200, "ok")})
-    try:
-        env = _script_env(
-            tmp_path,
-            frontend_url=f"http://127.0.0.1:{frontend.server_port}",
-            backend_url=f"http://127.0.0.1:{backend.server_port}",
-        )
-        result = subprocess.run(
-            ["bash", str(HEALTHCHECK_SCRIPT)],
-            cwd=REPO_ROOT,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    finally:
-        backend.shutdown()
-        backend.server_close()
-        frontend.shutdown()
-        frontend.server_close()
+
+    result = subprocess.run(
+        ["bash", str(HEALTHCHECK_SCRIPT)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     assert result.returncode == 1
 
@@ -450,3 +455,4 @@ def test_healthcheck_prioritizes_chat_smoke_when_only_chat_fails(tmp_path):
     assert payload["chat_smoke"]["status"] == "failed"
     assert payload["portfolio_smoke"]["status"] == "ok"
     assert payload["next_action"] == "Investigate /api/v1/chat failure before continuing product work"
+

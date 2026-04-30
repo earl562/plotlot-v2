@@ -23,6 +23,7 @@ async def list_evidence(
     project_id: str | None = None,
     site_id: str | None = None,
     analysis_id: str | None = None,
+    analysis_run_id: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ):
@@ -35,12 +36,19 @@ async def list_evidence(
             q = q.where(EvidenceItem.site_id == site_id)
         if analysis_id:
             q = q.where(EvidenceItem.analysis_id == analysis_id)
+        if analysis_run_id:
+            q = q.where(EvidenceItem.analysis_run_id == analysis_run_id)
         q = q.order_by(EvidenceItem.retrieved_at.desc()).limit(limit).offset(offset)
         result = await session.execute(q)
         rows = result.scalars().all()
         return [
             {
                 "id": r.id,
+                "workspace_id": r.workspace_id,
+                "project_id": r.project_id,
+                "site_id": r.site_id,
+                "analysis_id": r.analysis_id,
+                "analysis_run_id": r.analysis_run_id,
                 "claim_key": r.claim_key,
                 "tool_name": r.tool_name,
                 "confidence": r.confidence,
@@ -69,6 +77,8 @@ async def get_evidence(evidence_id: str):
             "project_id": row.project_id,
             "site_id": row.site_id,
             "analysis_id": row.analysis_id,
+            "analysis_run_id": row.analysis_run_id,
+            "tool_run_id": row.tool_run_id,
             "claim_key": row.claim_key,
             "value_json": row.value_json,
             "source_type": row.source_type,

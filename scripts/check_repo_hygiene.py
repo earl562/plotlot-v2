@@ -9,6 +9,10 @@ from pathlib import PurePosixPath
 
 BANNED_DIR_PREFIXES = (
     ".playwright-mcp/",
+    "frontend/playwright-report/",
+    "frontend/test-results/",
+    "frontend/tests/screenshots/",
+    "tests/screenshots/",
     "plotlot/frontend/playwright-report/",
     "plotlot/frontend/test-results/",
     "plotlot/frontend/tests/screenshots/",

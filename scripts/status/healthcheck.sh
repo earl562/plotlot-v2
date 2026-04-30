@@ -8,19 +8,27 @@ TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
 BACKEND_URL="${BACKEND_URL:-http://127.0.0.1:8000}"
 HEALTH_URL="$BACKEND_URL/health"
+BACKEND_HEALTH_RAW_OVERRIDE="${BACKEND_HEALTH_RAW_OVERRIDE:-}"
+FRONTEND_HTTP_CODE_OVERRIDE="${FRONTEND_HTTP_CODE_OVERRIDE:-}"
 ANALYZE_SMOKE_ENABLED="${ANALYZE_SMOKE_ENABLED:-0}"
 ANALYZE_SMOKE_URL="${ANALYZE_SMOKE_URL:-$BACKEND_URL/api/v1/analyze}"
 ANALYZE_SMOKE_ADDRESS="${ANALYZE_SMOKE_ADDRESS:-171 NE 209th Ter, Miami, FL 33179}"
 ANALYZE_SMOKE_TIMEOUT="${ANALYZE_SMOKE_TIMEOUT:-60}"
 ANALYZE_SMOKE_PAYLOAD="${ANALYZE_SMOKE_PAYLOAD:-}"
+ANALYZE_SMOKE_HTTP_CODE_OVERRIDE="${ANALYZE_SMOKE_HTTP_CODE_OVERRIDE:-}"
+ANALYZE_SMOKE_BODY_OVERRIDE="${ANALYZE_SMOKE_BODY_OVERRIDE:-}"
 CHAT_SMOKE_ENABLED="${CHAT_SMOKE_ENABLED:-0}"
 CHAT_SMOKE_URL="${CHAT_SMOKE_URL:-$BACKEND_URL/api/v1/chat}"
 CHAT_SMOKE_MESSAGE="${CHAT_SMOKE_MESSAGE:-What can I build here?}"
 CHAT_SMOKE_TIMEOUT="${CHAT_SMOKE_TIMEOUT:-60}"
 CHAT_SMOKE_PAYLOAD="${CHAT_SMOKE_PAYLOAD:-}"
+CHAT_SMOKE_HTTP_CODE_OVERRIDE="${CHAT_SMOKE_HTTP_CODE_OVERRIDE:-}"
+CHAT_SMOKE_BODY_OVERRIDE="${CHAT_SMOKE_BODY_OVERRIDE:-}"
 PORTFOLIO_SMOKE_ENABLED="${PORTFOLIO_SMOKE_ENABLED:-0}"
 PORTFOLIO_SMOKE_URL="${PORTFOLIO_SMOKE_URL:-$BACKEND_URL/api/v1/portfolio}"
 PORTFOLIO_SMOKE_TIMEOUT="${PORTFOLIO_SMOKE_TIMEOUT:-60}"
+PORTFOLIO_SMOKE_HTTP_CODE_OVERRIDE="${PORTFOLIO_SMOKE_HTTP_CODE_OVERRIDE:-}"
+PORTFOLIO_SMOKE_BODY_OVERRIDE="${PORTFOLIO_SMOKE_BODY_OVERRIDE:-}"
 STATUS_JSON="${STATUS_JSON:-$ROOT_DIR/docs/status/runtime-status.json}"
 STATE_MD="${STATE_MD:-$ROOT_DIR/docs/status/CURRENT_STATE.md}"
 HEALTH_LOG_DIR="${HEALTH_LOG_DIR:-$ROOT_DIR/logs/health}"
@@ -33,19 +41,27 @@ HEALTH_LOG="$HEALTH_LOG_DIR/healthcheck-$(date -u +"%Y%m%dT%H%M%SZ").log"
 
 backend_raw=""
 backend_error=""
-if ! backend_raw="$(curl -fsS "$HEALTH_URL" 2>&1)"; then
-  backend_error="$backend_raw"
-  backend_raw='{"status":"unreachable","checks":{}}'
+if [[ -n "$BACKEND_HEALTH_RAW_OVERRIDE" ]]; then
+  backend_raw="$BACKEND_HEALTH_RAW_OVERRIDE"
+else
+  if ! backend_raw="$(curl -fsS "$HEALTH_URL" 2>&1)"; then
+    backend_error="$backend_raw"
+    backend_raw='{"status":"unreachable","checks":{}}'
+  fi
 fi
 
 frontend_code="000"
 frontend_error=""
-frontend_stderr="$(mktemp)"
-if ! frontend_code="$(curl -o /dev/null -sS -w "%{http_code}" "$FRONTEND_URL" 2>"$frontend_stderr")"; then
-  frontend_error="$(cat "$frontend_stderr")"
-  frontend_code="000"
+if [[ -n "$FRONTEND_HTTP_CODE_OVERRIDE" ]]; then
+  frontend_code="$FRONTEND_HTTP_CODE_OVERRIDE"
+else
+  frontend_stderr="$(mktemp)"
+  if ! frontend_code="$(curl -o /dev/null -sS -w "%{http_code}" "$FRONTEND_URL" 2>"$frontend_stderr")"; then
+    frontend_error="$(cat "$frontend_stderr")"
+    frontend_code="000"
+  fi
+  rm -f "$frontend_stderr"
 fi
-rm -f "$frontend_stderr"
 
 if [[ -n "$PROCESS_LINES_OVERRIDE" ]]; then
   process_lines="$PROCESS_LINES_OVERRIDE"
@@ -125,23 +141,34 @@ PY
 )"
   fi
 
-  smoke_body_file="$(mktemp)"
-  smoke_stderr_file="$(mktemp)"
-  if analyze_smoke_http_code="$(
-    curl \
-      -o "$smoke_body_file" \
-      -sS \
-      -w "%{http_code}" \
-      -m "$ANALYZE_SMOKE_TIMEOUT" \
-      -H "Content-Type: application/json" \
-      -X POST \
-      -d "$payload" \
-      "$ANALYZE_SMOKE_URL" 2>"$smoke_stderr_file"
-  )"; then
-    analyze_smoke_body="$(cat "$smoke_body_file")"
-    if [[ "$analyze_smoke_http_code" == "200" ]]; then
-      analyze_smoke_status="ok"
-      analyze_smoke_summary="$(python3 - <<'PY' "$analyze_smoke_body"
+  if [[ -n "$ANALYZE_SMOKE_HTTP_CODE_OVERRIDE" ]]; then
+    analyze_smoke_http_code="$ANALYZE_SMOKE_HTTP_CODE_OVERRIDE"
+    analyze_smoke_body="$ANALYZE_SMOKE_BODY_OVERRIDE"
+  else
+    smoke_body_file="$(mktemp)"
+    smoke_stderr_file="$(mktemp)"
+    if analyze_smoke_http_code="$(
+      curl \
+        -o "$smoke_body_file" \
+        -sS \
+        -w "%{http_code}" \
+        -m "$ANALYZE_SMOKE_TIMEOUT" \
+        -H "Content-Type: application/json" \
+        -X POST \
+        -d "$payload" \
+        "$ANALYZE_SMOKE_URL" 2>"$smoke_stderr_file"
+    )"; then
+      analyze_smoke_body="$(cat "$smoke_body_file")"
+    else
+      analyze_smoke_http_code="000"
+      analyze_smoke_error="$(cat "$smoke_stderr_file")"
+    fi
+    rm -f "$smoke_body_file" "$smoke_stderr_file"
+  fi
+
+  if [[ "$analyze_smoke_http_code" == "200" ]]; then
+    analyze_smoke_status="ok"
+    analyze_smoke_summary="$(python3 - <<'PY' "$analyze_smoke_body"
 import json, sys
 body = sys.argv[1]
 try:
@@ -156,14 +183,9 @@ parts = [part for part in (address, municipality, confidence) if part]
 print(" | ".join(parts))
 PY
 )"
-    else
-      analyze_smoke_error="$analyze_smoke_body"
-    fi
   else
-    analyze_smoke_http_code="000"
-    analyze_smoke_error="$(cat "$smoke_stderr_file")"
+    analyze_smoke_error="${analyze_smoke_error:-$analyze_smoke_body}"
   fi
-  rm -f "$smoke_body_file" "$smoke_stderr_file"
 fi
 
 if [[ "$CHAT_SMOKE_ENABLED" == "1" ]]; then
@@ -177,55 +199,72 @@ PY
 )"
   fi
 
-  smoke_body_file="$(mktemp)"
-  smoke_stderr_file="$(mktemp)"
-  if chat_smoke_http_code="$(
-    curl \
-      -o "$smoke_body_file" \
-      -sS \
-      -w "%{http_code}" \
-      -m "$CHAT_SMOKE_TIMEOUT" \
-      -H "Content-Type: application/json" \
-      -X POST \
-      -d "$payload" \
-      "$CHAT_SMOKE_URL" 2>"$smoke_stderr_file"
-  )"; then
-    chat_smoke_body="$(cat "$smoke_body_file")"
-    if [[ "$chat_smoke_http_code" == "200" ]]; then
-      if grep -q "event: error" <<< "$chat_smoke_body"; then
-        chat_smoke_error="$chat_smoke_body"
-      elif grep -q "event: done" <<< "$chat_smoke_body"; then
-        chat_smoke_status="ok"
-        chat_smoke_summary="chat_sse_completed"
-      else
-        chat_smoke_error="$chat_smoke_body"
-      fi
+  if [[ -n "$CHAT_SMOKE_HTTP_CODE_OVERRIDE" ]]; then
+    chat_smoke_http_code="$CHAT_SMOKE_HTTP_CODE_OVERRIDE"
+    chat_smoke_body="$CHAT_SMOKE_BODY_OVERRIDE"
+  else
+    smoke_body_file="$(mktemp)"
+    smoke_stderr_file="$(mktemp)"
+    if chat_smoke_http_code="$(
+      curl \
+        -o "$smoke_body_file" \
+        -sS \
+        -w "%{http_code}" \
+        -m "$CHAT_SMOKE_TIMEOUT" \
+        -H "Content-Type: application/json" \
+        -X POST \
+        -d "$payload" \
+        "$CHAT_SMOKE_URL" 2>"$smoke_stderr_file"
+    )"; then
+      chat_smoke_body="$(cat "$smoke_body_file")"
+    else
+      chat_smoke_http_code="000"
+      chat_smoke_error="$(cat "$smoke_stderr_file")"
+    fi
+    rm -f "$smoke_body_file" "$smoke_stderr_file"
+  fi
+
+  if [[ "$chat_smoke_http_code" == "200" ]]; then
+    if grep -q "event: error" <<< "$chat_smoke_body"; then
+      chat_smoke_error="$chat_smoke_body"
+    elif grep -q "event: done" <<< "$chat_smoke_body"; then
+      chat_smoke_status="ok"
+      chat_smoke_summary="chat_sse_completed"
     else
       chat_smoke_error="$chat_smoke_body"
     fi
   else
-    chat_smoke_http_code="000"
-    chat_smoke_error="$(cat "$smoke_stderr_file")"
+    chat_smoke_error="${chat_smoke_error:-$chat_smoke_body}"
   fi
-  rm -f "$smoke_body_file" "$smoke_stderr_file"
 fi
 
 if [[ "$PORTFOLIO_SMOKE_ENABLED" == "1" ]]; then
   portfolio_smoke_status="failed"
-  smoke_body_file="$(mktemp)"
-  smoke_stderr_file="$(mktemp)"
-  if portfolio_smoke_http_code="$(
-    curl \
-      -o "$smoke_body_file" \
-      -sS \
-      -w "%{http_code}" \
-      -m "$PORTFOLIO_SMOKE_TIMEOUT" \
-      "$PORTFOLIO_SMOKE_URL" 2>"$smoke_stderr_file"
-  )"; then
-    portfolio_smoke_body="$(cat "$smoke_body_file")"
-    if [[ "$portfolio_smoke_http_code" == "200" ]]; then
-      portfolio_smoke_status="ok"
-      portfolio_smoke_summary="$(python3 - <<'PY' "$portfolio_smoke_body"
+  if [[ -n "$PORTFOLIO_SMOKE_HTTP_CODE_OVERRIDE" ]]; then
+    portfolio_smoke_http_code="$PORTFOLIO_SMOKE_HTTP_CODE_OVERRIDE"
+    portfolio_smoke_body="$PORTFOLIO_SMOKE_BODY_OVERRIDE"
+  else
+    smoke_body_file="$(mktemp)"
+    smoke_stderr_file="$(mktemp)"
+    if portfolio_smoke_http_code="$(
+      curl \
+        -o "$smoke_body_file" \
+        -sS \
+        -w "%{http_code}" \
+        -m "$PORTFOLIO_SMOKE_TIMEOUT" \
+        "$PORTFOLIO_SMOKE_URL" 2>"$smoke_stderr_file"
+    )"; then
+      portfolio_smoke_body="$(cat "$smoke_body_file")"
+    else
+      portfolio_smoke_http_code="000"
+      portfolio_smoke_error="$(cat "$smoke_stderr_file")"
+    fi
+    rm -f "$smoke_body_file" "$smoke_stderr_file"
+  fi
+
+  if [[ "$portfolio_smoke_http_code" == "200" ]]; then
+    portfolio_smoke_status="ok"
+    portfolio_smoke_summary="$(python3 - <<'PY' "$portfolio_smoke_body"
 import json, sys
 body = sys.argv[1]
 try:
@@ -239,14 +278,9 @@ else:
     print("entries=unknown")
 PY
 )"
-    else
-      portfolio_smoke_error="$portfolio_smoke_body"
-    fi
   else
-    portfolio_smoke_http_code="000"
-    portfolio_smoke_error="$(cat "$smoke_stderr_file")"
+    portfolio_smoke_error="${portfolio_smoke_error:-$portfolio_smoke_body}"
   fi
-  rm -f "$smoke_body_file" "$smoke_stderr_file"
 fi
 
 health_ok="true"

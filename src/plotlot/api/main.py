@@ -24,6 +24,7 @@ from plotlot.api.billing import router as billing_router  # noqa: F401 — regis
 from plotlot.api.chat import router as chat_router
 from plotlot.api.approvals import router as approvals_router
 from plotlot.api.workspaces import router as workspaces_router
+from plotlot.api.analyses import router as analyses_router
 from plotlot.api.tools import router as tools_router
 from plotlot.api.evidence import router as evidence_router
 from plotlot.api.mcp import router as mcp_router
@@ -196,6 +197,7 @@ app.include_router(billing_router)
 app.include_router(chat_router)
 app.include_router(approvals_router)
 app.include_router(workspaces_router)
+app.include_router(analyses_router)
 app.include_router(tools_router)
 app.include_router(evidence_router)
 app.include_router(mcp_router)

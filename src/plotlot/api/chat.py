@@ -1894,7 +1894,12 @@ async def chat(request: ChatRequest, http_request: Request):
                     actor_user_id = _actor_user_id(http_request)
                     claimed_approvals = set(request.approved_approval_ids or [])
                     validated_approvals = claimed_approvals
-                    if contract and contract.risk_class in {"write_external", "execution", "write_internal"}:
+                    if contract and contract.risk_class in {
+                        "write_external",
+                        "execution",
+                        "write_internal",
+                        "expensive_read",
+                    }:
                         validated_approvals = await _validated_approved_ids(
                             approval_ids=claimed_approvals,
                             workspace_id=request.workspace_id,
