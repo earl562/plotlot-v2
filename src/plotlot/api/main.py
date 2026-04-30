@@ -328,13 +328,28 @@ async def health():
 
     status = "healthy" if checks.get("database") == "ok" else "degraded"
     database_ready = checks.get("database") == "ok"
+    def _has_text_setting(name: str) -> bool:
+        """Return true only for explicitly configured string settings.
+
+        Several health tests patch ``settings`` with ``MagicMock``.  Accessing
+        an unset attribute on that mock creates a truthy mock object, so the
+        health endpoint must not rely on raw truthiness for optional credential
+        fields.
+        """
+
+        value = getattr(settings, name, "")
+        return isinstance(value, str) and bool(value.strip())
+
     agent_chat_ready = bool(
-        settings.openai_access_token
-        or settings.openai_api_key
-        or settings.nvidia_api_key
-        or settings.groq_api_key
+        _has_text_setting("openai_access_token")
+        or _has_text_setting("openai_api_key")
+        or _has_text_setting("nvidia_api_key")
+        or _has_text_setting("groq_api_key")
+        # Legacy compatibility for tests/deployments that still use the old
+        # OpenRouter setting name while the runtime uses Groq as the fallback.
+        or _has_text_setting("openrouter_api_key")
         or (
-            settings.use_codex_oauth
+            bool(getattr(settings, "use_codex_oauth", False))
             and has_saved_tokens(Path(settings.codex_auth_file).expanduser())
         )
     )

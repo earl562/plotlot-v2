@@ -571,6 +571,33 @@ async def _call_groq(
         return None
 
 
+async def _call_openrouter(
+    messages: list[dict],
+    *,
+    tools: list[dict] | None = None,
+    response_format: dict | None = None,
+    max_completion_tokens: int = 4000,
+    temperature: float = 0.1,
+    provider_name: str,
+) -> dict | None:
+    """Backward-compatible fallback hook name.
+
+    Earlier tests and deployments referred to the non-mainline fallback as
+    OpenRouter.  The runtime now routes that fallback through the Groq
+    OpenAI-compatible client, but keeping this seam stable lets tests and
+    integrations patch the fallback without depending on the provider rename.
+    """
+
+    return await _call_groq(
+        messages,
+        tools=tools,
+        response_format=response_format,
+        max_completion_tokens=max_completion_tokens,
+        temperature=temperature,
+        provider_name=provider_name,
+    )
+
+
 async def _call_llm_with_fallback(
     messages: list[dict],
     *,
@@ -594,7 +621,7 @@ async def _call_llm_with_fallback(
     if _usable_response(result):
         return result
 
-    return await _call_groq(
+    return await _call_openrouter(
         messages,
         tools=tools,
         response_format=response_format,
