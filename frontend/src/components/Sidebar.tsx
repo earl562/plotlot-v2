@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { UserButton } from "@clerk/nextjs";
+import { useState, useEffect, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import ChatHistory from "@/components/ChatHistory";
 import type { ChatSession } from "@/lib/sessions";
+import type { AppMode } from "@/components/ModeToggle";
 
 export type { ChatSession };
 
@@ -18,7 +18,22 @@ interface SidebarProps {
   onDeleteSession: (id: string) => void;
 }
 
-/* ── Sidebar Component ─────────────────────────────────────────────── */
+type NavItem = {
+  id: string;
+  label: string;
+  icon: string;
+  mode?: AppMode;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { id: "site-finder", label: "Site Finder", icon: "⌖", mode: "lookup" },
+  { id: "analyses", label: "Analyses", icon: "◫" },
+  { id: "evidence", label: "Evidence", icon: "◉" },
+  { id: "reports", label: "Reports", icon: "☰" },
+  { id: "harness-workspace", label: "Harness Workspace", icon: "✳", mode: "agent" },
+  { id: "connectors", label: "Connectors", icon: "◎" },
+];
+
 export default function Sidebar({
   sessions,
   activeSessionId,
@@ -29,16 +44,12 @@ export default function Sidebar({
   onDeleteSession,
 }: SidebarProps) {
   const [search, setSearch] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
-  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const [activeNavId, setActiveNavId] = useState<string>("site-finder");
 
-  /* Filter sessions by search term */
   const filtered = search.trim()
-    ? sessions.filter((s) =>
-        s.title.toLowerCase().includes(search.trim().toLowerCase())
-      )
+    ? sessions.filter((s) => s.title.toLowerCase().includes(search.trim().toLowerCase()))
     : sessions;
-  /* ── Keyboard shortcuts ─────────────────────────────────────────── */
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -51,7 +62,7 @@ export default function Sidebar({
         onNewChat();
       }
     },
-    [onToggle, onNewChat]
+    [onToggle, onNewChat],
   );
 
   useEffect(() => {
@@ -59,172 +70,126 @@ export default function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  /* ── Shared panel content ───────────────────────────────────────── */
-  const panelContent = (
-    <div className="relative flex h-full flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-4 top-6 h-40 rounded-[2rem] bg-[radial-gradient(circle_at_top,var(--hero-glow-strong),transparent_70%)] opacity-80" />
-      {/* Header — PlotLot branding + ThemeToggle */}
-      <div className="relative z-10 px-4 pt-6">
-        <div className="rounded-[2rem] border border-[var(--border-soft)] bg-[var(--bg-surface)]/92 p-2 shadow-[var(--shadow-panel)] backdrop-blur-xl">
-          <div className="rounded-[calc(2rem-0.5rem)] border border-white/50 bg-[var(--bg-surface-raised)] px-4 py-3 dark:border-white/5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-strong)] text-[10px] font-black text-white shadow-[0_10px_30px_rgba(180,83,9,0.2)]">
-                  P
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="font-display text-lg tracking-tight"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      PlotLot
-                    </span>
-                    <span
-                      className="rounded-full border border-amber-300/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em]"
-                      style={{
-                        background: "var(--brand-subtle)",
-                        color: "var(--brand-strong)",
-                      }}
-                    >
-                      Beta
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-[11px] tracking-[0.12em] text-[var(--text-muted)] uppercase">
-                    AI zoning analysis
-                  </p>
-                </div>
-              </div>
-              <ThemeToggle />
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <span className="rounded-full bg-[var(--bg-primary)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                104 municipalities
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const mode = (event as CustomEvent<{ mode: AppMode }>).detail?.mode;
+      if (mode === "lookup") setActiveNavId("site-finder");
+      if (mode === "agent") setActiveNavId("harness-workspace");
+    };
+    window.addEventListener("plotlot:mode-changed", handler);
+    return () => window.removeEventListener("plotlot:mode-changed", handler);
+  }, []);
 
-      {/* New analysis button */}
-      <div className="relative z-10 px-4 pb-3 pt-4">
-        <button
-          type="button"
-          onClick={onNewChat}
-          className="group flex w-full items-center justify-between rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] shadow-[var(--shadow-card)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-[var(--brand-soft-border)]"
-        >
-          <span>New analysis</span>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:-translate-y-[1px]">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </span>
-        </button>
-      </div>
-
-      {/* Search input */}
-      <div className="relative z-10 px-4 pb-3">
-        <input
-          ref={searchRef}
-          type="text"
-          placeholder="Search conversations..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:border-[var(--brand-soft-border)] focus:shadow-[var(--shadow-card)]"
-          style={{
-            color: "var(--text-primary)",
-          }}
-        />
-      </div>
-
-      {/* Chat history — scrollable */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-3">
-        <ChatHistory
-          sessions={filtered}
-          activeSessionId={activeSessionId}
-          onSelect={onSelectSession}
-          onDelete={onDeleteSession}
-        />
-      </div>
-
-      {/* Footer — user account + plan link */}
-      <div className="relative z-10 border-t border-[var(--border-soft)] px-4 py-4">
-        <div className="flex items-center justify-between">
-        {clerkEnabled ? (
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-7 h-7",
-              },
-            }}
-          />
-        ) : (
-          <div
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold"
-            style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
-            aria-label="Guest mode"
-            title="Guest mode"
-          >
-            G
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <a
-            href="/billing"
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors hover:opacity-80"
-            style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
-          >
-            Free
-          </a>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            104 municipalities
-          </span>
-        </div>
-        </div>
-      </div>
-    </div>
-  );
+  const handleNavClick = useCallback((item: NavItem) => {
+    setActiveNavId(item.id);
+    if (!item.mode) return;
+    window.dispatchEvent(new CustomEvent("plotlot:mode-change", { detail: { mode: item.mode } }));
+  }, []);
 
   return (
     <>
-      {/* ── Mobile backdrop ─────────────────────────────────────────── */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-          onClick={onToggle}
-          aria-hidden="true"
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={onToggle} aria-hidden="true" />}
 
-      {/* ── Sidebar panel ───────────────────────────────────────────── */}
       <aside
         className={`
-          fixed top-0 left-0 z-50 h-full w-[320px] border-r transition-transform duration-200
+          fixed left-0 top-0 z-50 h-full w-[320px] border-r transition-transform duration-200
           lg:relative lg:z-auto
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
         style={{
-          background: "var(--bg-sidebar)",
-          borderColor: "var(--border-soft)",
+          background: "#f2f2f4",
+          borderColor: "#e5e7eb",
         }}
       >
-        {panelContent}
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="border-b border-[#e5e7eb] px-3 pb-3 pt-3">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black text-sm font-bold text-white">
+                  P
+                </div>
+                <div className="leading-tight">
+                  <p className="font-medium text-[#111827]">PlotLot</p>
+                  <p className="text-xs tracking-wide text-[#6b7280]">AI ZONING ANALYSIS</p>
+                </div>
+              </div>
+              <ThemeToggle />
+            </div>
+
+            <button
+              type="button"
+              onClick={onNewChat}
+              className="flex h-12 w-full items-center justify-between rounded-xl border border-[#d7dbe3] bg-white px-4 text-left text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            >
+              <span className="inline-flex items-center gap-2">
+                <span className="text-base">⊕</span>
+                New analysis
+              </span>
+              <span className="rounded-md bg-[#eef1f5] px-2 py-1 text-xs font-semibold text-[#64748b]">⌘ K</span>
+            </button>
+          </div>
+
+          <div className="border-b border-[#e5e7eb] px-3 py-3">
+            <ul className="space-y-1">
+              {NAV_ITEMS.map((item) => {
+                const active = item.id === activeNavId;
+                return (
+                  <li key={item.label}>
+                    <button
+                      type="button"
+                      onClick={() => handleNavClick(item)}
+                      aria-current={active ? "page" : undefined}
+                      data-testid={`sidebar-nav-${item.id}`}
+                      className={`flex h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-[#e5e7eb] text-[#111827]"
+                          : "text-[#374151] hover:bg-[#eceff3]"
+                      }`}
+                    >
+                      <span className="w-5 text-center text-base leading-none">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="px-3 pb-2 pt-3">
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-11 w-full rounded-xl border border-[#d7dbe3] bg-white px-3 text-sm text-[#111827] placeholder:text-[#9ca3af] outline-none transition-colors focus:border-[#b7c0cf]"
+            />
+          </div>
+
+          <div className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]">
+            Chat History
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+            <ChatHistory
+              sessions={filtered}
+              activeSessionId={activeSessionId}
+              onSelect={onSelectSession}
+              onDelete={onDeleteSession}
+            />
+          </div>
+
+          <div className="border-t border-[#e5e7eb] px-4 py-3 text-xs text-[#6b7280]">
+            <div className="flex items-center justify-between">
+              <span>104 municipalities</span>
+              <span>Free</span>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   );
 }
 
-/* ── SidebarToggle — hamburger button for mobile top bar ───────────── */
 export function SidebarToggle({ onClick }: { onClick: () => void }) {
   return (
     <button

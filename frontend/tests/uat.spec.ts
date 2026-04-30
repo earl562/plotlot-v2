@@ -86,7 +86,7 @@ test.describe("Scenario 1: Welcome Screen", () => {
     ).toBeDisabled();
 
     // Capability chips (lookup mode)
-    for (const text of [/Houston, TX/, /Atlanta, GA/, /Miami Gardens, FL/]) {
+    for (const text of [/Miramar, FL/, /Miami Gardens, FL/, /Boca Raton, FL/]) {
       await expect(page.getByRole("button", { name: text })).toBeVisible();
     }
 
@@ -478,7 +478,7 @@ test.describe("Scenario 11: Mode Switching", () => {
     await page.goto("/");
 
     // Start in lookup mode — should show address example chips
-    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
 
     // Switch to agent mode
     const modeToggle = page.locator("[data-mode-toggle]").or(
@@ -500,6 +500,6 @@ test.describe("Scenario 11: Mode Switching", () => {
     }
 
     // Should show address chips again
-    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
   });
 });

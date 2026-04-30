@@ -9,10 +9,45 @@ async function gotoWelcome(page: Page) {
 async function stubAnalyzeStream(page: Page) {
   const body = `event: status\ndata: ${JSON.stringify({ step: "geocoding", message: "Resolving address...", complete: false })}\n\n`;
 
+  await page.evaluate((streamBody) => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
+      if (url.includes("/api/v1/analyze/stream")) {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(streamBody));
+          },
+        });
+        return Promise.resolve(
+          new Response(stream, {
+            status: 200,
+            headers: { "content-type": "text/event-stream" },
+          }),
+        );
+      }
+      return originalFetch(input, init);
+    }) as typeof window.fetch;
+  }, body);
+
   await page.route("**/api/v1/analyze/stream", async (route) => {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "content-type",
+    };
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({
+        status: 204,
+        headers: corsHeaders,
+      });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: "text/event-stream",
+      headers: corsHeaders,
       body,
     });
   });
@@ -68,7 +103,7 @@ test.describe("PlotLot design system", () => {
     await expect(input).toBeVisible();
     await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled();
 
-    for (const chip of ["Houston, TX", "Atlanta, GA", "Miami Gardens, FL"]) {
+    for (const chip of ["Miramar, FL", "Miami Gardens, FL", "Boca Raton, FL"]) {
       await expect(page.getByRole("button", { name: chip })).toBeVisible();
     }
 

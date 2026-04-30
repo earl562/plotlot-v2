@@ -31,11 +31,11 @@ export default function InputBar({
   isProcessing = false,
 }: InputBarProps) {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-[1024px]">
       <form onSubmit={onSubmit}>
         <div
-          className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2.5 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-4 sm:py-3"
-          style={{ boxShadow: "var(--shadow-elevated)" }}
+          className="flex items-center gap-2 rounded-[30px] border border-[#d1d5db] bg-white px-4 py-3 transition-all focus-within:border-[#9ca3af] focus-within:ring-2 focus-within:ring-[#dbe1ea]"
+          style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
         >
           {mode === "lookup" ? (
             <AddressAutocomplete
@@ -54,7 +54,7 @@ export default function InputBar({
               onChange={(e) => onChange(e.target.value)}
               placeholder={placeholder}
               disabled={disabled}
-              className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent text-base text-[#374151] placeholder:text-[#9ca3af] focus:outline-none"
               data-testid="agent-input"
             />
           )}
@@ -64,7 +64,7 @@ export default function InputBar({
             disabled={!value.trim() || isProcessing}
             aria-label="Send message"
             data-testid="send-button"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#111827] text-white transition-all hover:opacity-90 disabled:opacity-30"
           >
             {isProcessing ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">

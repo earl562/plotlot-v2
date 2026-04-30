@@ -8,6 +8,7 @@ import {
   InfoWindow,
   useMap,
 } from "@vis.gl/react-google-maps";
+import { openStreetMapStaticUrl, openStreetMapUrl } from "@/lib/mapAlternatives";
 
 interface SatelliteMapProps {
   lat: number;
@@ -92,6 +93,7 @@ function StaticFallback({ lat, lng, address }: SatelliteMapProps) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const googleMapsUrl = `https://www.google.com/maps/@${lat},${lng},18z/data=!3m1!1e3`;
+  const osmUrl = openStreetMapUrl(lat, lng, 18);
 
   if (MAPS_KEY && !imgError) {
     const staticUrl =
@@ -122,9 +124,32 @@ function StaticFallback({ lat, lng, address }: SatelliteMapProps) {
     );
   }
 
+  if (!imgError) {
+    const staticUrl = openStreetMapStaticUrl(lat, lng, 18);
+    return (
+      <a
+        href={osmUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative block overflow-hidden rounded-lg"
+      >
+        {!imgLoaded && (
+          <div className="h-[140px] w-full animate-pulse rounded-lg bg-[var(--bg-surface-raised)] sm:h-[180px]" />
+        )}
+        <img
+          src={staticUrl}
+          alt={`Map view of ${address}`}
+          className={`h-[140px] w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-[180px] ${imgLoaded ? "" : "absolute inset-0 opacity-0"}`}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+        />
+      </a>
+    );
+  }
+
   return (
     <a
-      href={googleMapsUrl}
+      href={osmUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="group flex min-h-[44px] items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-raised)] p-3 transition-all hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 sm:p-4"
@@ -140,7 +165,7 @@ function StaticFallback({ lat, lng, address }: SatelliteMapProps) {
           {address || "Open satellite view"}
         </div>
         <div className="text-xs text-stone-500">
-          View on Google Maps
+          View on OpenStreetMap
         </div>
       </div>
     </a>

@@ -158,7 +158,10 @@ export default function Home() {
   // Keep refs in sync with state
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { currentReportRef.current = currentReport; }, [currentReport]);
-  useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => {
+    modeRef.current = mode;
+    window.dispatchEvent(new CustomEvent("plotlot:mode-changed", { detail: { mode } }));
+  }, [mode]);
   useEffect(() => { localSessionIdRef.current = localSessionId; }, [localSessionId]);
 
   // Persist backend sessionId
@@ -541,6 +544,21 @@ export default function Home() {
     setInputError(null);
   }, []);
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const nextMode = (event as CustomEvent<{ mode?: AppMode }>).detail?.mode;
+      if (!nextMode) return;
+      if (nextMode !== modeRef.current) {
+        setMode(nextMode);
+        setContextualSuggestions([]);
+        setInputError(null);
+      }
+      setTimeout(() => inputRef.current?.focus(), 50);
+    };
+    window.addEventListener("plotlot:mode-change", handler);
+    return () => window.removeEventListener("plotlot:mode-change", handler);
+  }, []);
+
   const handleSave = useCallback(
     async (msgId: string, report: ZoningReportData) => {
       updateMessage(msgId, { saveStatus: "saving" });
@@ -581,142 +599,147 @@ export default function Home() {
   // ─── Welcome State (both modes) ────────────────────────────────────
   if (isWelcome) {
     return (
-      <main className="w-full max-w-full overflow-x-hidden px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-6xl flex-col justify-center py-12 md:py-20">
-        <motion.div
-          className="mb-6 inline-flex w-fit items-center gap-2 self-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)] shadow-[var(--shadow-card)]"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...springGentle, delay: 0.08 }}
-        >
-          <span className="inline-flex h-2 w-2 rounded-full bg-[var(--brand-strong)]" />
-          PlotLot
-        </motion.div>
+      <main className="relative flex min-h-screen w-full max-w-full items-center justify-center overflow-x-hidden bg-[#f5f5f6] px-4 py-8 sm:px-6 lg:px-10">
+        {mode === "agent" && (
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 rounded-full border border-[#d8e4ff] bg-[#eaf1ff] px-4 py-1.5 text-sm font-medium text-[#3b82f6]">
+            ♫ Upgrade your plan
+          </div>
+        )}
 
-        <motion.div
-          className="mb-10"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          <div className="max-w-5xl">
-            <motion.div
-              variants={staggerItem}
-              className="mb-4 text-sm tracking-wide text-[var(--text-muted)]"
-            >
-              Hi there
-            </motion.div>
-            <motion.h1
-              variants={staggerItem}
-              className="max-w-5xl font-display text-[clamp(3.35rem,7vw,6.2rem)] leading-[0.98] text-[var(--text-primary)]"
+        <div className="mx-auto flex w-full max-w-[1040px] flex-col items-center">
+          <motion.div
+            className="mb-8 w-full text-center"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <div className="mx-auto flex max-w-[780px] flex-col items-center">
+              <motion.div
+                variants={staggerItem}
+                className="mb-4 flex items-center justify-center gap-2 text-sm tracking-wide text-[var(--text-muted)]"
+              >
+                <span className="text-[var(--brand)]">✦</span>
+                <span>Hi there</span>
+              </motion.div>
+
+              {mode === "agent" && (
+                <motion.p variants={staggerItem} className="mb-3 text-[72px] font-black tracking-[0.18em] text-[#111827]">
+                  PLOTLOT
+                </motion.p>
+              )}
+
+              <motion.h1
+                variants={staggerItem}
+                className="max-w-[700px] text-center font-display text-[clamp(3.0rem,4.8vw,4.1rem)] leading-[1.02] text-[var(--text-primary)]"
+              >
+                {mode === "lookup" ? (
+                  <>Analyze any property<br />in the US</>
+                ) : (
+                  <>Ask anything about zoning &amp; land</>
+                )}
+              </motion.h1>
+
+              <motion.p variants={staggerItem} className="mt-4 max-w-2xl text-center text-[15px] leading-7 text-[var(--text-muted)] sm:text-base">
+                {mode === "lookup"
+                  ? "Zoning, density, comps, pro forma, and development potential — in seconds"
+                  : "Use the consultant harness: run analyses, attach evidence, and generate defensible reports in one workspace."}
+              </motion.p>
+            </div>
+          </motion.div>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.2 }}
+            className="relative z-30 mb-6 w-full max-w-[980px] self-center"
+          >
+            <div
+              className="glass-panel flex min-h-[76px] items-center gap-2 rounded-[34px] border border-[#cfd5df] bg-white px-4 py-3 transition-all focus-within:border-[#94a3b8] focus-within:ring-2 focus-within:ring-[#e2e8f0] sm:px-5"
+              style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}
             >
               {mode === "lookup" ? (
-                <>Analyze any property in the US</>
+                <AddressAutocomplete
+                  inputRef={inputRef}
+                  value={input}
+                  onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
+                  onSelect={(address) => sendMessage(address)}
+                  placeholder="Enter a property address..."
+                  disabled={isProcessing}
+                />
               ) : (
-                <>Ask anything about zoning &amp; land</>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
+                  placeholder="Ask about zoning, density, or property data..."
+                  disabled={isProcessing}
+                  className="min-w-0 flex-1 bg-transparent text-lg text-[#374151] placeholder:text-[#9ca3af] focus:outline-none"
+                  data-testid="agent-input"
+                />
               )}
-            </motion.h1>
-            <motion.p variants={staggerItem} className="mt-5 max-w-2xl text-[15px] leading-7 text-[var(--text-secondary)] sm:text-[17px]">
-              {mode === "lookup"
-                ? "Zoning, density, comps, pro forma, and development potential — in seconds"
-                : "Search properties, research zoning codes, or get answers from our database. Use agent mode when you need an exploratory partner, not just a single lookup."}
-            </motion.p>
-          </div>
-        </motion.div>
+              <ModeToggle mode={mode} onChange={handleModeChange} />
+              <button
+                type="submit"
+                disabled={!input.trim() || isProcessing}
+                aria-label="Send message"
+                data-testid="send-button"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#111827] text-white transition-all hover:opacity-90 disabled:opacity-20"
+              >
+                {isProcessing ? (
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {inputError && <p className="mt-2 px-1 text-xs text-red-500">{inputError}</p>}
+          </motion.form>
 
-        {/* Input bar — z-30 so autocomplete dropdown (z-50 inside) paints above chips below */}
-        <motion.form
-          onSubmit={handleSubmit}
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.25 }}
-          className="relative z-30 mb-8 w-full max-w-4xl self-center"
-        >
-          <div
-            className="glass-panel flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-4"
-            style={{ boxShadow: "var(--shadow-elevated)" }}
+          <motion.div
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.3 }}
+            className="relative z-0 min-h-[72px] w-full max-w-[980px] self-center"
           >
             {mode === "lookup" ? (
-              <AddressAutocomplete
-                inputRef={inputRef}
-                value={input}
-                onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
-                onSelect={(address) => sendMessage(address)}
-                placeholder="Enter a property address..."
-                disabled={isProcessing}
-              />
+              <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
             ) : (
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
-                placeholder="Ask about zoning, density, or property data..."
+              <ToolCards
+                onAnalyze={() => inputRef.current?.focus()}
+                onGenerateDoc={() => setDocCanvasOpen(true)}
+                onSendPrompt={sendMessage}
                 disabled={isProcessing}
-                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-                data-testid="agent-input"
+                hasReport={!!currentReport}
+                county={currentReport?.county}
               />
             )}
-            <ModeToggle mode={mode} onChange={setMode} />
-            <button
-              type="submit"
-              disabled={!input.trim() || isProcessing}
-              aria-label="Send message"
-              data-testid="send-button"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20 sm:h-9 sm:w-9"
-            >
-              {isProcessing ? (
-                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                </svg>
-              )}
-            </button>
-          </div>
-          {inputError && (
-            <p className="mt-2 px-1 text-xs text-red-500">{inputError}</p>
-          )}
-        </motion.form>
+          </motion.div>
 
-        {/* Capability chips / Tool cards — z-0 so autocomplete dropdown from form above paints on top */}
-        <motion.div
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.35 }}
-          className="relative z-0 min-h-[72px] w-full max-w-4xl self-center"
-        >
-          {mode === "lookup" ? (
-            <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
-          ) : (
-            <ToolCards
-              onAnalyze={() => inputRef.current?.focus()}
-              onGenerateDoc={() => setDocCanvasOpen(true)}
-              onSendPrompt={sendMessage}
-              disabled={isProcessing}
-              hasReport={!!currentReport}
-              county={currentReport?.county}
-            />
-          )}
-        </motion.div>
-
-        {/* Footer */}
-        <motion.p
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.45 }}
-          className="mt-12 text-center text-xs text-[var(--text-muted)]"
-        >
-          PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
-        </motion.p>
+          <motion.p
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.4 }}
+            className="mt-10 text-center text-xs text-[var(--text-muted)]"
+          >
+            PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
+          </motion.p>
         </div>
       </main>
     );
   }
 
-  // ─── Conversation State ───────────────────────────────────────────────
+// ─── Conversation State ───────────────────────────────────────────────
   return (
-    <div className="relative flex h-[calc(100vh-4rem)] flex-col">
+    <div className="relative flex h-[calc(100vh-4rem)] flex-col bg-[#f5f5f6]">
+      {mode === "agent" && (
+        <div className="pointer-events-none fixed left-1/2 top-5 z-40 -translate-x-1/2 rounded-full border border-[#d8e4ff] bg-[#eaf1ff] px-4 py-1.5 text-sm font-medium text-[#3b82f6]">
+          ♫ Upgrade your plan
+        </div>
+      )}
       {/* New Analysis button — fixed top-right */}
       <div className="fixed right-4 top-5 z-40 sm:right-6">
         <button
