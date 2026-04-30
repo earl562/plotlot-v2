@@ -206,3 +206,18 @@ async def test_execute_tool_routes_new_live_tools():
 
     assert open_data_payload["kind"] == "open_data"
     assert municode_payload["kind"] == "municode"
+
+
+@pytest.mark.asyncio
+async def test_external_write_tools_fail_closed_without_approval():
+    with patch("plotlot.api.chat.create_spreadsheet", new=AsyncMock()) as mock_create:
+        payload = json.loads(
+            await _execute_tool(
+                "create_spreadsheet",
+                {"title": "t", "headers": ["a"], "rows": [["1"]]},
+                session_id="s1",
+            )
+        )
+
+    assert payload["status"] == "pending_approval"
+    mock_create.assert_not_awaited()

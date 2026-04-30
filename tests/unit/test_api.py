@@ -118,6 +118,20 @@ async def test_api_version_header(client):
 
 
 @pytest.mark.asyncio
+async def test_cors_preflight_allows_loopback_origin(client):
+    """Local dev with 127.0.0.1 frontend must pass CORS preflight."""
+    resp = await client.options(
+        "/api/v1/chat",
+        headers={
+            "Origin": "http://127.0.0.1:3003",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.headers.get("access-control-allow-origin") == "http://127.0.0.1:3003"
+
+
+@pytest.mark.asyncio
 async def test_autocomplete_uses_geocode_fallback_without_geocodio_key(client):
     """Autocomplete should still return a suggestion when Google/Geocodio are unavailable."""
     with patch("plotlot.api.main.settings") as mock_settings, patch(
@@ -212,7 +226,9 @@ async def test_analyze_backend_unavailable_error_is_actionable(client):
 @pytest.mark.asyncio
 async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
     """Streaming analyze should emit actionable backend-unavailable SSE errors."""
-    with patch(
+    with (
+        patch("plotlot.api.routes.get_cached_report", new_callable=AsyncMock, return_value=None),
+        patch(
         "plotlot.api.routes.geocode_address",
         new_callable=AsyncMock,
         return_value={
@@ -221,10 +237,12 @@ async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
             "lat": 25.957,
             "lng": -80.199,
         },
-    ), patch(
-        "plotlot.api.routes.lookup_property",
-        new_callable=AsyncMock,
-        side_effect=OSError("[Errno 61] Connection refused"),
+        ),
+        patch(
+            "plotlot.api.routes.lookup_property",
+            new_callable=AsyncMock,
+            side_effect=OSError("[Errno 61] Connection refused"),
+        ),
     ):
         resp = await client.post(
             "/api/v1/analyze/stream",

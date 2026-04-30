@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from plotlot.observability.tracing import configure_mlflow
+from plotlot.observability.tracing import configure_mlflow, start_run
 
 
 def test_configure_mlflow_fails_open_when_tracking_backend_raises():
@@ -44,3 +44,19 @@ def test_configure_mlflow_short_circuits_when_tracking_backend_unreachable():
     assert result is False
     mock_mlflow.set_tracking_uri.assert_not_called()
     mock_mlflow.set_experiment.assert_not_called()
+
+
+def test_start_run_fails_open_when_mlflow_run_creation_raises():
+    mock_mlflow = MagicMock()
+    mock_mlflow.active_run.return_value = None
+    mock_mlflow.start_run.side_effect = RuntimeError("Could not find experiment with ID 0")
+
+    with (
+        patch("plotlot.observability.tracing._HAS_MLFLOW", True),
+        patch("plotlot.observability.tracing._mlflow", mock_mlflow),
+    ):
+        with start_run(run_name="stream") as run:
+            assert run is None
+
+    mock_mlflow.active_run.assert_called_once()
+    mock_mlflow.start_run.assert_called_once_with(run_name="stream")

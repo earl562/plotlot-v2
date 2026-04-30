@@ -282,6 +282,17 @@ class ChatRequest(BaseModel):
     history: list[ChatMessage] = []
     report_context: ZoningReportResponse | None = None
     session_id: str | None = None
+    # Approval and governance controls
+    approved_approval_ids: list[str] = []
+    risk_budget_cents: int = Field(
+        default=100,
+        ge=0,
+        description="Budget for expensive reads during a chat turn (governance control)",
+    )
+    workspace_id: str = Field(
+        default="default-workspace",
+        description="Optional workspace selector for harness governance",
+    )
 
 
 # ---------------------------------------------------------------------------

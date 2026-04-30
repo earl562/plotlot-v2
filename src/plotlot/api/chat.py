@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 from plotlot.api.schemas import ChatRequest
@@ -36,14 +36,128 @@ from plotlot.retrieval.bulk_search import (
 from plotlot.retrieval.google_workspace import create_document, create_spreadsheet
 from plotlot.retrieval.llm import call_llm
 from plotlot.retrieval.search import hybrid_search
-from plotlot.storage.db import get_session
 from plotlot.observability.prompts import get_active_prompt
 from plotlot.observability.tracing import start_span
 from plotlot.oauth.openai_auth import has_saved_tokens
+from plotlot.storage.db import get_session
+from plotlot.storage.models import ApprovalRequest, ToolRun, Workspace
+from plotlot.land_use import ToolContext
+from plotlot.land_use.policy import ToolPolicy
+from plotlot.harness.policy import HarnessPolicyEngine
+from plotlot.harness.tool_registry import get_tool_contract
+from plotlot.harness.default_runtime import get_default_runtime
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["chat"])
+
+
+def _actor_user_id(http_request: Request | None) -> str:
+    user = getattr(http_request.state, "user", None) if http_request is not None else None
+    if isinstance(user, dict) and user.get("user_id"):
+        return str(user["user_id"])
+    return "anonymous"
+
+
+def _expected_approval_id(*, tool_name: str, run_id: str) -> str:
+    """Match ToolPolicy's deterministic approval ID format."""
+
+    safe_tool = tool_name.replace(".", "_")
+    return f"apr_{run_id}_{safe_tool}"
+
+
+async def _persist_pending_approval(
+    *,
+    approval_id: str,
+    context: ToolContext,
+    tool_name: str,
+    risk_class: str,
+    args: dict,
+    reason: str,
+) -> None:
+    """Best-effort persistence for approvals and tool-run audit.
+
+    If persistence fails, we still fail closed (no external write happens).
+    """
+
+    session = await get_session()
+    try:
+        workspace = await session.get(Workspace, context.workspace_id)
+        if workspace is None:
+            session.add(
+                Workspace(
+                    id=context.workspace_id,
+                    name="Default Workspace",
+                    owner_user_id=context.actor_user_id if context.actor_user_id != "anonymous" else None,
+                )
+            )
+            await session.flush()
+        tool_run = ToolRun(
+            workspace_id=context.workspace_id,
+            project_id=context.project_id,
+            site_id=context.site_id,
+            analysis_id=context.analysis_id,
+            analysis_run_id=None,
+            tool_name=tool_name,
+            risk_class=risk_class,
+            status="pending_approval",
+            input_json=args,
+            output_json={},
+        )
+        session.add(tool_run)
+        await session.flush()
+        approval = ApprovalRequest(
+            id=approval_id,
+            workspace_id=context.workspace_id,
+            project_id=context.project_id,
+            analysis_run_id=None,
+            tool_run_id=tool_run.id,
+            status="pending",
+            risk_class=risk_class,
+            action_name=tool_name,
+            reason=reason,
+            request_json={"tool": tool_name, "args": args, "run_id": context.run_id},
+            response_json={},
+            requested_by=context.actor_user_id,
+        )
+        session.add(approval)
+        await session.commit()
+    except Exception:
+        try:
+            await session.rollback()
+        except Exception:
+            logger.warning("Approval persistence rollback failed", exc_info=True)
+        logger.warning("Approval persistence failed", exc_info=True)
+    finally:
+        await session.close()
+
+
+async def _validated_approved_ids(
+    *,
+    approval_ids: set[str],
+    workspace_id: str,
+) -> set[str]:
+    """Return the subset of approval IDs that are actually approved in the DB.
+
+    Fail-closed: if the database is unavailable, return an empty set.
+    """
+
+    if not approval_ids:
+        return set()
+
+    session = await get_session()
+    try:
+        approved: set[str] = set()
+        for approval_id in approval_ids:
+            row = await session.get(ApprovalRequest, approval_id)
+            if row and row.workspace_id == workspace_id and row.status == "approved":
+                approved.add(approval_id)
+        return approved
+    except Exception:
+        logger.warning("Approval validation failed; failing closed", exc_info=True)
+        return set()
+    finally:
+        await session.close()
 
 # ---------------------------------------------------------------------------
 # Session management — bounded memory store with LRU eviction
@@ -426,7 +540,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                 "Create a Google Sheets spreadsheet with structured data. "
                 "Use this when the user asks to put data into a spreadsheet, "
                 "export results, or create a table they can share or download. "
-                "Returns a shareable link to the new spreadsheet."
+                "Returns a shareable link to the new spreadsheet. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -448,6 +563,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                         },
                         "description": "Data rows — each row is an array of string values matching the headers",
                     },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
+                    },
                 },
                 "required": ["title", "headers", "rows"],
             },
@@ -461,7 +580,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                 "Create a Google Docs document with text content. "
                 "Use this when the user asks for a written report, summary document, "
                 "analysis writeup, or any formatted text output they can share or download. "
-                "Returns a shareable link to the new document."
+                "Returns a shareable link to the new document. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -473,6 +593,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                     "content": {
                         "type": "string",
                         "description": "Text content for the document. Use newlines for paragraphs.",
+                    },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
                     },
                 },
                 "required": ["title", "content"],
@@ -670,7 +794,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
             "description": (
                 "Export the current search results to a Google Spreadsheet. "
                 "Automatically formats all records with appropriate headers. "
-                "Use after search_properties or filter_dataset."
+                "Use after search_properties or filter_dataset. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -687,6 +812,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                             "owner, land_use_code, lot_size_sqft, year_built, assessed_value, "
                             "last_sale_price, last_sale_date, lat, lng"
                         ),
+                    },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
                     },
                 },
             },
@@ -1206,8 +1335,21 @@ async def _execute_web_search(query: str) -> str:
         return json.dumps({"status": "error", "message": f"Web search failed: {str(e)}"})
 
 
-async def _execute_create_spreadsheet(title: str, headers: list[str], rows: list[list[str]]) -> str:
+async def _execute_create_spreadsheet(
+    title: str,
+    headers: list[str],
+    rows: list[list[str]],
+    *,
+    approval_id: str | None = None,
+) -> str:
     """Create a Google Sheets spreadsheet with data."""
+    if not approval_id:
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     try:
         result = await create_spreadsheet(title, headers, rows)
         return json.dumps(
@@ -1224,8 +1366,20 @@ async def _execute_create_spreadsheet(title: str, headers: list[str], rows: list
         return json.dumps({"status": "error", "message": f"Failed to create spreadsheet: {str(e)}"})
 
 
-async def _execute_create_document(title: str, content: str) -> str:
+async def _execute_create_document(
+    title: str,
+    content: str,
+    *,
+    approval_id: str | None = None,
+) -> str:
     """Create a Google Docs document with content."""
+    if not approval_id:
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     try:
         result = await create_document(title, content)
         return json.dumps(
@@ -1473,6 +1627,13 @@ async def _execute_get_dataset_info(session_id: str) -> str:
 
 async def _execute_export_dataset(session_id: str, args: dict) -> str:
     """Export the in-session dataset to a Google Spreadsheet."""
+    if not args.get("approval_id"):
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     dataset = _sessions.get_dataset(session_id)
     if not dataset or not dataset.records:
         return json.dumps(
@@ -1537,11 +1698,13 @@ async def _execute_tool(name: str, args: dict, session_id: str = "") -> str:
             args.get("title", "Untitled"),
             args.get("headers", []),
             args.get("rows", []),
+            approval_id=args.get("approval_id"),
         )
     elif name == "create_document":
         return await _execute_create_document(
             args.get("title", "Untitled"),
             args.get("content", ""),
+            approval_id=args.get("approval_id"),
         )
     elif name == "generate_document":
         return await _execute_generate_document(session_id, args)
@@ -1572,7 +1735,7 @@ def _sse_event(event: str, data: dict) -> str:
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, http_request: Request):
     """Agentic chat with tool use, streaming, and conversation memory."""
 
     # Get or create session for memory
@@ -1695,6 +1858,11 @@ async def chat(request: ChatRequest):
                     tc_id = tc.get("id", "")
 
                     try:
+                        contract = get_tool_contract(fn_name)
+                    except KeyError:
+                        contract = None
+
+                    try:
                         fn_args = json.loads(fn_args_str)
                     except json.JSONDecodeError:
                         fn_args = {}
@@ -1722,16 +1890,116 @@ async def chat(request: ChatRequest):
                         },
                     )
 
-                    # Execute tool
-                    result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                    # Governance: authorize tool call through harness policy
+                    actor_user_id = _actor_user_id(http_request)
+                    claimed_approvals = set(request.approved_approval_ids or [])
+                    validated_approvals = claimed_approvals
+                    if contract and contract.risk_class in {"write_external", "execution", "write_internal"}:
+                        validated_approvals = await _validated_approved_ids(
+                            approval_ids=claimed_approvals,
+                            workspace_id=request.workspace_id,
+                        )
 
-                    yield _sse_event(
-                        "tool_result",
-                        {
-                            "tool": fn_name,
-                            "status": "complete",
-                        },
+                    context = ToolContext(
+                        workspace_id=request.workspace_id,
+                        actor_user_id=actor_user_id,
+                        run_id=session_id,
+                        risk_budget_cents=request.risk_budget_cents,
+                        approved_approval_ids=validated_approvals,
                     )
+                    policy_engine = HarnessPolicyEngine(
+                        policy=ToolPolicy(internal_write_tools=frozenset({"generate_document"}))
+                    )
+                    if contract is None:
+                        decision = policy_engine.authorize(tool_name="gateway.execute", context=context)
+                    else:
+                        decision = policy_engine.authorize(tool_name=fn_name, context=context)
+
+                    if decision.approval_required:
+                        approval_id = decision.approval_id
+                        risk_class = contract.risk_class if contract else "execution"
+                        await _persist_pending_approval(
+                            approval_id=approval_id or "",
+                            context=context,
+                            tool_name=fn_name,
+                            risk_class=risk_class,
+                            args=fn_args,
+                            reason=decision.reason,
+                        )
+                        tool_payload = {
+                            "status": "pending_approval",
+                            "approval_id": approval_id,
+                            "risk_class": risk_class,
+                            "message": decision.reason,
+                        }
+                        result = json.dumps(tool_payload)
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "pending_approval",
+                                "approval_id": approval_id,
+                                "risk_class": risk_class,
+                                "message": decision.reason,
+                            },
+                        )
+                    elif not decision.allowed:
+                        result = json.dumps(
+                            {
+                                "status": "blocked",
+                                "message": decision.reason,
+                            }
+                        )
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "blocked",
+                                "message": decision.reason,
+                            },
+                        )
+                    else:
+                        # Execute tool (allowed)
+                        if contract and contract.risk_class in {
+                            "write_external",
+                            "expensive_read",
+                            "write_internal",
+                        }:
+                            expected = _expected_approval_id(tool_name=fn_name, run_id=session_id)
+                            if expected in context.approved_approval_ids:
+                                fn_args["approval_id"] = expected
+
+                        # Route core tools through the shared harness runtime.
+                        if fn_name in {
+                            "geocode_address",
+                            "lookup_property_info",
+                            "search_zoning_ordinance",
+                            "search_municode_live",
+                            "discover_open_data_layers",
+                            "generate_document",
+                        }:
+                            runtime = get_default_runtime()
+                            tool_result = await runtime.call_tool(
+                                tool_name=fn_name,
+                                tool_args=fn_args,
+                                context=context,
+                                approval_id=fn_args.get("approval_id"),
+                            )
+                            # Preserve chat session behaviors.
+                            if fn_name == "geocode_address" and tool_result.result:
+                                geocode = tool_result.result.get("result")
+                                if isinstance(geocode, dict) and session_id:
+                                    _sessions.set_geocode(session_id, geocode)
+                            result = json.dumps(tool_result.result or {})
+                        else:
+                            result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "complete",
+                            },
+                        )
 
                     messages.append(
                         {
