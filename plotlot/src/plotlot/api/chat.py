@@ -40,6 +40,7 @@ from plotlot.storage.chat_store import (
     append_tool_call,
     delete_chat_session,
     load_chat_messages,
+    load_tool_calls,
 )
 from plotlot.storage.db import get_session
 from plotlot.observability.prompts import get_active_prompt
@@ -1748,6 +1749,35 @@ async def chat(request: ChatRequest):
 async def list_sessions():
     """List active conversation sessions (for debugging/admin)."""
     return _sessions.list_sessions()
+
+
+@router.get("/chat/sessions/{session_id}/transcript")
+async def get_session_transcript(session_id: str, limit: int = MAX_MEMORY_MESSAGES):
+    """Return the chat transcript for a session.
+
+    The backend is the source of truth. Falls back to in-memory transcript when
+    the DB is unavailable.
+    """
+
+    try:
+        messages = await load_chat_messages(session_id, limit=limit)
+        return {"session_id": session_id, "messages": messages, "source": "db"}
+    except Exception as exc:
+        logger.warning("Chat transcript fetch failed (falling back to memory): %s", exc)
+        memory = _sessions.get_messages(session_id)
+        return {"session_id": session_id, "messages": memory[-limit:], "source": "memory"}
+
+
+@router.get("/chat/sessions/{session_id}/tool-calls")
+async def get_session_tool_calls(session_id: str, limit: int = 200):
+    """Return the tool-call audit trail for a chat session."""
+
+    try:
+        calls = await load_tool_calls(session_id, limit=limit)
+        return {"session_id": session_id, "tool_calls": calls}
+    except Exception as exc:
+        logger.warning("Chat tool-call fetch failed: %s", exc)
+        return {"session_id": session_id, "tool_calls": []}
 
 
 @router.delete("/chat/sessions/{session_id}")

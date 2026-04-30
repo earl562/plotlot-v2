@@ -71,6 +71,39 @@ async def append_chat_message(session_id: str, role: str, content: str) -> None:
         await session.close()
 
 
+async def load_tool_calls(session_id: str, *, limit: int = 200) -> list[dict]:
+    """Load the most recent tool calls for a session.
+
+    Returned in chronological order.
+    """
+
+    session = await get_session()
+    try:
+        stmt = (
+            select(ChatToolCallRecord)
+            .where(ChatToolCallRecord.session_id == session_id)
+            .order_by(ChatToolCallRecord.id.desc())
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        rows = list(result.scalars().all())
+        rows.reverse()
+        return [
+            {
+                "id": r.id,
+                "tool_call_id": r.tool_call_id,
+                "tool": r.tool_name,
+                "args": r.tool_args,
+                "result": r.tool_result,
+                "status": r.status,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ]
+    finally:
+        await session.close()
+
+
 async def append_tool_call(
     session_id: str,
     *,
