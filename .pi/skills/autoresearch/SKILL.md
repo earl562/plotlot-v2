@@ -45,7 +45,27 @@ node .pi/skills/autoresearch/scripts/download_arxiv_papers.mjs \
   --concurrency 2
 ```
 
-Outputs:
+Outputs (gitignored):
 - `docs/research/_cache/arxiv/<id>.pdf`
 - `docs/research/_cache/arxiv/<id>.txt`
 - `docs/research/_cache/arxiv/index.json`
+
+## Helper: fetch titles/abstracts/metadata (fast, no PDFs)
+
+Preferred (arXiv export API):
+
+```bash
+node .pi/skills/autoresearch/scripts/fetch_arxiv_metadata.mjs \
+  --input "docs/research/arxiv-urls.txt" \
+  --output "docs/research/arxiv-abstracts.json" \
+  --batch-size 20
+```
+
+Alternate (Jina abs-page extraction; may rate limit):
+
+```bash
+node .pi/skills/autoresearch/scripts/fetch_arxiv_abstracts.mjs \
+  --input "docs/research/arxiv-urls.txt" \
+  --output "docs/research/arxiv-abstracts.json" \
+  --concurrency 2 --sleep-ms 500
+```
