@@ -27,10 +27,12 @@ function extractUrls(text) {
     .map((u) => u.replace(/[,.;]+$/g, ""))
     .filter((u) => u.includes("arxiv.org"));
 
+  // Normalize arXiv links a bit (strip trailing fragment)
   const norm = urls.map((u) => {
     try {
       const parsed = new URL(u);
       parsed.hash = "";
+      // keep query because some versions include v1
       return parsed.toString();
     } catch {
       return u;
