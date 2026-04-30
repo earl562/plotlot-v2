@@ -8,6 +8,7 @@ Run:
 
 import asyncio
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -554,5 +555,21 @@ async def debug_llm():
 
 
 def run():
-    """Entry point for plotlot-api console script."""
-    uvicorn.run("plotlot.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    """Entry point for plotlot-api console script.
+
+    Environment overrides (useful for local port conflicts + deployments):
+    - PLOTLOT_API_HOST (fallback HOST, default 0.0.0.0)
+    - PLOTLOT_API_PORT (fallback PORT, default 8000)
+    - PLOTLOT_API_RELOAD (default 1)
+    """
+
+    host = os.environ.get("PLOTLOT_API_HOST") or os.environ.get("HOST") or "0.0.0.0"
+    port_raw = os.environ.get("PLOTLOT_API_PORT") or os.environ.get("PORT") or "8000"
+    try:
+        port = int(port_raw)
+    except ValueError as e:
+        raise ValueError(f"Invalid API port: {port_raw!r}") from e
+
+    reload_raw = os.environ.get("PLOTLOT_API_RELOAD", "1")
+    reload = reload_raw not in {"0", "false", "False", "no", "NO"}
+    uvicorn.run("plotlot.api.main:app", host=host, port=port, reload=reload)

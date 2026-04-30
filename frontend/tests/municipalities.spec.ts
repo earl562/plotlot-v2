@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
 /**
  * Municipality Coverage Tests — verify every ingested municipality
  * returns a valid zoning report through the full pipeline.
@@ -116,10 +118,10 @@ const MUNICIPALITY_ADDRESSES: Record<string, { address: string; county: string }
 let ingestedMunicipalities: Set<string> = new Set();
 
 test.beforeAll(async ({ request }) => {
-  const health = await request.get("http://localhost:8000/health");
+  const health = await request.get(`${API_BASE}/health`);
   expect(health.ok()).toBeTruthy();
 
-  const stats = await request.get("http://localhost:8000/api/v1/admin/chunks/stats");
+  const stats = await request.get(`${API_BASE}/api/v1/admin/chunks/stats`);
   const chunks = await stats.json();
   ingestedMunicipalities = new Set(
     chunks.breakdown.map((m: { municipality: string }) => m.municipality),

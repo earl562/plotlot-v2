@@ -95,4 +95,3 @@ async def test_analysis_lifecycle_create_and_run(client):
         fetched_run = resp.json()
         assert fetched_run["id"] == run_id
         assert fetched_run["analysis_id"] == analysis_id
-

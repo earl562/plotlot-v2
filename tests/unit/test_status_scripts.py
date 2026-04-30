@@ -455,4 +455,3 @@ def test_healthcheck_prioritizes_chat_smoke_when_only_chat_fails(tmp_path):
     assert payload["chat_smoke"]["status"] == "failed"
     assert payload["portfolio_smoke"]["status"] == "ok"
     assert payload["next_action"] == "Investigate /api/v1/chat failure before continuing product work"
-

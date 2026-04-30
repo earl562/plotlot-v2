@@ -1,6 +1,6 @@
 # Agentic Harness Research Trace
 
-> PRD: `.omx/plans/prd-agentic-land-use-harness.md`  
+> PRD: `.omx/plans/prd-agentic-land-use-harness.md`
 > Architecture: `docs/architecture/agentic-land-use-harness.md`
 
 Purpose: make the research-to-design mapping explicit so the PRD does not merely assert “we incorporated arXiv/agent research.”

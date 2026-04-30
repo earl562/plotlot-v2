@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
 // ---------------------------------------------------------------------------
 // Helper: run analysis for a given address and wait for report
 // ---------------------------------------------------------------------------
@@ -37,16 +39,14 @@ async function analyzeAddress(
 // Pre-flight: verify backend + data before running UAT
 // ---------------------------------------------------------------------------
 test.beforeAll(async ({ request }) => {
-  const health = await request.get("http://localhost:8000/health");
+  const health = await request.get(`${API_BASE}/health`);
   expect(health.ok()).toBeTruthy();
   const body = await health.json();
   expect(body.status).toBe("healthy");
   expect(body.checks.database).toBe("ok");
 
   // Verify we have data for all test municipalities
-  const stats = await request.get(
-    "http://localhost:8000/api/v1/admin/chunks/stats",
-  );
+  const stats = await request.get(`${API_BASE}/api/v1/admin/chunks/stats`);
   const chunks = await stats.json();
   const municipalities = chunks.breakdown.map(
     (m: { municipality: string }) => m.municipality,

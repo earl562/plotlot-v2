@@ -198,7 +198,7 @@ plotlot/frontend/
 
 | Variable | Purpose |
 |----------|---------|
-| `NEXT_PUBLIC_API_URL` | Backend base URL (localhost:8000 dev / Render prod) |
+| `NEXT_PUBLIC_API_URL` | Backend base URL (default http://localhost:8000; override as needed, e.g. http://127.0.0.1:8001) |
 | `NEXT_PUBLIC_APP_URL` | App URL for Stripe callbacks |
 | `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Google Maps + Places API |
 | `STRIPE_SECRET_KEY` | Stripe checkout session creation |
