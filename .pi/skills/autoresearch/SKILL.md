@@ -18,10 +18,34 @@ Repo-owned research workflow inspired by open-source "autoresearch".
 - `docs/research/arxiv-urls.txt` (deduped URL list)
 - `docs/research/autoresearch/<slug>.md` (summaries)
 
-## Helper: extract arXiv URLs from Obsidian note
+## Helper: extract arXiv URLs
+
+From a single Obsidian note:
 
 ```bash
 node .pi/skills/autoresearch/scripts/extract_arxiv_urls.mjs \
   --input "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md" \
   --output "docs/research/arxiv-urls.txt"
 ```
+
+From an entire Obsidian vault directory:
+
+```bash
+node .pi/skills/autoresearch/scripts/extract_arxiv_urls_from_dir.mjs \
+  --root "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes" \
+  --output "docs/research/arxiv-urls.txt"
+```
+
+## Helper: download PDFs + extract text
+
+```bash
+node .pi/skills/autoresearch/scripts/download_arxiv_papers.mjs \
+  --input "docs/research/arxiv-urls.txt" \
+  --out-dir "docs/research/_cache/arxiv" \
+  --concurrency 2
+```
+
+Outputs:
+- `docs/research/_cache/arxiv/<id>.pdf`
+- `docs/research/_cache/arxiv/<id>.txt`
+- `docs/research/_cache/arxiv/index.json`

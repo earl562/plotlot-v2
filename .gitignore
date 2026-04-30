@@ -58,5 +58,8 @@ plotlot/tests/screenshots/
 /*.webm
 /*.zip
 
+# Research caches (downloaded PDFs, extracted text)
+docs/research/_cache/
+
 # Python typing cache
 .mypy_cache/
