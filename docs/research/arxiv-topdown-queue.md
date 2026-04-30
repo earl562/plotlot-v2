@@ -3,8 +3,8 @@
 Generated from: `arxiv-abstracts.json`
 Total papers: **100**
 Duplicates dropped: **3**
-Reviewed: **22**
-Remaining: **78**
+Reviewed: **23**
+Remaining: **77**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -20,7 +20,6 @@ Priority tiers:
 - **P0** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _stub_
 - **P0** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _stub_
 - **P0** (25) [2602.19672v1](https://arxiv.org/abs/2602.19672v1) — SkillOrchestra: Learning to Route Agents via Skill Transfer  — [note](docs/research/arxiv-notes/2602.19672v1.md) — _stub_
-- **P0** (25) [2604.11378v1](https://arxiv.org/abs/2604.11378v1) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution  — [note](docs/research/arxiv-notes/2604.11378v1.md) — _stub_
 - **P0** (22) [2604.13151v1](https://arxiv.org/abs/2604.13151v1) — Exploration and Exploitation Errors Are Measurable for Language Model Agents  — [note](docs/research/arxiv-notes/2604.13151v1.md) — _stub_
 - **P0** (21) [2604.13018v1](https://arxiv.org/abs/2604.13018v1) — Toward Autonomous Long-Horizon Engineering for ML Research  — [note](docs/research/arxiv-notes/2604.13018v1.md) — _stub_
 - **P0** (20) [2604.20779v1](https://arxiv.org/abs/2604.20779v1) — SWE-chat: Coding Agent Interactions From Real Users in the Wild  — [note](docs/research/arxiv-notes/2604.20779v1.md) — _stub_
@@ -75,6 +74,7 @@ Priority tiers:
 - **P2** (19) [2602.11304v1](https://arxiv.org/abs/2602.11304v1) — CryptoAnalystBench: Failures in Multi-Tool Long-Form LLM Analysis  — [note](docs/research/arxiv-notes/2602.11304v1.md) — _stub_
 - **P2** (19) [2603.20075v1](https://arxiv.org/abs/2603.20075v1) — Agentic Harness for Real-World Compilers  — [note](docs/research/arxiv-notes/2603.20075v1.md) — _stub_
 - **P2** (19) [2603.26996v1](https://arxiv.org/abs/2603.26996v1) — FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?  — [note](docs/research/arxiv-notes/2603.26996v1.md) — _stub_
+- **P2** (16) [2602.14878v2](https://arxiv.org/abs/2602.14878v2) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions  — [note](docs/research/arxiv-notes/2602.14878v2.md) — _stub_
 
 ## Already reviewed
 
@@ -96,6 +96,7 @@ Priority tiers:
 - **✅** (37) [2603.29199v1](https://arxiv.org/abs/2603.29199v1) — AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction  — [note](docs/research/arxiv-notes/2603.29199v1.md) — _reviewed_
 - **✅** (39) [2604.07833v2](https://arxiv.org/abs/2604.07833v2) — Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution  — [note](docs/research/arxiv-notes/2604.07833v2.md) — _reviewed_
 - **✅** (60) [2604.08224v1](https://arxiv.org/abs/2604.08224v1) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering  — [note](docs/research/arxiv-notes/2604.08224v1.md) — _reviewed_
+- **✅** (25) [2604.11378v1](https://arxiv.org/abs/2604.11378v1) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution  — [note](docs/research/arxiv-notes/2604.11378v1.md) — _reviewed_
 - **✅** (27) [2604.11548v1](https://arxiv.org/abs/2604.11548v1) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering  — [note](docs/research/arxiv-notes/2604.11548v1.md) — _reviewed_
 - **✅** (24) [2604.13630v1](https://arxiv.org/abs/2604.13630v1) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment  — [note](docs/research/arxiv-notes/2604.13630v1.md) — _reviewed_
 - **✅** (51) [2604.14228v1](https://arxiv.org/abs/2604.14228v1) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems  — [note](docs/research/arxiv-notes/2604.14228v1.md) — _reviewed_
