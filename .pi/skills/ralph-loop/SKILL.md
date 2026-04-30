@@ -46,7 +46,13 @@ Do **not** ask “Continue?” — the harness will decide whether to enqueue an
 
 Choose the narrowest verification that matches what you changed:
 
-- Backend / Python:
+- Backend / Python (default fast lane):
+
+```bash
+cd plotlot && make lint && uv run pytest tests/unit/ -v
+```
+
+- Backend / Python (full suite; includes live/integration/eval — use intentionally):
 
 ```bash
 cd plotlot && make test
