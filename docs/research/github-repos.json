@@ -1,0 +1,268 @@
+{
+  "extractedAt": "2026-04-30T19:30:18.012Z",
+  "count": 35,
+  "repos": [
+    {
+      "repo": "aaif-goose/goose",
+      "url": "https://github.com/aaif-goose/goose",
+      "urls": [
+        "http://github.com/aaif-goose/goose#start-of-content",
+        "https://github.com/aaif-goose/goose"
+      ]
+    },
+    {
+      "repo": "aiming-lab/WebXSkill",
+      "url": "https://github.com/aiming-lab/WebXSkill",
+      "urls": [
+        "https://github.com/aiming-lab/WebXSkill"
+      ]
+    },
+    {
+      "repo": "alexzhang13/rlm",
+      "url": "https://github.com/alexzhang13/rlm",
+      "urls": [
+        "https://github.com/alexzhang13/rlm"
+      ]
+    },
+    {
+      "repo": "AltimateAI/altimate-code",
+      "url": "https://github.com/AltimateAI/altimate-code",
+      "urls": [
+        "https://github.com/AltimateAI/altimate-code"
+      ]
+    },
+    {
+      "repo": "amazon-science/sop-bench",
+      "url": "https://github.com/amazon-science/sop-bench",
+      "urls": [
+        "https://github.com/amazon-science/sop-bench"
+      ]
+    },
+    {
+      "repo": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "urls": [
+        "https://github.com/anthropics/skills"
+      ]
+    },
+    {
+      "repo": "borislavmavrin/harmonyagent",
+      "url": "https://github.com/borislavmavrin/harmonyagent",
+      "urls": [
+        "https://github.com/borislavmavrin/harmonyagent.git"
+      ]
+    },
+    {
+      "repo": "bytedance/deer-flow",
+      "url": "https://github.com/bytedance/deer-flow",
+      "urls": [
+        "http://github.com/bytedance/deer-flow#-deerflow---20",
+        "http://github.com/bytedance/deer-flow#official-website",
+        "https://github.com/bytedance/deer-flow",
+        "https://github.com/bytedance/deer-flow/blob/main/LICENSE",
+        "https://github.com/bytedance/deer-flow/blob/main/Makefile",
+        "https://github.com/bytedance/deer-flow/blob/main/README_fr.md",
+        "https://github.com/bytedance/deer-flow/blob/main/README_ja.md",
+        "https://github.com/bytedance/deer-flow/blob/main/README_ru.md",
+        "https://github.com/bytedance/deer-flow/blob/main/README_zh.md",
+        "https://github.com/bytedance/deer-flow/blob/main/backend/pyproject.toml",
+        "https://github.com/bytedance/deer-flow/tree/main-1.x"
+      ]
+    },
+    {
+      "repo": "bytedance/UI-TARS-desktop",
+      "url": "https://github.com/bytedance/UI-TARS-desktop",
+      "urls": [
+        "http://github.com/bytedance/UI-TARS-desktop#start-of-content",
+        "https://github.com/bytedance/UI-TARS-desktop"
+      ]
+    },
+    {
+      "repo": "chelof100/acp-framework-en",
+      "url": "https://github.com/chelof100/acp-framework-en",
+      "urls": [
+        "https://github.com/chelof100/acp-framework-en"
+      ]
+    },
+    {
+      "repo": "ChenglinPoly/infiAgent",
+      "url": "https://github.com/ChenglinPoly/infiAgent",
+      "urls": [
+        "https://github.com/ChenglinPoly/infiAgent"
+      ]
+    },
+    {
+      "repo": "CodingThrust/problem-reductions",
+      "url": "https://github.com/CodingThrust/problem-reductions",
+      "urls": [
+        "https://github.com/CodingThrust/problem-reductions"
+      ]
+    },
+    {
+      "repo": "containers/libkrun",
+      "url": "https://github.com/containers/libkrun",
+      "urls": [
+        "https://github.com/containers/libkrun?tab=readme-ov-file"
+      ]
+    },
+    {
+      "repo": "douyipu/ajar",
+      "url": "https://github.com/douyipu/ajar",
+      "urls": [
+        "https://github.com/douyipu/ajar"
+      ]
+    },
+    {
+      "repo": "dtcxzyw/llvm-autofix",
+      "url": "https://github.com/dtcxzyw/llvm-autofix",
+      "urls": [
+        "https://github.com/dtcxzyw/llvm-autofix"
+      ]
+    },
+    {
+      "repo": "DVampire/Autogenesis",
+      "url": "https://github.com/DVampire/Autogenesis",
+      "urls": [
+        "https://github.com/DVampire/Autogenesis"
+      ]
+    },
+    {
+      "repo": "emcie-co/parlant",
+      "url": "https://github.com/emcie-co/parlant",
+      "urls": [
+        "https://github.com/emcie-co/parlant"
+      ]
+    },
+    {
+      "repo": "HKUDS/OpenHarness",
+      "url": "https://github.com/HKUDS/OpenHarness",
+      "urls": [
+        "https://github.com/HKUDS/OpenHarness"
+      ]
+    },
+    {
+      "repo": "jayluxferro/llm-redactor",
+      "url": "https://github.com/jayluxferro/llm-redactor",
+      "urls": [
+        "https://github.com/jayluxferro/llm-redactor"
+      ]
+    },
+    {
+      "repo": "jiayuww/SkillOrchestra",
+      "url": "https://github.com/jiayuww/SkillOrchestra",
+      "urls": [
+        "https://github.com/jiayuww/SkillOrchestra"
+      ]
+    },
+    {
+      "repo": "keli-wen/agentic-harness-patterns-skill",
+      "url": "https://github.com/keli-wen/agentic-harness-patterns-skill",
+      "urls": [
+        "https://github.com/keli-wen/agentic-harness-patterns-skill"
+      ]
+    },
+    {
+      "repo": "langchain-ai/deepagents",
+      "url": "https://github.com/langchain-ai/deepagents",
+      "urls": [
+        "https://github.com/langchain-ai/deepagents"
+      ]
+    },
+    {
+      "repo": "letta-ai/letta",
+      "url": "https://github.com/letta-ai/letta",
+      "urls": [
+        "https://github.com/letta-ai/letta"
+      ]
+    },
+    {
+      "repo": "lobehub/lobehub",
+      "url": "https://github.com/lobehub/lobehub",
+      "urls": [
+        "http://github.com/lobehub/lobehub#start-of-content",
+        "https://github.com/lobehub/lobehub"
+      ]
+    },
+    {
+      "repo": "math-ai-org/mathcode",
+      "url": "https://github.com/math-ai-org/mathcode",
+      "urls": [
+        "https://github.com/math-ai-org/mathcode"
+      ]
+    },
+    {
+      "repo": "MemTensor/MemRL",
+      "url": "https://github.com/MemTensor/MemRL",
+      "urls": [
+        "https://github.com/MemTensor/MemRL"
+      ]
+    },
+    {
+      "repo": "mindfold-ai/Trellis",
+      "url": "https://github.com/mindfold-ai/Trellis",
+      "urls": [
+        "http://github.com/mindfold-ai/Trellis#start-of-content",
+        "https://github.com/mindfold-ai/Trellis"
+      ]
+    },
+    {
+      "repo": "nomic-ai/aec-bench",
+      "url": "https://github.com/nomic-ai/aec-bench",
+      "urls": [
+        "https://github.com/nomic-ai/aec-bench"
+      ]
+    },
+    {
+      "repo": "NousResearch/autoreason",
+      "url": "https://github.com/NousResearch/autoreason",
+      "urls": [
+        "http://github.com/NousResearch/autoreason#start-of-content",
+        "https://github.com/NousResearch/autoreason",
+        "https://github.com/NousResearch/autoreason/blob/main/paper/autoreason.pdf"
+      ]
+    },
+    {
+      "repo": "OpenHands/OpenHands",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "urls": [
+        "http://github.com/OpenHands/OpenHands#start-of-content",
+        "https://github.com/OpenHands/OpenHands"
+      ]
+    },
+    {
+      "repo": "scienceaix/agentskills",
+      "url": "https://github.com/scienceaix/agentskills",
+      "urls": [
+        "https://github.com/scienceaix/agentskills"
+      ]
+    },
+    {
+      "repo": "smol-machines/smolvm",
+      "url": "https://github.com/smol-machines/smolvm",
+      "urls": [
+        "https://github.com/smol-machines/smolvm/tree/main"
+      ]
+    },
+    {
+      "repo": "x1xhlol/system-prompts-and-models-of-ai-tools",
+      "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools",
+      "urls": [
+        "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"
+      ]
+    },
+    {
+      "repo": "ynulihao/AgentSkillOS",
+      "url": "https://github.com/ynulihao/AgentSkillOS",
+      "urls": [
+        "https://github.com/ynulihao/AgentSkillOS"
+      ]
+    },
+    {
+      "repo": "YurenHao0426/VARS",
+      "url": "https://github.com/YurenHao0426/VARS",
+      "urls": [
+        "https://github.com/YurenHao0426/VARS"
+      ]
+    }
+  ]
+}
