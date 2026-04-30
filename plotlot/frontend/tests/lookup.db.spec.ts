@@ -27,9 +27,12 @@ test.describe("Canonical db-backed lookup lane", () => {
     await waitForReport(page);
 
     await expect(page.getByTestId("report-root")).toBeVisible();
+    await expect(page.getByTestId("report-zoning-tab")).toBeVisible();
+    await expect(page.getByTestId("report-section-zoning")).toBeVisible();
     await expect(page.getByTestId("report-property-tab")).toBeVisible();
-    await expect(page.getByTestId("report-section-property")).toBeVisible();
 
+    await page.getByTestId("report-property-tab").click();
+    await expect(page.getByTestId("report-section-property")).toBeVisible();
     await page.getByTestId("report-zoning-tab").click();
     await expect(page.getByTestId("report-section-zoning")).toBeVisible();
 

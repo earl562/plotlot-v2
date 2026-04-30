@@ -221,6 +221,76 @@ export interface RuntimeHealthData {
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const STREAM_TIMEOUT_MS = 120_000;
+const FIRST_EVENT_TIMEOUT_MS = 15_000;
+const NETWORK_FAILURE_DETAIL = "Connection failed. The server may be starting up — try again in a moment.";
+const BACKEND_UNAVAILABLE_DETAIL =
+  "Analysis is temporarily unavailable because the data backend is offline. Please try again shortly.";
+const STREAM_TIMEOUT_DETAIL =
+  "Request timed out after 2 minutes. The server may be starting up — try again.";
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+function isStreamStartupTimeout(error: unknown): boolean {
+  return error instanceof Error && error.message === "STREAM_FIRST_EVENT_TIMEOUT";
+}
+
+function isDbBackedAnalysisReady(health: RuntimeHealthData): boolean {
+  const capabilityReady = health.capabilities?.db_backed_analysis_ready;
+  const detailReady = health.capability_details?.db_backed_analysis_ready?.ready;
+
+  if (typeof capabilityReady === "boolean") return capabilityReady;
+  if (typeof detailReady === "boolean") return detailReady;
+  return health.status === "healthy";
+}
+
+function normalizeAnalysisError(detail: string, fallbackType: AnalysisErrorType): AnalysisError {
+  const lowered = detail.toLowerCase();
+
+  if (
+    lowered.includes("backend is offline") ||
+    lowered.includes("temporarily unavailable") ||
+    lowered.includes("database_unavailable")
+  ) {
+    return { detail, errorType: "backend_unavailable" };
+  }
+
+  if (lowered.includes("timed out")) {
+    return { detail, errorType: "timeout" };
+  }
+
+  if (lowered.includes("could not geocode") || lowered.includes("geocoding")) {
+    return { detail, errorType: "geocoding_failed" };
+  }
+
+  return { detail, errorType: fallbackType };
+}
+
+async function recoverFromStreamFailure(
+  options: AnalysisOptions,
+  onResult: (report: ZoningReportData) => void,
+  fallbackDetail: string,
+): Promise<AnalysisError | null> {
+  const health = await fetchRuntimeHealth().catch(() => null);
+
+  if (health && !isDbBackedAnalysisReady(health)) {
+    return {
+      detail: BACKEND_UNAVAILABLE_DETAIL,
+      errorType: "backend_unavailable",
+    };
+  }
+
+  try {
+    const report = await analyzeAddress(options.address);
+    onResult(report);
+    return null;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : fallbackDetail;
+    return normalizeAnalysisError(detail, "network_error");
+  }
+}
 
 export async function fetchRuntimeHealth(): Promise<RuntimeHealthData> {
   const response = await fetch(`${API_BASE}/health`, {
@@ -262,7 +332,7 @@ export async function streamAnalysis(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120_000);
+    const timeoutId = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
 
     try {
       const response = await fetch(`${API_BASE}/api/v1/analyze/stream`, {
@@ -295,9 +365,19 @@ export async function streamAnalysis(
       let buffer = "";
       let eventType = "";
       let eventData = "";
+      let receivedFirstEvent = false;
+      let receivedTerminalEvent = false;
 
       while (true) {
-        const { done, value } = await reader.read();
+        const readResult = receivedFirstEvent
+          ? reader.read()
+          : Promise.race([
+              reader.read(),
+              new Promise<never>((_, reject) => {
+                setTimeout(() => reject(new Error("STREAM_FIRST_EVENT_TIMEOUT")), FIRST_EVENT_TIMEOUT_MS);
+              }),
+            ]);
+        const { done, value } = await readResult;
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
@@ -312,15 +392,18 @@ export async function streamAnalysis(
           } else if (line === "" && eventType && eventData) {
             try {
               const parsed = JSON.parse(eventData);
+              receivedFirstEvent = true;
               if (eventType === "status") {
                 onStatus(parsed as PipelineStatus);
               } else if (eventType === "result") {
+                receivedTerminalEvent = true;
                 onResult(parsed as ZoningReportData);
               } else if (eventType === "thinking") {
                 onThinking?.(parsed as ThinkingEvent);
               } else if (eventType === "suggestions") {
                 onSuggestions?.(parsed.suggestions || []);
               } else if (eventType === "error") {
+                receivedTerminalEvent = true;
                 onError({
                   detail: parsed.detail || "Unknown error",
                   errorType: (parsed.error_type || "unknown") as AnalysisErrorType,
@@ -334,25 +417,50 @@ export async function streamAnalysis(
           }
         }
       }
+
+      if (!receivedTerminalEvent) {
+        const recoveredError = await recoverFromStreamFailure(
+          options,
+          onResult,
+          receivedFirstEvent
+            ? "The analysis stream ended before a final result was returned."
+            : NETWORK_FAILURE_DETAIL,
+        );
+        if (recoveredError) {
+          onError(recoveredError);
+        }
+      }
+
       return; // Success — exit retry loop
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
+      if (isAbortError(err)) {
         onError({
-          detail: "Request timed out after 2 minutes. The server may be starting up \u2014 try again.",
+          detail: STREAM_TIMEOUT_DETAIL,
           errorType: "timeout",
         });
         return;
       }
+
+      if (isStreamStartupTimeout(err)) {
+        const recoveredError = await recoverFromStreamFailure(options, onResult, NETWORK_FAILURE_DETAIL);
+        if (recoveredError) {
+          onError(recoveredError);
+        }
+        return;
+      }
+
       // Network error — retry if we have attempts left
       if (attempt < maxRetries) {
         onRetry?.(attempt + 1);
         await new Promise((r) => setTimeout(r, 2000));
         continue;
       }
-      onError({
-        detail: "Connection failed. The server may be starting up \u2014 try again in a moment.",
-        errorType: "network_error",
-      });
+
+      const recoveredError = await recoverFromStreamFailure(options, onResult, NETWORK_FAILURE_DETAIL);
+      if (recoveredError) {
+        onError(recoveredError);
+      }
+      return;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -363,18 +471,31 @@ export async function streamAnalysis(
  * Non-streaming analysis — simple POST, wait for full result.
  */
 export async function analyzeAddress(address: string): Promise<ZoningReportData> {
-  const response = await fetch(`${API_BASE}/api/v1/analyze`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(extractErrorMessage(err, response.status));
+  try {
+    const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: "Request failed" }));
+      throw new Error(extractErrorMessage(err, response.status));
+    }
+
+    return response.json();
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new Error(STREAM_TIMEOUT_DETAIL);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json();
 }
 
 // ---------------------------------------------------------------------------
@@ -407,6 +528,7 @@ export async function streamChat(
   onSession?: (sessionId: string) => void,
   onToolUse?: (event: ToolUseEvent) => void,
   onToolResult?: (tool: string) => void,
+  onThinking?: (event: ThinkingEvent) => void,
 ): Promise<void> {
   const response = await fetch(`${API_BASE}/api/v1/chat`, {
     method: "POST",
@@ -456,6 +578,8 @@ export async function streamChat(
             onSession?.(parsed.session_id);
           } else if (eventType === "token") {
             onToken(parsed.content);
+          } else if (eventType === "thinking") {
+            onThinking?.(parsed as ThinkingEvent);
           } else if (eventType === "tool_use") {
             onToolUse?.(parsed as ToolUseEvent);
           } else if (eventType === "tool_result") {

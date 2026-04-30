@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { ZoningReportData } from "@/lib/api";
+import { openStreetMapStaticUrl, openStreetMapUrl } from "@/lib/mapAlternatives";
 
 const ArcGISParcelMap = dynamic(() => import("./ArcGISParcelMap"), {
   ssr: false,
@@ -175,11 +176,35 @@ function TabBar({ activeTab, onTabChange }: { activeTab: ViewTab; onTabChange: (
 function StreetViewTab({ report }: { report: ZoningReportData }) {
   const [imgError, setImgError] = useState(false);
   const googleMapsUrl = `https://www.google.com/maps/@${report.lat},${report.lng},3a,75y,0h,90t/data=!3m1!1e1`;
+  const osmUrl = openStreetMapUrl(report.lat!, report.lng!, 18);
 
   if (!MAPS_KEY || imgError) {
+    if (!imgError) {
+      const staticOsm = openStreetMapStaticUrl(report.lat!, report.lng!, 18);
+      return (
+        <a
+          href={osmUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group relative block h-full min-h-[220px] overflow-hidden rounded-b-xl lg:rounded-bl-none lg:rounded-r-xl"
+        >
+          <img
+            src={staticOsm}
+            alt={`Map view of ${report.formatted_address}`}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            onError={() => setImgError(true)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[var(--bg-surface)]/90 px-3 py-1.5 backdrop-blur-sm">
+            <span className="text-xs text-[var(--text-muted)]">OpenStreetMap preview</span>
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Open full view</span>
+          </div>
+        </a>
+      );
+    }
+
     return (
       <a
-        href={googleMapsUrl}
+        href={osmUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex h-full min-h-[220px] items-center justify-center rounded-b-xl bg-[var(--bg-surface-raised)] transition-colors hover:bg-[var(--bg-surface-raised)]/80 lg:rounded-bl-none lg:rounded-r-xl"
@@ -188,7 +213,7 @@ function StreetViewTab({ report }: { report: ZoningReportData }) {
           <svg className="mx-auto h-8 w-8 text-[var(--text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
-          <p className="mt-2 text-xs text-[var(--text-muted)]">View on Google Maps ↗</p>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">Open on OpenStreetMap ↗</p>
         </div>
       </a>
     );

@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     geocodio_api_key: str = ""
     hf_token: str = ""
     nvidia_api_key: str = ""
+    nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
+    nvidia_model: str = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+    nvidia_fallback_model: str = "minimaxai/minimax-m2.5"
     anthropic_api_key: str = ""
     google_api_key: str = ""
     openai_api_key: str = ""
@@ -103,14 +106,14 @@ class Settings(BaseSettings):
     openai_oauth_redirect_uri: str = DEFAULT_REDIRECT_URI
     openai_oauth_scope: str = "openid offline_access"
 
-    # OpenRouter (OpenAI-compatible) — optional fallback provider
-    openrouter_api_key: str = ""
-    openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    # If unset, PlotLot will derive a default from OPENAI_MODEL (e.g. openai/gpt-4.1)
-    openrouter_model: str = ""
-    # Optional attribution headers (recommended by OpenRouter)
-    openrouter_http_referer: str = ""
-    openrouter_app_title: str = ""
+    # Groq (OpenAI-compatible) — preferred non-mainline fallback provider
+    groq_enabled_non_mainline: bool = Field(
+        default=False,
+        validation_alias="PLOTLOT_GROQ_ENABLED_NON_MAINLINE",
+    )
+    groq_api_key: str = ""
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    groq_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
     # Jina.ai search
     jina_api_key: str = ""
@@ -125,6 +128,9 @@ class Settings(BaseSettings):
             "geocodio_api_key",
             "hf_token",
             "nvidia_api_key",
+            "nvidia_base_url",
+            "nvidia_model",
+            "nvidia_fallback_model",
             "anthropic_api_key",
             "google_api_key",
             "openai_api_key",
@@ -136,11 +142,9 @@ class Settings(BaseSettings):
             "openai_base_url",
             "openai_organization",
             "openai_project",
-            "openrouter_api_key",
-            "openrouter_base_url",
-            "openrouter_model",
-            "openrouter_http_referer",
-            "openrouter_app_title",
+            "groq_api_key",
+            "groq_base_url",
+            "groq_model",
             "codex_auth_file",
             "openai_oauth_client_id",
             "openai_oauth_authorize_url",
@@ -204,9 +208,13 @@ class Settings(BaseSettings):
     cors_origins: list[str] = [
         "https://mlopprojects.vercel.app",
         "http://localhost:3000",
+        "http://127.0.0.1:3000",
         "http://localhost:3001",
+        "http://127.0.0.1:3001",
         "http://localhost:3002",
+        "http://127.0.0.1:3002",
         "http://localhost:3003",
+        "http://127.0.0.1:3003",
         "https://plotlot-api-production.up.railway.app",
     ]
 

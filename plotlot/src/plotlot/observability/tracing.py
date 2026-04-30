@@ -20,6 +20,7 @@ Usage (replaces `import mlflow` in all modules):
 import functools
 import logging
 import socket
+import sys
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
@@ -71,11 +72,23 @@ def trace(name: str | None = None, **kwargs):
 @contextmanager
 def start_span(name: str = "span", **kwargs):
     """Context manager: MLflow span if available, otherwise no-op."""
-    if _HAS_MLFLOW:
-        with _mlflow.start_span(name=name, **kwargs) as span:
-            yield span
-    else:
+    if not _HAS_MLFLOW:
         yield _NoOpSpan()
+        return
+
+    span_cm = None
+    try:
+        span_cm = _mlflow.start_span(name=name, **kwargs)
+        span = span_cm.__enter__()
+    except Exception as exc:
+        logger.debug("MLflow start_span unavailable — continuing without span: %s", exc)
+        yield _NoOpSpan()
+        return
+
+    try:
+        yield span
+    finally:
+        span_cm.__exit__(*sys.exc_info())
 
 
 @contextmanager
@@ -87,7 +100,12 @@ def start_run(**kwargs):
     blocks all subsequent requests when a previous run leaked (e.g., the
     streaming endpoint crashed mid-analysis).
     """
-    if _HAS_MLFLOW:
+    if not _HAS_MLFLOW:
+        yield None
+        return
+
+    run_cm = None
+    try:
         active = _mlflow.active_run()
         if active:
             logger.warning(
@@ -95,10 +113,17 @@ def start_run(**kwargs):
                 active.info.run_id,
             )
             _mlflow.end_run()
-        with _mlflow.start_run(**kwargs) as run:
-            yield run
-    else:
+        run_cm = _mlflow.start_run(**kwargs)
+        run = run_cm.__enter__()
+    except Exception as exc:
+        logger.warning("MLflow start_run unavailable — continuing without run: %s", exc)
         yield None
+        return
+
+    try:
+        yield run
+    finally:
+        run_cm.__exit__(*sys.exc_info())
 
 
 # ---------------------------------------------------------------------------

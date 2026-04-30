@@ -6,6 +6,53 @@ async function gotoWelcome(page: Page) {
   await expect(page.getByText("PlotLot", { exact: true }).first()).toBeVisible();
 }
 
+async function stubAnalyzeStream(page: Page) {
+  const body = `event: status\ndata: ${JSON.stringify({ step: "geocoding", message: "Resolving address...", complete: false })}\n\n`;
+
+  await page.evaluate((streamBody) => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
+      if (url.includes("/api/v1/analyze/stream")) {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(streamBody));
+          },
+        });
+        return Promise.resolve(
+          new Response(stream, {
+            status: 200,
+            headers: { "content-type": "text/event-stream" },
+          }),
+        );
+      }
+      return originalFetch(input, init);
+    }) as typeof window.fetch;
+  }, body);
+
+  await page.route("**/api/v1/analyze/stream", async (route) => {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "content-type",
+    };
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({
+        status: 204,
+        headers: corsHeaders,
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: "text/event-stream",
+      headers: corsHeaders,
+      body,
+    });
+  });
+}
+
 async function expectCompactHero(heading: Locator) {
   await expect(heading).toBeVisible();
 
@@ -45,20 +92,18 @@ test.describe("PlotLot design system", () => {
   test("lookup welcome screen matches the current editorial hero contract", async ({ page }, testInfo) => {
     await gotoWelcome(page);
 
-    await expect(page.getByText("Beta", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("5 states", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Toggle dark mode" })).toBeVisible();
-    await expect(page.getByText("PlotLot is running in degraded local mode.")).toBeVisible();
+    await expect(page.getByText("Hi there", { exact: true })).toBeVisible();
 
     const heading = page.getByRole("heading", { name: "Analyze any property in the US" });
     await expectCompactHero(heading);
-    await expect(page.getByText("Zoning, density, comps, pro forma, and development potential")).toBeVisible();
+    await expect(page.getByText(/Zoning, density, comps, pro forma, and development potential/)).toBeVisible();
 
     const input = page.getByPlaceholder("Enter a property address...");
     await expect(input).toBeVisible();
     await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled();
 
-    for (const chip of ["Houston, TX", "Atlanta, GA", "Miami Gardens, FL"]) {
+    for (const chip of ["Miramar, FL", "Miami Gardens, FL", "Boca Raton, FL"]) {
       await expect(page.getByRole("button", { name: chip })).toBeVisible();
     }
 
@@ -111,26 +156,18 @@ test.describe("PlotLot design system", () => {
     await expect(html).toHaveClass(/dark/);
   });
 
-  test("lookup address submission reveals the four-card deal gate before any backend analysis", async ({ page }) => {
+  test("lookup address submission starts analysis directly without a deal gate", async ({ page }) => {
     await gotoWelcome(page);
+
+    await stubAnalyzeStream(page);
 
     await page.getByPlaceholder("Enter a property address...").fill("18901 NW 27th Ave, Miami Gardens, FL 33056");
     await page.getByRole("button", { name: "Send message" }).click();
 
-    await expect(page.getByTestId("deal-type-selector")).toBeVisible();
-    await expect(page.getByText("What type of deal are you evaluating?")).toBeVisible();
-
-    for (const card of [
-      "deal-type-land",
-      "deal-type-wholesale",
-      "deal-type-creative-finance",
-      "deal-type-hybrid",
-    ]) {
-      await expect(page.getByTestId(card)).toBeVisible();
-    }
-
-    await expect(page.getByRole("button", { name: /Land Deal:/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Wholesale:/ })).toBeVisible();
+    await expect(page.getByTestId("deal-type-selector")).toHaveCount(0);
+    await expect(page.getByText("What type of deal are you evaluating?")).toHaveCount(0);
+    await expect(page.getByTestId("pipeline-stepper")).toBeVisible();
+    await expect(page.getByTestId("pipeline-step-geocoding")).toBeVisible();
   });
 
   test("lookup mode rejects non-address prompts instead of drifting into chat", async ({ page }) => {

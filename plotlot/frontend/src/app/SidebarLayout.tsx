@@ -84,7 +84,6 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,var(--hero-glow),transparent_58%)] opacity-80" />
         {/* Mobile top bar */}
         <div
           className="relative z-10 flex items-center border-b border-[var(--border-soft)] bg-[var(--bg-surface)]/90 px-3 py-3 backdrop-blur-xl lg:hidden"

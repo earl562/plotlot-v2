@@ -12,6 +12,7 @@ Uses SSE streaming for real-time token delivery + tool status events.
 
 import json
 import logging
+import re
 import time
 import uuid
 from datetime import datetime, timezone
@@ -19,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 from plotlot.api.schemas import ChatRequest
@@ -35,14 +36,134 @@ from plotlot.retrieval.bulk_search import (
 from plotlot.retrieval.google_workspace import create_document, create_spreadsheet
 from plotlot.retrieval.llm import call_llm
 from plotlot.retrieval.search import hybrid_search
-from plotlot.storage.db import get_session
 from plotlot.observability.prompts import get_active_prompt
 from plotlot.observability.tracing import start_span
 from plotlot.oauth.openai_auth import has_saved_tokens
+from plotlot.storage.db import get_session
+from plotlot.storage.models import ApprovalRequest, ToolRun, Workspace
+from plotlot.land_use import ToolContext
+from plotlot.land_use.policy import ToolPolicy
+from plotlot.harness.policy import HarnessPolicyEngine
+from plotlot.harness.tool_registry import get_tool_contract
+from plotlot.harness.default_runtime import get_default_runtime
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["chat"])
+
+
+def _actor_user_id(http_request: Request | None) -> str:
+    user = getattr(http_request.state, "user", None) if http_request is not None else None
+    if isinstance(user, dict) and user.get("user_id"):
+        return str(user["user_id"])
+    return "anonymous"
+
+
+def _expected_approval_id(*, tool_name: str, run_id: str) -> str:
+    """Match ToolPolicy's deterministic approval ID format."""
+
+    safe_tool = tool_name.replace(".", "_")
+    return f"apr_{run_id}_{safe_tool}"
+
+
+async def _persist_pending_approval(
+    *,
+    approval_id: str,
+    context: ToolContext,
+    tool_name: str,
+    risk_class: str,
+    args: dict,
+    reason: str,
+) -> None:
+    """Best-effort persistence for approvals and tool-run audit.
+
+    If persistence fails, we still fail closed (no external write happens).
+    """
+
+    session = await get_session()
+    try:
+        workspace = await session.get(Workspace, context.workspace_id)
+        if workspace is None:
+            session.add(
+                Workspace(
+                    id=context.workspace_id,
+                    name="Default Workspace",
+                    owner_user_id=context.actor_user_id if context.actor_user_id != "anonymous" else None,
+                )
+            )
+            await session.flush()
+        tool_run = ToolRun(
+            workspace_id=context.workspace_id,
+            project_id=context.project_id,
+            site_id=context.site_id,
+            analysis_id=context.analysis_id,
+            analysis_run_id=None,
+            tool_name=tool_name,
+            risk_class=risk_class,
+            status="pending_approval",
+            input_json=args,
+            output_json={},
+        )
+        session.add(tool_run)
+        await session.flush()
+        approval = ApprovalRequest(
+            id=approval_id,
+            workspace_id=context.workspace_id,
+            project_id=context.project_id,
+            analysis_run_id=None,
+            tool_run_id=tool_run.id,
+            status="pending",
+            risk_class=risk_class,
+            action_name=tool_name,
+            reason=reason,
+            request_json={"tool": tool_name, "args": args, "run_id": context.run_id},
+            response_json={},
+            requested_by=context.actor_user_id,
+        )
+        session.add(approval)
+        await session.commit()
+    except Exception:
+        try:
+            await session.rollback()
+        except Exception:
+            logger.warning("Approval persistence rollback failed", exc_info=True)
+        logger.warning("Approval persistence failed", exc_info=True)
+    finally:
+        await session.close()
+
+
+async def _validated_approved_ids(
+    *,
+    approval_ids: set[str],
+    workspace_id: str,
+) -> set[str]:
+    """Return the subset of approval IDs that are actually approved in the DB.
+
+    Fail-closed: if the database is unavailable, return an empty set.
+    """
+
+    if not approval_ids:
+        return set()
+
+    session = await get_session()
+    try:
+        now = datetime.now(timezone.utc)
+        approved: set[str] = set()
+        for approval_id in approval_ids:
+            row = await session.get(ApprovalRequest, approval_id)
+            if (
+                row
+                and row.workspace_id == workspace_id
+                and row.status == "approved"
+                and (row.expires_at is None or row.expires_at > now)
+            ):
+                approved.add(approval_id)
+        return approved
+    except Exception:
+        logger.warning("Approval validation failed; failing closed", exc_info=True)
+        return set()
+    finally:
+        await session.close()
 
 # ---------------------------------------------------------------------------
 # Session management — bounded memory store with LRU eviction
@@ -156,10 +277,12 @@ AGENT_SYSTEM_PROMPT = get_active_prompt("chat_agent")
 
 
 def _llm_unavailable_detail() -> str:
+    using_nvidia = bool(settings.nvidia_api_key)
     if not (
         settings.openai_access_token
         or settings.openai_api_key
-        or settings.openrouter_api_key
+        or settings.nvidia_api_key
+        or settings.groq_api_key
         or (
             settings.use_codex_oauth
             and has_saved_tokens(Path(settings.codex_auth_file).expanduser())
@@ -167,7 +290,12 @@ def _llm_unavailable_detail() -> str:
     ):
         return (
             "Chat is temporarily unavailable because no LLM credentials are configured. "
-            "Set OPENAI_API_KEY, OPENAI_ACCESS_TOKEN, OPENROUTER_API_KEY, or enable PLOTLOT_USE_CODEX_OAUTH to enable agent responses."
+            "Set NVIDIA_API_KEY, GROQ_API_KEY, OPENAI_API_KEY, OPENAI_ACCESS_TOKEN, or enable PLOTLOT_USE_CODEX_OAUTH to enable agent responses."
+        )
+    if using_nvidia:
+        return (
+            "Chat is temporarily unavailable because the configured NVIDIA NIM model "
+            "returned no usable response. Verify the model slug or try the fallback model."
         )
     return "Chat is temporarily unavailable because the LLM returned an empty response."
 
@@ -334,6 +462,64 @@ CHAT_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "search_municode_live",
+            "description": (
+                "Live Municode fallback for ordinance lookups when local indexed ordinance "
+                "search returns weak, stale, or irrelevant results. Resolves the municipality's "
+                "Municode authority, searches likely section headings, and returns live section snippets."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "municipality": {
+                        "type": "string",
+                        "description": "Municipality or jurisdiction name (e.g., 'Fort Lauderdale', 'Miramar')",
+                    },
+                    "query": {
+                        "type": "string",
+                        "description": "What regulation to look up live (e.g., 'RS-8 setbacks density height')",
+                    },
+                },
+                "required": ["municipality", "query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "discover_open_data_layers",
+            "description": (
+                "Live ArcGIS/Open Data dataset discovery. Use this when you need to inspect which "
+                "parcel or zoning layers are available for a county at a given location before making "
+                "a zoning/owner-data claim."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "description": "County name (e.g., 'Miami-Dade', 'Broward', 'Palm Beach')",
+                    },
+                    "state": {
+                        "type": "string",
+                        "description": "Two-letter state code (default FL)",
+                    },
+                    "lat": {
+                        "type": "number",
+                        "description": "Latitude for coverage validation",
+                    },
+                    "lng": {
+                        "type": "number",
+                        "description": "Longitude for coverage validation",
+                    },
+                },
+                "required": ["county", "lat", "lng"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "web_search",
             "description": (
                 "LAST RESORT — ONLY use when search_zoning_ordinance returns nothing "
@@ -360,7 +546,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                 "Create a Google Sheets spreadsheet with structured data. "
                 "Use this when the user asks to put data into a spreadsheet, "
                 "export results, or create a table they can share or download. "
-                "Returns a shareable link to the new spreadsheet."
+                "Returns a shareable link to the new spreadsheet. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -382,6 +569,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                         },
                         "description": "Data rows — each row is an array of string values matching the headers",
                     },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
+                    },
                 },
                 "required": ["title", "headers", "rows"],
             },
@@ -395,7 +586,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                 "Create a Google Docs document with text content. "
                 "Use this when the user asks for a written report, summary document, "
                 "analysis writeup, or any formatted text output they can share or download. "
-                "Returns a shareable link to the new document."
+                "Returns a shareable link to the new document. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -407,6 +599,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                     "content": {
                         "type": "string",
                         "description": "Text content for the document. Use newlines for paragraphs.",
+                    },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
                     },
                 },
                 "required": ["title", "content"],
@@ -604,7 +800,8 @@ CHAT_TOOLS: list[dict[str, Any]] = [
             "description": (
                 "Export the current search results to a Google Spreadsheet. "
                 "Automatically formats all records with appropriate headers. "
-                "Use after search_properties or filter_dataset."
+                "Use after search_properties or filter_dataset. "
+                "External writes require explicit approval."
             ),
             "parameters": {
                 "type": "object",
@@ -621,6 +818,10 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                             "owner, land_use_code, lot_size_sqft, year_built, assessed_value, "
                             "last_sale_price, last_sale_date, lat, lng"
                         ),
+                    },
+                    "approval_id": {
+                        "type": "string",
+                        "description": "Approval token for external write (returned as pending_approval)",
                     },
                 },
             },
@@ -639,6 +840,8 @@ CORE_TOOLS = [
         "geocode_address",
         "lookup_property_info",
         "search_zoning_ordinance",
+        "search_municode_live",
+        "discover_open_data_layers",
         "web_search",
         "search_properties",
     }
@@ -990,6 +1193,115 @@ async def _execute_zoning_search(municipality: str, query: str) -> str:
         return json.dumps({"status": "success", "results": chunks})
 
 
+async def _execute_municode_live_search(municipality: str, query: str) -> str:
+    """Search live Municode sections for a municipality using heading-based matching."""
+    from plotlot.ingestion.discovery import get_municode_configs
+    from plotlot.ingestion.scraper import MunicodeScraper
+
+    try:
+        configs = await get_municode_configs()
+        config = configs.get(municipality.lower().replace("-", "_").replace(" ", "_"))
+        if not config:
+            candidates = [cfg for cfg in configs.values() if cfg.municipality.lower() == municipality.lower()]
+            config = candidates[0] if candidates else None
+        if not config:
+            return json.dumps(
+                {
+                    "status": "no_results",
+                    "message": f"No live Municode authority found for {municipality}",
+                }
+            )
+
+        scraper = MunicodeScraper(max_concurrent=3)
+        raw_terms = [term.lower() for term in re.findall(r"[a-z0-9-]+", query) if len(term) >= 3]
+        query_terms: list[str] = []
+        for term in raw_terms:
+            query_terms.append(term)
+            if term.endswith("s") and len(term) > 3:
+                query_terms.append(term[:-1])
+
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            leaves = await scraper.walk_toc(client, config, config.zoning_node_id, max_depth=3)
+            ranked = []
+            for leaf in leaves:
+                haystack = f"{leaf.heading} {leaf.parent_heading or ''}".lower()
+                score = sum(1 for term in query_terms if term in haystack)
+                if score > 0:
+                    ranked.append((score, leaf))
+            ranked.sort(key=lambda item: item[0], reverse=True)
+            top = ranked[:3]
+            if not top:
+                return json.dumps(
+                    {
+                        "status": "no_results",
+                        "message": f"No live Municode sections matched '{query}' for {municipality}",
+                    }
+                )
+
+            results = []
+            for score, leaf in top:
+                html = await scraper.get_section_content(client, config, leaf.node_id)
+                snippet = re.sub(r"<[^>]+>", " ", html)
+                snippet = re.sub(r"\s+", " ", snippet).strip()[:800]
+                results.append(
+                    {
+                        "heading": leaf.heading,
+                        "parent_heading": leaf.parent_heading,
+                        "node_id": leaf.node_id,
+                        "score": score,
+                        "snippet": snippet,
+                    }
+                )
+
+        return json.dumps(
+            {
+                "status": "success",
+                "municipality": config.municipality,
+                "source_type": "municode_live",
+                "results": results,
+            }
+        )
+    except Exception as e:
+        logger.warning("Live Municode search failed for %s: %s", municipality, e)
+        return json.dumps({"status": "error", "message": f"Live Municode search failed: {str(e)}"})
+
+
+async def _execute_open_data_discovery(county: str, state: str, lat: float, lng: float) -> str:
+    """Discover live parcel/zoning datasets via ArcGIS Hub for a county/location."""
+    from plotlot.property.hub_discovery import discover_datasets
+
+    try:
+        parcels_ds, zoning_ds = await discover_datasets(lat, lng, county, state or "FL")
+
+        def _serialize(ds):
+            if not ds:
+                return None
+            return {
+                "dataset_id": ds.dataset_id,
+                "name": ds.name,
+                "url": ds.url,
+                "layer_id": ds.layer_id,
+                "dataset_type": ds.dataset_type,
+                "county": ds.county,
+                "state": ds.state,
+                "field_count": len(ds.fields),
+                "fields_preview": ds.fields[:15],
+            }
+
+        return json.dumps(
+            {
+                "status": "success",
+                "county": county,
+                "state": state or "FL",
+                "parcels_dataset": _serialize(parcels_ds),
+                "zoning_dataset": _serialize(zoning_ds),
+            }
+        )
+    except Exception as e:
+        logger.warning("Open data discovery failed for %s, %s: %s", county, state, e)
+        return json.dumps({"status": "error", "message": f"Open data discovery failed: {str(e)}"})
+
+
 async def _execute_web_search(query: str) -> str:
     """Search the web via Jina.ai Search API."""
     if not settings.jina_api_key:
@@ -1029,8 +1341,21 @@ async def _execute_web_search(query: str) -> str:
         return json.dumps({"status": "error", "message": f"Web search failed: {str(e)}"})
 
 
-async def _execute_create_spreadsheet(title: str, headers: list[str], rows: list[list[str]]) -> str:
+async def _execute_create_spreadsheet(
+    title: str,
+    headers: list[str],
+    rows: list[list[str]],
+    *,
+    approval_id: str | None = None,
+) -> str:
     """Create a Google Sheets spreadsheet with data."""
+    if not approval_id:
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     try:
         result = await create_spreadsheet(title, headers, rows)
         return json.dumps(
@@ -1047,8 +1372,20 @@ async def _execute_create_spreadsheet(title: str, headers: list[str], rows: list
         return json.dumps({"status": "error", "message": f"Failed to create spreadsheet: {str(e)}"})
 
 
-async def _execute_create_document(title: str, content: str) -> str:
+async def _execute_create_document(
+    title: str,
+    content: str,
+    *,
+    approval_id: str | None = None,
+) -> str:
     """Create a Google Docs document with content."""
+    if not approval_id:
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     try:
         result = await create_document(title, content)
         return json.dumps(
@@ -1296,6 +1633,13 @@ async def _execute_get_dataset_info(session_id: str) -> str:
 
 async def _execute_export_dataset(session_id: str, args: dict) -> str:
     """Export the in-session dataset to a Google Spreadsheet."""
+    if not args.get("approval_id"):
+        return json.dumps(
+            {
+                "status": "pending_approval",
+                "message": "External write requires approval",
+            }
+        )
     dataset = _sessions.get_dataset(session_id)
     if not dataset or not dataset.records:
         return json.dumps(
@@ -1341,6 +1685,18 @@ async def _execute_tool(name: str, args: dict, session_id: str = "") -> str:
             args.get("municipality", ""),
             args.get("query", ""),
         )
+    elif name == "search_municode_live":
+        return await _execute_municode_live_search(
+            args.get("municipality", ""),
+            args.get("query", ""),
+        )
+    elif name == "discover_open_data_layers":
+        return await _execute_open_data_discovery(
+            args.get("county", ""),
+            args.get("state", "FL"),
+            args.get("lat", 0.0),
+            args.get("lng", 0.0),
+        )
     elif name == "web_search":
         return await _execute_web_search(args.get("query", ""))
     elif name == "create_spreadsheet":
@@ -1348,11 +1704,13 @@ async def _execute_tool(name: str, args: dict, session_id: str = "") -> str:
             args.get("title", "Untitled"),
             args.get("headers", []),
             args.get("rows", []),
+            approval_id=args.get("approval_id"),
         )
     elif name == "create_document":
         return await _execute_create_document(
             args.get("title", "Untitled"),
             args.get("content", ""),
+            approval_id=args.get("approval_id"),
         )
     elif name == "generate_document":
         return await _execute_generate_document(session_id, args)
@@ -1383,7 +1741,7 @@ def _sse_event(event: str, data: dict) -> str:
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, http_request: Request):
     """Agentic chat with tool use, streaming, and conversation memory."""
 
     # Get or create session for memory
@@ -1506,6 +1864,11 @@ async def chat(request: ChatRequest):
                     tc_id = tc.get("id", "")
 
                     try:
+                        contract = get_tool_contract(fn_name)
+                    except KeyError:
+                        contract = None
+
+                    try:
                         fn_args = json.loads(fn_args_str)
                     except json.JSONDecodeError:
                         fn_args = {}
@@ -1533,16 +1896,121 @@ async def chat(request: ChatRequest):
                         },
                     )
 
-                    # Execute tool
-                    result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                    # Governance: authorize tool call through harness policy
+                    actor_user_id = _actor_user_id(http_request)
+                    claimed_approvals = set(request.approved_approval_ids or [])
+                    validated_approvals = claimed_approvals
+                    if contract and contract.risk_class in {
+                        "write_external",
+                        "execution",
+                        "write_internal",
+                        "expensive_read",
+                    }:
+                        validated_approvals = await _validated_approved_ids(
+                            approval_ids=claimed_approvals,
+                            workspace_id=request.workspace_id,
+                        )
 
-                    yield _sse_event(
-                        "tool_result",
-                        {
-                            "tool": fn_name,
-                            "status": "complete",
-                        },
+                    context = ToolContext(
+                        workspace_id=request.workspace_id,
+                        actor_user_id=actor_user_id,
+                        run_id=session_id,
+                        risk_budget_cents=request.risk_budget_cents,
+                        approved_approval_ids=validated_approvals,
                     )
+                    policy_engine = HarnessPolicyEngine(
+                        policy=ToolPolicy(internal_write_tools=frozenset({"generate_document"}))
+                    )
+                    if contract is None:
+                        decision = policy_engine.authorize(tool_name="gateway.execute", context=context)
+                    else:
+                        decision = policy_engine.authorize(tool_name=fn_name, context=context)
+
+                    if decision.approval_required:
+                        approval_id = decision.approval_id
+                        risk_class = contract.risk_class if contract else "execution"
+                        await _persist_pending_approval(
+                            approval_id=approval_id or "",
+                            context=context,
+                            tool_name=fn_name,
+                            risk_class=risk_class,
+                            args=fn_args,
+                            reason=decision.reason,
+                        )
+                        tool_payload = {
+                            "status": "pending_approval",
+                            "approval_id": approval_id,
+                            "risk_class": risk_class,
+                            "message": decision.reason,
+                        }
+                        result = json.dumps(tool_payload)
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "pending_approval",
+                                "approval_id": approval_id,
+                                "risk_class": risk_class,
+                                "message": decision.reason,
+                            },
+                        )
+                    elif not decision.allowed:
+                        result = json.dumps(
+                            {
+                                "status": "blocked",
+                                "message": decision.reason,
+                            }
+                        )
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "blocked",
+                                "message": decision.reason,
+                            },
+                        )
+                    else:
+                        # Execute tool (allowed)
+                        if contract and contract.risk_class in {
+                            "write_external",
+                            "expensive_read",
+                            "write_internal",
+                        }:
+                            expected = _expected_approval_id(tool_name=fn_name, run_id=session_id)
+                            if expected in context.approved_approval_ids:
+                                fn_args["approval_id"] = expected
+
+                        # Route core tools through the shared harness runtime.
+                        if fn_name in {
+                            "geocode_address",
+                            "lookup_property_info",
+                            "search_zoning_ordinance",
+                            "search_municode_live",
+                            "discover_open_data_layers",
+                            "generate_document",
+                        }:
+                            runtime = get_default_runtime()
+                            tool_result = await runtime.call_tool(
+                                tool_name=fn_name,
+                                tool_args=fn_args,
+                                context=context,
+                                approval_id=fn_args.get("approval_id"),
+                            )
+                            # Preserve chat session behaviors.
+                            if fn_name == "geocode_address" and tool_result.result:
+                                geocode = tool_result.result.get("result")
+                                if isinstance(geocode, dict) and session_id:
+                                    _sessions.set_geocode(session_id, geocode)
+                            result = json.dumps(tool_result.result or {})
+                        else:
+                            result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                        yield _sse_event(
+                            "tool_result",
+                            {
+                                "tool": fn_name,
+                                "status": "complete",
+                            },
+                        )
 
                     messages.append(
                         {

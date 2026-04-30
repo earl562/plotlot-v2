@@ -21,6 +21,42 @@ from plotlot.observability.tracing import start_span, trace
 
 logger = logging.getLogger(__name__)
 
+BROWARD_CITY_CODES: dict[str, str] = {
+    "coconut creek": "CK",
+    "cooper city": "CY",
+    "coral springs": "CS",
+    "dania beach": "DN",
+    "dania": "DN",
+    "davie": "DV",
+    "deerfield beach": "DB",
+    "fort lauderdale": "FL",
+    "hallandale beach": "HA",
+    "hallandale": "HA",
+    "hillsboro beach": "HB",
+    "hollywood": "HW",
+    "lauderdale lakes": "LP",
+    "lauderdale-by-the-sea": "LS",
+    "lauderhill": "LL",
+    "lazy lake": "LZ",
+    "lighthouse point": "LH",
+    "margate": "MG",
+    "miramar": "MM",
+    "north lauderdale": "NL",
+    "oakland park": "OP",
+    "parkland": "PK",
+    "pembroke park": "PI",
+    "pembroke pines": "PB",
+    "plantation": "PL",
+    "pompano beach": "PA",
+    "sea ranch lakes": "SL",
+    "southwest ranches": "SW",
+    "sunrise": "SU",
+    "tamarac": "TM",
+    "west park": "WP",
+    "weston": "WM",
+    "wilton manors": "WS",
+}
+
 # ---------------------------------------------------------------------------
 # Miami-Dade County
 # ---------------------------------------------------------------------------
@@ -96,6 +132,20 @@ def _normalize_address(address: str) -> str:
     # Remove periods
     street = street.replace(".", "")
     return street
+
+
+def _extract_city_hint(address: str) -> str:
+    """Extract the city portion from a free-form address when present."""
+    parts = [part.strip() for part in address.split(",") if part.strip()]
+    if len(parts) < 2:
+        return ""
+    city = parts[1]
+    city = re.sub(r"\bFL(?:ORIDA)?\b.*$", "", city, flags=re.IGNORECASE).strip()
+    return city.lower()
+
+
+def _distance_sq(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    return (lat1 - lat2) ** 2 + (lng1 - lng2) ** 2
 
 
 def _safe_float(val) -> float:
@@ -359,7 +409,12 @@ async def _lookup_broward(
         for suffix in ["BLVD", "AVE", "ST", "DR", "CT", "LN", "PL", "RD", "TER", "WAY", "CIR"]:
             street_name = re.sub(rf"\b{suffix}\b", "", street_name).strip()
 
+        city_hint = _extract_city_hint(address)
+        city_code = BROWARD_CITY_CODES.get(city_hint, city_hint.upper() if len(city_hint) == 2 else "")
+
         where = f"SITUS_STREET_NUMBER='{street_num}' AND SITUS_STREET_NAME LIKE '%{street_name}%'"
+        if city_code:
+            where += f" AND SITUS_CITY='{city_code}'"
 
         features = await _query_arcgis(
             BROWARD_PROPERTY_URL,
@@ -367,9 +422,45 @@ async def _lookup_broward(
             out_fields=BROWARD_PROPERTY_FIELDS,
             limit=None,  # Broward MapServer errors on resultRecordCount without orderBy
         )
+        if not features and city_code:
+            features = await _query_arcgis(
+                BROWARD_PROPERTY_URL,
+                where=f"SITUS_STREET_NUMBER='{street_num}' AND SITUS_STREET_NAME LIKE '%{street_name}%'",
+                out_fields=BROWARD_PROPERTY_FIELDS,
+                limit=None,
+            )
         if not features:
             span.set_outputs({"error": "no_features_found"})
             return None
+
+        if len(features) > 1:
+            def _feature_score(feature: dict) -> float:
+                attrs = feature.get("attributes", {})
+                geom = feature.get("geometry", {})
+                score = 0.0
+
+                situs_city = str(attrs.get("SITUS_CITY") or "").strip().upper()
+                if city_code and situs_city == city_code:
+                    score += 1000
+
+                addr_parts = [
+                    str(attrs.get("SITUS_STREET_NUMBER") or ""),
+                    str(attrs.get("SITUS_STREET_DIRECTION") or ""),
+                    str(attrs.get("SITUS_STREET_NAME") or ""),
+                    str(attrs.get("SITUS_STREET_TYPE") or ""),
+                ]
+                candidate_addr = _normalize_address(" ".join(p for p in addr_parts if p).strip())
+                if candidate_addr == street:
+                    score += 500
+                elif street_name and street_name in candidate_addr:
+                    score += 100
+
+                if lat is not None and lng is not None and geom.get("y") and geom.get("x"):
+                    score -= _distance_sq(lat, lng, geom["y"], geom["x"]) * 1_000_000
+
+                return score
+
+            features = sorted(features, key=_feature_score, reverse=True)
 
         attrs = features[0].get("attributes", {})
 

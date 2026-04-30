@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 from plotlot.core.types import PropertyRecord
 from plotlot.retrieval.property import (
+    BROWARD_CITY_CODES,
+    _extract_city_hint,
     _normalize_address,
     _parse_lot_dimensions,
     _safe_float,
@@ -29,6 +31,17 @@ class TestNormalizeAddress:
 
     def test_removes_periods(self):
         assert _normalize_address("100 N.W. 1st Ave") == "100 NW 1 AVE"
+
+
+class TestBrowardHelpers:
+    def test_extract_city_hint(self):
+        assert _extract_city_hint("1517 NE 5th Ct, Fort Lauderdale, FL 33301") == "fort lauderdale"
+
+    def test_extract_city_hint_missing_city(self):
+        assert _extract_city_hint("1517 NE 5th Ct") == ""
+
+    def test_broward_city_code_map_contains_fort_lauderdale(self):
+        assert BROWARD_CITY_CODES["fort lauderdale"] == "FL"
 
 
 class TestParseLotDimensions:
@@ -214,6 +227,98 @@ class TestLookupProperty:
         assert result.folio == "74434316090000100"
         assert result.lot_size_sqft == pytest.approx(21780.0, rel=0.01)
         assert result.year_built == 1990
+
+    @pytest.mark.asyncio
+    async def test_broward_prefers_city_filtered_match_when_multiple_features(self):
+        property_features = [
+            {
+                "attributes": {
+                    "FOLIO_NUMBER": "504221120010",
+                    "SITUS_STREET_NUMBER": "1517",
+                    "SITUS_STREET_DIRECTION": "SW",
+                    "SITUS_STREET_NAME": "25",
+                    "SITUS_STREET_TYPE": "ST",
+                    "SITUS_CITY": "FL",
+                    "NAME_LINE_1": "WRONG MATCH LLC",
+                    "USE_CODE": "08",
+                    "BLDG_YEAR_BUILT": 1978,
+                    "BLDG_ADJ_SQ_FOOTAGE": 1206.0,
+                    "UNDER_AIR_SQFT": "0",
+                    "JUST_BUILDING_VALUE": 379820,
+                },
+                "geometry": {"x": -80.1619, "y": 26.0920},
+            },
+            {
+                "attributes": {
+                    "FOLIO_NUMBER": "494234120010",
+                    "SITUS_STREET_NUMBER": "1517",
+                    "SITUS_STREET_DIRECTION": "NE",
+                    "SITUS_STREET_NAME": "5",
+                    "SITUS_STREET_TYPE": "CT",
+                    "SITUS_CITY": "FL",
+                    "NAME_LINE_1": "RIGHT MATCH LLC",
+                    "USE_CODE": "01",
+                    "BLDG_YEAR_BUILT": 1954,
+                    "BLDG_ADJ_SQ_FOOTAGE": 1450.0,
+                    "UNDER_AIR_SQFT": "1300",
+                    "JUST_BUILDING_VALUE": 250000,
+                },
+                "geometry": {"x": -80.128145, "y": 26.129402},
+            },
+        ]
+        parcel_features = [
+            {
+                "attributes": {
+                    "FOLIO": "494234120010",
+                    "SHAPE.STArea()": 8000.0,
+                },
+            }
+        ]
+
+        async def mock_arcgis(url, **kwargs):
+            if "MapServer/16" in url:
+                return parcel_features
+            return property_features
+
+        with (
+            patch("plotlot.retrieval.property._query_arcgis", side_effect=mock_arcgis),
+            patch(
+                "plotlot.retrieval.property._spatial_query_zoning",
+                return_value=("RS-8", "Residential Single Family"),
+            ),
+        ):
+            result = await lookup_property(
+                "1517 NE 5th Ct, Fort Lauderdale, FL 33301",
+                county="Broward",
+                lat=26.129402,
+                lng=-80.128145,
+            )
+
+        assert isinstance(result, PropertyRecord)
+        assert result.folio == "494234120010"
+        assert result.address == "1517 NE 5 CT"
+        assert result.owner == "RIGHT MATCH LLC"
+        assert result.zoning_code == "RS-8"
+
+    @pytest.mark.asyncio
+    async def test_broward_lookup_includes_city_code_in_primary_query(self):
+        captured_wheres: list[str] = []
+
+        async def mock_arcgis(url, **kwargs):
+            captured_wheres.append(kwargs["where"])
+            return []
+
+        with patch("plotlot.retrieval.property._query_arcgis", side_effect=mock_arcgis):
+            result = await lookup_property(
+                "1517 NE 5th Ct, Fort Lauderdale, FL 33301",
+                county="Broward",
+                lat=26.129402,
+                lng=-80.128145,
+            )
+
+        assert result is None
+        assert captured_wheres
+        assert "SITUS_CITY='FL'" in captured_wheres[0]
 
     @pytest.mark.asyncio
     async def test_not_found(self):

@@ -1,0 +1,74 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local databases / app runtime
+*.db
+*.sqlite
+*.sqlite3
+mlflow.db
+mlruns/
+logs/
+
+# Data artifacts: keep curated fixtures under data/golden
+/data/*
+!/data/.gitignore
+!/data/golden/
+!/data/golden/**
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/coverage/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/playwright-report/
+frontend/test-results/
+frontend/tests/screenshots/
+
+# OS/editor
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# OMX runtime state (plans/context can be committed when intentionally added)
+.omx/state/
+.omx/logs/
+
+# Generated media and temp artifacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mov
+*.mp4
+
+# Generated mutation-test worktrees/artifacts
+mutants/
+
+# Temporary local Playwright specs
+frontend/tests/temp-*.spec.ts
+
+# OMX local integration hooks
+.omx/tmux-hook.json

@@ -5,7 +5,7 @@ without starting a real server. Pipeline is mocked to avoid real API/DB calls.
 """
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -118,6 +118,44 @@ async def test_api_version_header(client):
 
 
 @pytest.mark.asyncio
+async def test_cors_preflight_allows_loopback_origin(client):
+    """Local dev with 127.0.0.1 frontend must pass CORS preflight."""
+    resp = await client.options(
+        "/api/v1/chat",
+        headers={
+            "Origin": "http://127.0.0.1:3003",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.headers.get("access-control-allow-origin") == "http://127.0.0.1:3003"
+
+
+@pytest.mark.asyncio
+async def test_autocomplete_uses_geocode_fallback_without_geocodio_key(client):
+    """Autocomplete should still return a suggestion when Google/Geocodio are unavailable."""
+    with patch("plotlot.api.main.settings") as mock_settings, patch(
+        "plotlot.api.main.geocode_address",
+        new_callable=AsyncMock,
+        return_value={
+            "formatted_address": "171 NE 209TH TER, MIAMI GARDENS, FL, 33179",
+            "municipality": "Miami Gardens",
+        },
+    ):
+        mock_settings.geocodio_api_key = ""
+        resp = await client.get("/api/v1/autocomplete?q=171 NE 209th Ter Miami Florida 33179")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["suggestions"]) == 1
+    assert data["suggestions"][0]["address"] == "171 NE 209TH TER, MIAMI GARDENS, FL, 33179"
+    assert data["suggestions"][0]["street"] == "171 NE 209TH TER"
+    assert data["suggestions"][0]["city"] == "Miami Gardens"
+    assert data["suggestions"][0]["state"] == "FL"
+    assert data["suggestions"][0]["zip"] == "33179"
+
+
+@pytest.mark.asyncio
 async def test_analyze_success(client):
     """Successful analysis returns full ZoningReport."""
     report = _mock_report()
@@ -188,7 +226,9 @@ async def test_analyze_backend_unavailable_error_is_actionable(client):
 @pytest.mark.asyncio
 async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
     """Streaming analyze should emit actionable backend-unavailable SSE errors."""
-    with patch(
+    with (
+        patch("plotlot.api.routes.get_cached_report", new_callable=AsyncMock, return_value=None),
+        patch(
         "plotlot.api.routes.geocode_address",
         new_callable=AsyncMock,
         return_value={
@@ -197,10 +237,12 @@ async def test_analyze_stream_backend_unavailable_error_is_actionable(client):
             "lat": 25.957,
             "lng": -80.199,
         },
-    ), patch(
-        "plotlot.api.routes.lookup_property",
-        new_callable=AsyncMock,
-        side_effect=OSError("[Errno 61] Connection refused"),
+        ),
+        patch(
+            "plotlot.api.routes.lookup_property",
+            new_callable=AsyncMock,
+            side_effect=OSError("[Errno 61] Connection refused"),
+        ),
     ):
         resp = await client.post(
             "/api/v1/analyze/stream",
@@ -254,6 +296,8 @@ async def test_chat_reports_actionable_error_when_llm_unavailable(client):
         patch("plotlot.api.chat.call_llm", new_callable=AsyncMock, return_value=None),
         patch("plotlot.api.chat.settings") as mock_settings,
     ):
+        mock_settings.nvidia_api_key = ""
+        mock_settings.groq_api_key = ""
         mock_settings.openai_api_key = ""
         mock_settings.openai_access_token = ""
         mock_settings.openrouter_api_key = ""
@@ -271,8 +315,83 @@ async def test_chat_reports_actionable_error_when_llm_unavailable(client):
     assert resp.status_code == 200
     body = resp.text
     assert "no LLM credentials are configured" in body
+    assert "NVIDIA_API_KEY" in body
+    assert "GROQ_API_KEY" in body
     assert "OPENAI_API_KEY" in body
-    assert "OPENROUTER_API_KEY" in body
+
+
+@pytest.mark.asyncio
+async def test_chat_reports_nvidia_specific_error_when_stale_openai_token_exists(client):
+    """Chat should still explain the NVIDIA empty-response path when NVIDIA is mainline."""
+    from plotlot.api.chat import _sessions
+
+    _sessions._conversations.clear()
+    _sessions._last_access.clear()
+
+    with (
+        patch("plotlot.api.chat.call_llm", new_callable=AsyncMock, return_value=None),
+        patch("plotlot.api.chat.settings") as mock_settings,
+    ):
+        mock_settings.nvidia_api_key = "nv-key"
+        mock_settings.groq_api_key = ""
+        mock_settings.openai_api_key = ""
+        mock_settings.openai_access_token = "stale-openai-token"
+        mock_settings.openrouter_api_key = ""
+        mock_settings.use_codex_oauth = False
+        mock_settings.codex_auth_file = "~/.codex/auth.json"
+        resp = await client.post(
+            "/api/v1/chat",
+            json={
+                "message": "What can I build?",
+                "history": [],
+                "report_context": None,
+            },
+        )
+
+    assert resp.status_code == 200
+    assert "configured NVIDIA NIM model returned no usable response" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_debug_llm_prefers_nvidia_when_stale_openai_token_exists(client):
+    """The debug endpoint should probe NVIDIA when both NVIDIA and stale OpenAI creds exist."""
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+
+    with (
+        patch("openai.AsyncOpenAI", return_value=mock_client) as async_openai_ctor,
+        patch("plotlot.config.settings") as mock_settings,
+    ):
+        mock_settings.nvidia_api_key = "nv-key"
+        mock_settings.nvidia_base_url = "https://integrate.api.nvidia.com/v1"
+        mock_settings.nvidia_model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+        mock_settings.openai_api_key = ""
+        mock_settings.openai_access_token = "stale-openai-token"
+        mock_settings.openai_base_url = "https://api.openai.com/v1"
+        mock_settings.openai_model = "gpt-4.1"
+        mock_settings.openai_reasoning_effort = "medium"
+        mock_settings.openai_organization = ""
+        mock_settings.openai_project = ""
+        mock_settings.groq_api_key = ""
+        mock_settings.openrouter_api_key = ""
+
+        resp = await client.get("/debug/llm")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["providers"]["nvidia"]["status"] == "ok"
+    assert data["providers"]["nvidia"]["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+    assert "openai" not in data["providers"]
+    _, client_kwargs = async_openai_ctor.call_args
+    assert client_kwargs["api_key"] == "nv-key"
+    assert client_kwargs["base_url"] == "https://integrate.api.nvidia.com/v1"
+    _, create_kwargs = mock_client.chat.completions.create.await_args
+    assert create_kwargs["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+    assert create_kwargs["messages"][0]["content"] == "/no_think"
+    assert "reasoning_effort" not in create_kwargs
 
 
 @pytest.mark.asyncio

@@ -1,27 +1,9 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
 import { SidebarLayout } from "./SidebarLayout";
-import { MapsProvider } from "@/components/MapsProvider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  weight: "400",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "PlotLot - AI Zoning Analysis",
@@ -68,13 +50,11 @@ export default function RootLayout({
           />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} min-h-screen bg-[var(--bg-primary)] font-sans antialiased`}
+          className="min-h-screen bg-[var(--bg-primary)] font-sans antialiased"
         >
           <ThemeProvider>
             <ToastProvider>
-              <MapsProvider>
-                <SidebarLayout>{children}</SidebarLayout>
-              </MapsProvider>
+              <SidebarLayout>{children}</SidebarLayout>
             </ToastProvider>
           </ThemeProvider>
         </body>

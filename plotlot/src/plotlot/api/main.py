@@ -8,6 +8,7 @@ Run:
 
 import asyncio
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -22,6 +23,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from plotlot.api.auth import get_current_user
 from plotlot.api.billing import router as billing_router  # noqa: F401 — registered below
 from plotlot.api.chat import router as chat_router
+from plotlot.api.approvals import router as approvals_router
+from plotlot.api.workspaces import router as workspaces_router
+from plotlot.api.analyses import router as analyses_router
+from plotlot.api.tools import router as tools_router
+from plotlot.api.evidence import router as evidence_router
+from plotlot.api.mcp import router as mcp_router
 from plotlot.api.geometry import router as geometry_router
 from plotlot.api.middleware import rate_limiter
 from plotlot.api.portfolio import router as portfolio_router
@@ -31,6 +38,7 @@ from plotlot.config import settings
 from plotlot.observability.logging import correlation_id, setup_logging
 from plotlot.observability.tracing import configure_mlflow
 from plotlot.oauth.openai_auth import has_saved_tokens
+from plotlot.retrieval.geocode import geocode_address
 from plotlot.storage.db import get_session, init_db
 
 logger = logging.getLogger(__name__)
@@ -188,6 +196,12 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(billing_router)
 app.include_router(chat_router)
+app.include_router(approvals_router)
+app.include_router(workspaces_router)
+app.include_router(analyses_router)
+app.include_router(tools_router)
+app.include_router(evidence_router)
+app.include_router(mcp_router)
 app.include_router(portfolio_router)
 app.include_router(geometry_router)
 app.include_router(render_router)
@@ -205,37 +219,71 @@ app.include_router(documents_router)
 
 @app.get("/api/v1/autocomplete")
 async def autocomplete(q: str = ""):
-    """Return address suggestions using Geocodio forward geocoding."""
-    if len(q) < 3 or not settings.geocodio_api_key:
+    """Return address suggestions using Geocodio, then Census-backed geocoding fallback."""
+    if len(q) < 3:
         return {"suggestions": []}
 
     import httpx
 
-    try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            resp = await client.get(
-                "https://api.geocod.io/v1.7/geocode",
-                params={"q": q, "api_key": settings.geocodio_api_key, "limit": 5},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-    except Exception:
+    suggestions = []
+
+    if settings.geocodio_api_key:
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                resp = await client.get(
+                    "https://api.geocod.io/v1.7/geocode",
+                    params={"q": q, "api_key": settings.geocodio_api_key, "limit": 5},
+                )
+                resp.raise_for_status()
+                data = resp.json()
+        except Exception:
+            data = {}
+
+        for result in data.get("results", []):
+            formatted = result.get("formatted_address", "")
+            components = result.get("address_components", {})
+            if formatted:
+                suggestions.append(
+                    {
+                        "address": formatted,
+                        "street": f"{components.get('number', '')} {components.get('formatted_street', '')}".strip(),
+                        "city": components.get("city", ""),
+                        "state": components.get("state", ""),
+                        "zip": components.get("zip", ""),
+                    }
+                )
+
+    if suggestions:
+        return {"suggestions": suggestions}
+
+    fallback = await geocode_address(q)
+    if not fallback or not fallback.get("formatted_address"):
         return {"suggestions": []}
 
-    suggestions = []
-    for result in data.get("results", []):
-        formatted = result.get("formatted_address", "")
-        components = result.get("address_components", {})
-        if formatted:
-            suggestions.append(
-                {
-                    "address": formatted,
-                    "street": f"{components.get('number', '')} {components.get('formatted_street', '')}".strip(),
-                    "city": components.get("city", ""),
-                    "state": components.get("state", ""),
-                    "zip": components.get("zip", ""),
-                }
-            )
+    formatted = str(fallback["formatted_address"])
+    street, _, remainder = formatted.partition(",")
+    remainder_parts = [part.strip() for part in remainder.split(",") if part.strip()]
+    city = fallback.get("municipality", "")
+    state = ""
+    zip_code = ""
+    if remainder_parts:
+        city = city or remainder_parts[0]
+    if len(remainder_parts) > 1:
+        state_zip_parts = " ".join(remainder_parts[1:]).split()
+        if state_zip_parts:
+            state = state_zip_parts[0]
+        if len(state_zip_parts) > 1:
+            zip_code = state_zip_parts[1]
+
+    suggestions.append(
+        {
+            "address": formatted,
+            "street": street.strip() or formatted,
+            "city": city,
+            "state": state,
+            "zip": zip_code,
+        }
+    )
     return {"suggestions": suggestions}
 
 
@@ -293,12 +341,28 @@ async def health():
 
     status = "healthy" if checks.get("database") == "ok" else "degraded"
     database_ready = checks.get("database") == "ok"
+    def _has_text_setting(name: str) -> bool:
+        """Return true only for explicitly configured string settings.
+
+        Several health tests patch ``settings`` with ``MagicMock``.  Accessing
+        an unset attribute on that mock creates a truthy mock object, so the
+        health endpoint must not rely on raw truthiness for optional credential
+        fields.
+        """
+
+        value = getattr(settings, name, "")
+        return isinstance(value, str) and bool(value.strip())
+
     agent_chat_ready = bool(
-        settings.openai_access_token
-        or settings.openai_api_key
-        or settings.openrouter_api_key
+        _has_text_setting("openai_access_token")
+        or _has_text_setting("openai_api_key")
+        or _has_text_setting("nvidia_api_key")
+        or _has_text_setting("groq_api_key")
+        # Legacy compatibility for tests/deployments that still use the old
+        # OpenRouter setting name while the runtime uses Groq as the fallback.
+        or _has_text_setting("openrouter_api_key")
         or (
-            settings.use_codex_oauth
+            bool(getattr(settings, "use_codex_oauth", False))
             and has_saved_tokens(Path(settings.codex_auth_file).expanduser())
         )
     )
@@ -386,75 +450,73 @@ async def debug_traces(limit: int = 10):
 
 @app.get("/debug/llm")
 async def debug_llm():
-    """LLM connectivity test for OpenAI (primary) + OpenRouter (fallback)."""
+    """LLM connectivity test for the primary provider + Groq fallback."""
     import time
     from openai import AsyncOpenAI
     from plotlot.config import settings as _s
 
     diag: dict = {"providers": {}}
 
-    token = _s.openai_access_token or _s.openai_api_key
+    using_nvidia = bool(_s.nvidia_api_key)
+    token = _s.nvidia_api_key if using_nvidia else (_s.openai_access_token or _s.openai_api_key)
     if token:
         t0 = time.monotonic()
         try:
             client_kwargs = {"api_key": token, "timeout": 15.0}
-            if _s.openai_base_url:
-                client_kwargs["base_url"] = _s.openai_base_url
-            if _s.openai_organization:
+            base_url = _s.nvidia_base_url if using_nvidia else _s.openai_base_url
+            if base_url:
+                client_kwargs["base_url"] = base_url
+            if _s.openai_organization and not using_nvidia:
                 client_kwargs["organization"] = _s.openai_organization
-            if _s.openai_project:
+            if _s.openai_project and not using_nvidia:
                 client_kwargs["project"] = _s.openai_project
             client = AsyncOpenAI(**client_kwargs)
-            resp = await client.chat.completions.create(
-                model=_s.openai_model or "gpt-4.1",
-                messages=[{"role": "user", "content": "Say 'ok' in one word."}],
-                max_completion_tokens=8,
-                temperature=0,
-                reasoning_effort=_s.openai_reasoning_effort,
-            )
+            kwargs = {
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
+                "messages": (
+                    [
+                        {"role": "system", "content": "/no_think"},
+                        {"role": "user", "content": "Say 'ok' in one word."},
+                    ]
+                    if using_nvidia
+                    else [{"role": "user", "content": "Say 'ok' in one word."}]
+                ),
+                "max_completion_tokens": 8,
+                "temperature": 0,
+            }
+            if not using_nvidia:
+                kwargs["reasoning_effort"] = _s.openai_reasoning_effort
+            resp = await client.chat.completions.create(**kwargs)
             elapsed = round(time.monotonic() - t0, 2)
             text = resp.choices[0].message.content or ""
-            diag["providers"]["openai"] = {
+            diag["providers"]["nvidia" if using_nvidia else "openai"] = {
                 "status": "ok",
-                "model": _s.openai_model or "gpt-4.1",
-                "base_url": _s.openai_base_url,
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
+                "base_url": base_url,
                 "latency_s": elapsed,
                 "response": text[:100],
             }
         except Exception as e:
             elapsed = round(time.monotonic() - t0, 2)
-            diag["providers"]["openai"] = {
+            diag["providers"]["nvidia" if using_nvidia else "openai"] = {
                 "status": "error",
-                "model": _s.openai_model or "gpt-4.1",
+                "model": _s.nvidia_model if using_nvidia else (_s.openai_model or "gpt-4.1"),
                 "error": f"{type(e).__name__}: {e}",
                 "elapsed_s": elapsed,
             }
     else:
-        diag["providers"]["openai"] = {"status": "no_credentials"}
+        diag["providers"]["nvidia" if using_nvidia else "openai"] = {"status": "no_credentials"}
 
-    # --- OpenRouter (fallback) ---
-    if _s.openrouter_api_key:
+    # --- Groq (fallback) ---
+    if _s.groq_api_key:
         t0 = time.monotonic()
         try:
-            headers: dict[str, str] = {}
-            if _s.openrouter_http_referer:
-                headers["HTTP-Referer"] = _s.openrouter_http_referer
-            if _s.openrouter_app_title:
-                headers["X-OpenRouter-Title"] = _s.openrouter_app_title
-
-            # If OPENROUTER_MODEL isn't set, derive from OPENAI_MODEL.
-            if _s.openrouter_model:
-                model = _s.openrouter_model
-            elif _s.openai_model and "/" not in _s.openai_model:
-                model = f"openai/{_s.openai_model}"
-            else:
-                model = _s.openai_model or "openai/gpt-4.1"
+            model = _s.groq_model or "meta-llama/llama-4-scout-17b-16e-instruct"
 
             client = AsyncOpenAI(
-                api_key=_s.openrouter_api_key,
-                base_url=_s.openrouter_base_url,
+                api_key=_s.groq_api_key,
+                base_url=_s.groq_base_url,
                 timeout=15.0,
-                default_headers=headers or None,
             )
             resp = await client.chat.completions.create(
                 model=model,
@@ -464,23 +526,23 @@ async def debug_llm():
             )
             elapsed = round(time.monotonic() - t0, 2)
             text = resp.choices[0].message.content or ""
-            diag["providers"]["openrouter"] = {
+            diag["providers"]["groq"] = {
                 "status": "ok",
                 "model": model,
-                "base_url": _s.openrouter_base_url,
+                "base_url": _s.groq_base_url,
                 "latency_s": elapsed,
                 "response": text[:100],
             }
         except Exception as e:
             elapsed = round(time.monotonic() - t0, 2)
-            diag["providers"]["openrouter"] = {
+            diag["providers"]["groq"] = {
                 "status": "error",
-                "model": _s.openrouter_model or "(derived)",
+                "model": _s.groq_model or "meta-llama/llama-4-scout-17b-16e-instruct",
                 "error": f"{type(e).__name__}: {e}",
                 "elapsed_s": elapsed,
             }
     else:
-        diag["providers"]["openrouter"] = {"status": "no_credentials"}
+        diag["providers"]["groq"] = {"status": "no_credentials"}
 
     # --- Circuit breaker states ---
     from plotlot.retrieval.llm import _breakers
@@ -493,5 +555,21 @@ async def debug_llm():
 
 
 def run():
-    """Entry point for plotlot-api console script."""
-    uvicorn.run("plotlot.api.main:app", host="0.0.0.0", port=8000, reload=True)
+    """Entry point for plotlot-api console script.
+
+    Environment overrides (useful for local port conflicts + deployments):
+    - PLOTLOT_API_HOST (fallback HOST, default 0.0.0.0)
+    - PLOTLOT_API_PORT (fallback PORT, default 8000)
+    - PLOTLOT_API_RELOAD (default 1)
+    """
+
+    host = os.environ.get("PLOTLOT_API_HOST") or os.environ.get("HOST") or "0.0.0.0"
+    port_raw = os.environ.get("PLOTLOT_API_PORT") or os.environ.get("PORT") or "8000"
+    try:
+        port = int(port_raw)
+    except ValueError as e:
+        raise ValueError(f"Invalid API port: {port_raw!r}") from e
+
+    reload_raw = os.environ.get("PLOTLOT_API_RELOAD", "1")
+    reload = reload_raw not in {"0", "false", "False", "no", "NO"}
+    uvicorn.run("plotlot.api.main:app", host=host, port=port, reload=reload)

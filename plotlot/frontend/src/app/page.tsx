@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, FormEvent, useId } from "react";
+import { useState, useRef, useEffect, useCallback, FormEvent } from "react";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItem, fadeUp, springGentle } from "@/lib/motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ZoningReport from "@/components/ZoningReport";
 import TabbedReport from "@/components/TabbedReport";
-import DealTypeSelector from "@/components/DealTypeSelector";
-import type { DealType } from "@/components/DealTypeSelector";
-import PipelineApproval from "@/components/PipelineApproval";
 import AnalysisStream from "@/components/AnalysisStream";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import ModeToggle from "@/components/ModeToggle";
@@ -19,6 +16,7 @@ import ToolCards from "@/components/ToolCards";
 import DocumentCanvas from "@/components/DocumentCanvas";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputBar from "@/components/InputBar";
+import ThinkingIndicator from "@/components/ThinkingIndicator";
 import {
   AnalysisError,
   PipelineStatus,
@@ -58,25 +56,24 @@ interface DisplayMessage {
   toolActivity?: ToolActivity[];
   errorType?: "timeout" | "bad_address" | "backend_unavailable" | "generic";
   retryAddress?: string;
+  reportVariant?: "lookup" | "agent";
 }
 
 // ---------------------------------------------------------------------------
 // Address detection heuristic
 // ---------------------------------------------------------------------------
 
-const FL_PATTERNS = /\b(miami|fort lauderdale|hollywood|hialeah|pembroke|miramar|coral|doral|homestead|aventura|boca|delray|boynton|west palm|palm beach|broward|dade|FL|florida)\b/i;
 const ADDRESS_PATTERN = /\d+\s+(?:\w+\s+)+(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|ter|terrace|ct|court|ln|lane|way|pl|place|cir|circle|pkwy|parkway|hwy|highway|trl|trail|real|path)\b/i;
-// Broader fallback: "123 Something, City, FL 33xxx" pattern (number + comma + FL indicator + zip)
-const ADDRESS_WITH_ZIP = /\d+\s+[\w\s]+,\s*[\w\s]+,\s*FL\s+\d{5}/i;
+const ADDRESS_WITH_CITY_ZIP = /\d+\s+[\w\s]+,\s*[\w\s]+,\s*[A-Z]{2}\s+\d{5}/i;
 
 function extractAddress(text: string): string | null {
-  if (ADDRESS_PATTERN.test(text) && FL_PATTERNS.test(text)) {
+  if (ADDRESS_PATTERN.test(text)) {
     return text.trim();
   }
-  if (ADDRESS_WITH_ZIP.test(text)) {
+  if (ADDRESS_WITH_CITY_ZIP.test(text)) {
     return text.trim();
   }
-  if (/\b(analyze|look up|lookup|check|search|zoning (?:for|rules|regulations|code)|what can .* build)\b/i.test(text) && FL_PATTERNS.test(text)) {
+  if (/\b(analyze|look up|lookup|check|search|zoning (?:for|rules|regulations|code)|what can .* build)\b/i.test(text)) {
     // Only extract if there's an actual street address (starts with a number)
     const match = text.match(/\d+\s+[\w\s]+(?:,\s*[\w\s]+){0,3}/);
     if (match) return match[0].trim();
@@ -107,24 +104,46 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentReport, setCurrentReport] = useState<ZoningReportData | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  // Lookup mode: deal type flow
-  const [pendingAddress, setPendingAddress] = useState<string | null>(null);
-  const [selectedDealType, setSelectedDealType] = useState<DealType | null>(null);
-  const [awaitingApproval, setAwaitingApproval] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("plotlot_backend_session");
+  });
   const [docCanvasOpen, setDocCanvasOpen] = useState(false);
   const [contextualSuggestions, setContextualSuggestions] = useState<string[]>([]);
   const [inputError, setInputError] = useState<string | null>(null);
   const [localSessionId, setLocalSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const idPrefix = useId();
-  const msgCounterRef = useRef(0);
   const localSessionIdRef = useRef<string | null>(null);
   const messagesRef = useRef<DisplayMessage[]>([]);
   const currentReportRef = useRef<ZoningReportData | null>(null);
   const modeRef = useRef<AppMode>("lookup");
   const hasProcessedRef = useRef(false);
+
+  const makeMessageId = useCallback(() => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }, []);
+
+  const normalizeMessageIds = useCallback(
+    (msgs: DisplayMessage[]): DisplayMessage[] => {
+      const seen = new Set<string>();
+      return msgs.map((msg) => {
+        const candidate = msg.id || makeMessageId();
+        if (!seen.has(candidate)) {
+          seen.add(candidate);
+          return { ...msg, id: candidate };
+        }
+        let unique = makeMessageId();
+        while (seen.has(unique)) unique = makeMessageId();
+        seen.add(unique);
+        return { ...msg, id: unique };
+      });
+    },
+    [makeMessageId],
+  );
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -139,16 +158,11 @@ export default function Home() {
   // Keep refs in sync with state
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { currentReportRef.current = currentReport; }, [currentReport]);
-  useEffect(() => { modeRef.current = mode; }, [mode]);
-  useEffect(() => { localSessionIdRef.current = localSessionId; }, [localSessionId]);
-
-  // Fix 3: Mode switch — clear lookup-mode state
   useEffect(() => {
-    setPendingAddress(null);
-    setSelectedDealType(null);
-    setAwaitingApproval(false);
-    setContextualSuggestions([]);
+    modeRef.current = mode;
+    window.dispatchEvent(new CustomEvent("plotlot:mode-changed", { detail: { mode } }));
   }, [mode]);
+  useEffect(() => { localSessionIdRef.current = localSessionId; }, [localSessionId]);
 
   // Persist backend sessionId
   useEffect(() => {
@@ -162,9 +176,6 @@ export default function Home() {
 
   // Mount: restore last session from localStorage
   useEffect(() => {
-    const backendId = localStorage.getItem("plotlot_backend_session");
-    if (backendId) setSessionId(backendId);
-
     const lastId = localStorage.getItem("plotlot_last_session");
     if (!lastId) return;
     const session = getLocalSession(lastId);
@@ -176,19 +187,21 @@ export default function Home() {
     if (restored.length === 0) return;
 
     if (session.report && restored.length > 0) {
+      const restoredReport = session.report;
       restored.splice(1, 0, {
-        id: `${idPrefix}-mount-report`,
+        id: makeMessageId(),
         role: "system",
         content: "",
-        report: session.report,
+        report: restoredReport,
+        reportVariant: session.mode,
       });
-      setCurrentReport(session.report);
+      queueMicrotask(() => setCurrentReport(restoredReport));
     }
-    setMessages(restored);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring persisted session state on first mount
+    setMessages(normalizeMessageIds(restored));
     setLocalSessionId(lastId);
     localSessionIdRef.current = lastId;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [makeMessageId, normalizeMessageIds]);
 
   // Save messages to local session after processing completes
   useEffect(() => {
@@ -235,33 +248,31 @@ export default function Home() {
 
       if (session.report && restored.length > 0) {
         restored.splice(1, 0, {
-          id: `${idPrefix}-sel-report`,
+          id: makeMessageId(),
           role: "system",
           content: "",
           report: session.report,
+          reportVariant: session.mode,
         });
         setCurrentReport(session.report);
       } else {
         setCurrentReport(null);
       }
-      setMessages(restored);
+      setMessages(normalizeMessageIds(restored));
       setLocalSessionId(id);
       localSessionIdRef.current = id;
       setInput("");
-      setPendingAddress(null);
-      setSelectedDealType(null);
-      setAwaitingApproval(false);
       setIsProcessing(false);
     };
     window.addEventListener("plotlot:session-selected", handler);
     return () => window.removeEventListener("plotlot:session-selected", handler);
-  }, [idPrefix]);
+  }, [makeMessageId, normalizeMessageIds]);
 
   const addMessage = useCallback((msg: Omit<DisplayMessage, "id">) => {
-    const newMsg = { ...msg, id: `${idPrefix}-${msgCounterRef.current++}` };
+    const newMsg = { ...msg, id: makeMessageId() };
     setMessages((prev) => [...prev, newMsg]);
     return newMsg.id;
-  }, [idPrefix]);
+  }, [makeMessageId]);
 
   const updateMessage = useCallback((id: string, updates: Partial<DisplayMessage>) => {
     setMessages((prev) =>
@@ -271,7 +282,7 @@ export default function Home() {
 
   // Run the full analysis pipeline
   const runAnalysis = useCallback(
-    async (address: string, skipSteps: string[] = []) => {
+    async (address: string, reportVariant: "lookup" | "agent", skipSteps: string[] = []) => {
       const progressId = addMessage({
         role: "system",
         content: "",
@@ -288,7 +299,7 @@ export default function Home() {
         await streamAnalysis(
           {
             address,
-            dealType: selectedDealType || "land_deal",
+            dealType: "land_deal",
             skipSteps,
           },
           (status) => {
@@ -316,7 +327,11 @@ export default function Home() {
           (report) => {
             finalReport = report;
             setCurrentReport(report);
-            updateMessage(progressId, { report, pipelineSteps: undefined });
+            updateMessage(progressId, {
+              report,
+              pipelineSteps: undefined,
+              reportVariant,
+            });
           },
           (error: AnalysisError) => {
             // Error recovery UX — provide actionable buttons based on error type
@@ -380,7 +395,7 @@ export default function Home() {
         });
       }
     },
-    [addMessage, updateMessage, selectedDealType],
+    [addMessage, updateMessage],
   );
 
   // Send a chat message
@@ -402,24 +417,23 @@ export default function Home() {
 
       addMessage({ role: "user", content: text.trim() });
 
-      // Lookup mode: address → deal type selector → pipeline
+      // Lookup mode: address → direct analysis
       if (mode === "lookup" && address) {
-        setPendingAddress(address);
-        setSelectedDealType(null);
         setCurrentReport(null);
+        await runAnalysis(address, "lookup");
         setIsProcessing(false);
         return;
       }
 
       // Agent mode: address detected — run pipeline directly
       if (address && !currentReport) {
-        await runAnalysis(address);
+        await runAnalysis(address, "agent");
         setIsProcessing(false);
         return;
       }
       if (address && currentReport) {
         setCurrentReport(null);
-        await runAnalysis(address);
+        await runAnalysis(address, "agent");
         setIsProcessing(false);
         return;
       }
@@ -430,6 +444,7 @@ export default function Home() {
         content: "",
         isStreaming: true,
         toolActivity: [],
+        thinkingEvents: [],
       });
 
       const history: ChatMessageData[] = [
@@ -473,6 +488,10 @@ export default function Home() {
               prev.map((m) => {
                 if (m.id !== assistantId) return m;
                 const tools = m.toolActivity || [];
+                const lastTool = tools[tools.length - 1];
+                if (lastTool?.tool === toolEvent.tool && lastTool.message === toolEvent.message) {
+                  return m;
+                }
                 return {
                   ...m,
                   toolActivity: [...tools, { tool: toolEvent.tool, message: toolEvent.message, status: "running" as const }],
@@ -484,10 +503,25 @@ export default function Home() {
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== assistantId) return m;
-                const tools = (m.toolActivity || []).map((t) =>
-                  t.tool === toolName ? { ...t, status: "complete" as const } : t,
-                );
+                const tools = [...(m.toolActivity || [])];
+                for (let i = tools.length - 1; i >= 0; i -= 1) {
+                  if (tools[i].tool === toolName && tools[i].status === "running") {
+                    tools[i] = { ...tools[i], status: "complete" as const };
+                    break;
+                  }
+                }
                 return { ...m, toolActivity: tools };
+              }),
+            );
+          },
+          (thinkingEvent: ThinkingEvent) => {
+            setMessages((prev) =>
+              prev.map((m) => {
+                if (m.id !== assistantId) return m;
+                return {
+                  ...m,
+                  thinkingEvents: [...(m.thinkingEvents || []), thinkingEvent],
+                };
               }),
             );
           },
@@ -503,6 +537,27 @@ export default function Home() {
     },
     [messages, isProcessing, currentReport, sessionId, mode, addMessage, updateMessage, runAnalysis],
   );
+
+  const handleModeChange = useCallback((nextMode: AppMode) => {
+    setMode(nextMode);
+    setContextualSuggestions([]);
+    setInputError(null);
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const nextMode = (event as CustomEvent<{ mode?: AppMode }>).detail?.mode;
+      if (!nextMode) return;
+      if (nextMode !== modeRef.current) {
+        setMode(nextMode);
+        setContextualSuggestions([]);
+        setInputError(null);
+      }
+      setTimeout(() => inputRef.current?.focus(), 50);
+    };
+    window.addEventListener("plotlot:mode-change", handler);
+    return () => window.removeEventListener("plotlot:mode-change", handler);
+  }, []);
 
   const handleSave = useCallback(
     async (msgId: string, report: ZoningReportData) => {
@@ -524,38 +579,6 @@ export default function Home() {
 
   const hasReport = messages.some((m) => m.report);
 
-  // Handle deal type selection in lookup mode — show pipeline approval
-  const handleDealTypeSelect = useCallback(
-    (dealType: DealType) => {
-      if (!pendingAddress) return;
-      setSelectedDealType(dealType);
-      setAwaitingApproval(true);
-    },
-    [pendingAddress],
-  );
-
-  // Handle pipeline approval — run with selected skip steps
-  const handlePipelineApprove = useCallback(
-    async (skipSteps: string[]) => {
-      if (!pendingAddress) return;
-      const address = pendingAddress;
-      setAwaitingApproval(false);
-      setPendingAddress(null);
-      setIsProcessing(true);
-      try {
-        await runAnalysis(address, skipSteps);
-      } finally {
-        setIsProcessing(false);
-      }
-    },
-    [pendingAddress, runAnalysis],
-  );
-
-  const handlePipelineCancel = useCallback(() => {
-    setAwaitingApproval(false);
-    setSelectedDealType(null);
-  }, []);
-
   const handleNewAnalysis = useCallback(() => {
     setMessages([]);
     setCurrentReport(null);
@@ -563,9 +586,7 @@ export default function Home() {
     setLocalSessionId(null);
     localSessionIdRef.current = null;
     hasProcessedRef.current = false;
-    setPendingAddress(null);
-    setSelectedDealType(null);
-    setAwaitingApproval(false);
+    setContextualSuggestions([]);
     setInput("");
     setIsProcessing(false);
     localStorage.removeItem("plotlot_backend_session");
@@ -578,142 +599,147 @@ export default function Home() {
   // ─── Welcome State (both modes) ────────────────────────────────────
   if (isWelcome) {
     return (
-      <main className="w-full max-w-full overflow-x-hidden px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-6xl flex-col justify-center py-12 md:py-20">
-        <motion.div
-          className="mb-6 inline-flex w-fit items-center gap-2 self-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)] shadow-[var(--shadow-card)]"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...springGentle, delay: 0.08 }}
-        >
-          <span className="inline-flex h-2 w-2 rounded-full bg-[var(--brand-strong)]" />
-          PlotLot
-        </motion.div>
+      <main className="relative flex min-h-screen w-full max-w-full items-center justify-center overflow-x-hidden bg-[#f5f5f6] px-4 py-8 sm:px-6 lg:px-10">
+        {mode === "agent" && (
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 rounded-full border border-[#d8e4ff] bg-[#eaf1ff] px-4 py-1.5 text-sm font-medium text-[#3b82f6]">
+            ♫ Upgrade your plan
+          </div>
+        )}
 
-        <motion.div
-          className="mb-10"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          <div className="max-w-5xl">
-            <motion.div
-              variants={staggerItem}
-              className="mb-4 text-sm tracking-wide text-[var(--text-muted)]"
-            >
-              Hi there
-            </motion.div>
-            <motion.h1
-              variants={staggerItem}
-              className="max-w-5xl font-display text-[clamp(3.35rem,7vw,6.2rem)] leading-[0.98] text-[var(--text-primary)]"
+        <div className="mx-auto flex w-full max-w-[1040px] flex-col items-center">
+          <motion.div
+            className="mb-8 w-full text-center"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <div className="mx-auto flex max-w-[780px] flex-col items-center">
+              <motion.div
+                variants={staggerItem}
+                className="mb-4 flex items-center justify-center gap-2 text-sm tracking-wide text-[var(--text-muted)]"
+              >
+                <span className="text-[var(--brand)]">✦</span>
+                <span>Hi there</span>
+              </motion.div>
+
+              {mode === "agent" && (
+                <motion.p variants={staggerItem} className="mb-3 text-[72px] font-black tracking-[0.18em] text-[#111827]">
+                  PLOTLOT
+                </motion.p>
+              )}
+
+              <motion.h1
+                variants={staggerItem}
+                className="max-w-[700px] text-center font-display text-[clamp(3.0rem,4.8vw,4.1rem)] leading-[1.02] text-[var(--text-primary)]"
+              >
+                {mode === "lookup" ? (
+                  <>Analyze any property<br />in the US</>
+                ) : (
+                  <>Ask anything about zoning &amp; land</>
+                )}
+              </motion.h1>
+
+              <motion.p variants={staggerItem} className="mt-4 max-w-2xl text-center text-[15px] leading-7 text-[var(--text-muted)] sm:text-base">
+                {mode === "lookup"
+                  ? "Zoning, density, comps, pro forma, and development potential — in seconds"
+                  : "Use the consultant harness: run analyses, attach evidence, and generate defensible reports in one workspace."}
+              </motion.p>
+            </div>
+          </motion.div>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.2 }}
+            className="relative z-30 mb-6 w-full max-w-[980px] self-center"
+          >
+            <div
+              className="glass-panel flex min-h-[76px] items-center gap-2 rounded-[34px] border border-[#cfd5df] bg-white px-4 py-3 transition-all focus-within:border-[#94a3b8] focus-within:ring-2 focus-within:ring-[#e2e8f0] sm:px-5"
+              style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}
             >
               {mode === "lookup" ? (
-                <>Analyze any property in the US</>
+                <AddressAutocomplete
+                  inputRef={inputRef}
+                  value={input}
+                  onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
+                  onSelect={(address) => sendMessage(address)}
+                  placeholder="Enter a property address..."
+                  disabled={isProcessing}
+                />
               ) : (
-                <>Ask anything about zoning &amp; land</>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
+                  placeholder="Ask about zoning, density, or property data..."
+                  disabled={isProcessing}
+                  className="min-w-0 flex-1 bg-transparent text-lg text-[#374151] placeholder:text-[#9ca3af] focus:outline-none"
+                  data-testid="agent-input"
+                />
               )}
-            </motion.h1>
-            <motion.p variants={staggerItem} className="mt-5 max-w-2xl text-[15px] leading-7 text-[var(--text-secondary)] sm:text-[17px]">
-              {mode === "lookup"
-                ? "Zoning, density, comps, pro forma, and development potential — in seconds"
-                : "Search properties, research zoning codes, or get answers from our database. Use agent mode when you need an exploratory partner, not just a single lookup."}
-            </motion.p>
-          </div>
-        </motion.div>
+              <ModeToggle mode={mode} onChange={handleModeChange} />
+              <button
+                type="submit"
+                disabled={!input.trim() || isProcessing}
+                aria-label="Send message"
+                data-testid="send-button"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#111827] text-white transition-all hover:opacity-90 disabled:opacity-20"
+              >
+                {isProcessing ? (
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {inputError && <p className="mt-2 px-1 text-xs text-red-500">{inputError}</p>}
+          </motion.form>
 
-        {/* Input bar — z-30 so autocomplete dropdown (z-50 inside) paints above chips below */}
-        <motion.form
-          onSubmit={handleSubmit}
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.25 }}
-          className="relative z-30 mb-8 w-full max-w-4xl self-center"
-        >
-          <div
-            className="glass-panel flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-4"
-            style={{ boxShadow: "var(--shadow-elevated)" }}
+          <motion.div
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.3 }}
+            className="relative z-0 min-h-[72px] w-full max-w-[980px] self-center"
           >
             {mode === "lookup" ? (
-              <AddressAutocomplete
-                inputRef={inputRef}
-                value={input}
-                onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
-                onSelect={(address) => sendMessage(address)}
-                placeholder="Enter a property address..."
-                disabled={isProcessing}
-              />
+              <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
             ) : (
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
-                placeholder="Ask about zoning, density, or property data..."
+              <ToolCards
+                onAnalyze={() => inputRef.current?.focus()}
+                onGenerateDoc={() => setDocCanvasOpen(true)}
+                onSendPrompt={sendMessage}
                 disabled={isProcessing}
-                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-                data-testid="agent-input"
+                hasReport={!!currentReport}
+                county={currentReport?.county}
               />
             )}
-            <ModeToggle mode={mode} onChange={setMode} />
-            <button
-              type="submit"
-              disabled={!input.trim() || isProcessing}
-              aria-label="Send message"
-              data-testid="send-button"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20 sm:h-9 sm:w-9"
-            >
-              {isProcessing ? (
-                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                </svg>
-              )}
-            </button>
-          </div>
-          {inputError && (
-            <p className="mt-2 px-1 text-xs text-red-500">{inputError}</p>
-          )}
-        </motion.form>
+          </motion.div>
 
-        {/* Capability chips / Tool cards — z-0 so autocomplete dropdown from form above paints on top */}
-        <motion.div
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.35 }}
-          className="relative z-0 min-h-[72px] w-full max-w-4xl self-center"
-        >
-          {mode === "lookup" ? (
-            <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
-          ) : (
-            <ToolCards
-              onAnalyze={() => inputRef.current?.focus()}
-              onGenerateDoc={() => setDocCanvasOpen(true)}
-              onSendPrompt={sendMessage}
-              disabled={isProcessing}
-              hasReport={!!currentReport}
-              county={currentReport?.county}
-            />
-          )}
-        </motion.div>
-
-        {/* Footer */}
-        <motion.p
-          {...fadeUp}
-          transition={{ ...springGentle, delay: 0.45 }}
-          className="mt-12 text-center text-xs text-[var(--text-muted)]"
-        >
-          PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
-        </motion.p>
+          <motion.p
+            {...fadeUp}
+            transition={{ ...springGentle, delay: 0.4 }}
+            className="mt-10 text-center text-xs text-[var(--text-muted)]"
+          >
+            PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
+          </motion.p>
         </div>
       </main>
     );
   }
 
-  // ─── Conversation State ───────────────────────────────────────────────
+// ─── Conversation State ───────────────────────────────────────────────
   return (
-    <div className="relative flex h-[calc(100vh-4rem)] flex-col">
+    <div className="relative flex h-[calc(100vh-4rem)] flex-col bg-[#f5f5f6]">
+      {mode === "agent" && (
+        <div className="pointer-events-none fixed left-1/2 top-5 z-40 -translate-x-1/2 rounded-full border border-[#d8e4ff] bg-[#eaf1ff] px-4 py-1.5 text-sm font-medium text-[#3b82f6]">
+          ♫ Upgrade your plan
+        </div>
+      )}
       {/* New Analysis button — fixed top-right */}
       <div className="fixed right-4 top-5 z-40 sm:right-6">
         <button
@@ -752,8 +778,8 @@ export default function Home() {
               {msg.report && (
                 <div className="space-y-3 animate-fade-up">
                   <ErrorBoundary>
-                    {selectedDealType ? (
-                      <TabbedReport report={msg.report} dealType={selectedDealType} />
+                    {msg.reportVariant === "lookup" ? (
+                      <TabbedReport report={msg.report} dealType="land_deal" />
                     ) : (
                       <ZoningReport report={msg.report} />
                     )}
@@ -805,37 +831,51 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tool use badges (ChatGPT-style) */}
-              {msg.toolActivity && msg.toolActivity.length > 0 && (
-                <div className="mb-2 flex justify-start">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-800 text-xs font-black text-white">
-                      P
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {msg.toolActivity.map((t, i) => (
-                        <span
-                          key={i}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                            t.status === "running"
-                              ? "border border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                              : "border border-[var(--border)] bg-[var(--bg-surface-raised)] text-[var(--text-muted)]"
-                          }`}
-                        >
-                          {t.status === "running" ? (
-                            <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse-dot" />
-                          ) : (
-                            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                          {t.status === "complete" ? `Used ${t.tool}` : t.message}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+              {msg.role === "assistant" && msg.thinkingEvents && msg.thinkingEvents.length > 0 && (
+                <div className="mb-2 ml-9 max-w-[95%] sm:max-w-[85%]">
+                  <ThinkingIndicator events={msg.thinkingEvents} />
                 </div>
               )}
+
+              {/* Tool use badges (ChatGPT-style) */}
+              {msg.toolActivity && msg.toolActivity.length > 0 && (() => {
+                const visibleTools = msg.thinkingEvents && msg.thinkingEvents.length > 0
+                  ? msg.toolActivity.filter((t) => t.status === "running").slice(-1)
+                  : msg.toolActivity;
+
+                if (visibleTools.length === 0) return null;
+
+                return (
+                  <div className="mb-2 flex justify-start">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-800 text-xs font-black text-white">
+                        P
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {visibleTools.map((t, i) => (
+                          <span
+                            key={i}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                              t.status === "running"
+                                ? "border border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                                : "border border-[var(--border)] bg-[var(--bg-surface-raised)] text-[var(--text-muted)]"
+                            }`}
+                          >
+                            {t.status === "running" ? (
+                              <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse-dot" />
+                            ) : (
+                              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                            {t.message}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Regular message */}
               {msg.content && msg.role !== "system" && (
@@ -905,7 +945,7 @@ export default function Home() {
                               <button
                                 onClick={() => {
                                   setMessages((prev) => prev.filter((m) => m.id !== msg.id));
-                                  runAnalysis(msg.retryAddress!);
+                                  runAnalysis(msg.retryAddress!, msg.reportVariant ?? "lookup");
                                 }}
                                 disabled={isProcessing}
                                 data-testid="report-retry-button"
@@ -934,25 +974,6 @@ export default function Home() {
               )}
             </div>
           ))}
-          {/* Deal type selector — appears when address entered in lookup mode */}
-          {pendingAddress && !selectedDealType && (
-            <div className="mx-auto max-w-xl px-3 py-4 sm:px-0">
-              <DealTypeSelector onSelect={handleDealTypeSelect} disabled={isProcessing} />
-            </div>
-          )}
-
-          {/* Pipeline approval gate — appears after deal type selection */}
-          {pendingAddress && selectedDealType && awaitingApproval && (
-            <div className="mx-auto max-w-xl px-3 py-4 sm:px-0 animate-fade-up">
-              <PipelineApproval
-                address={pendingAddress}
-                dealType={selectedDealType}
-                onApprove={handlePipelineApprove}
-                onCancel={handlePipelineCancel}
-                disabled={isProcessing}
-              />
-            </div>
-          )}
 
           <div ref={messagesEndRef} />
         </div>
@@ -970,7 +991,7 @@ export default function Home() {
               {contextualSuggestions.map((s) => (
                 <button
                   key={s}
-                  onClick={() => { setMode("agent"); sendMessage(s); }}
+                  onClick={() => { handleModeChange("agent"); sendMessage(s); }}
                   className="min-h-[44px] rounded-full border border-amber-200 bg-amber-50/50 px-4 py-2 text-xs text-amber-700 transition-all hover:bg-amber-100 hover:-translate-y-0.5 active:scale-[0.98] dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50 sm:min-h-0 sm:py-1.5"
                 >
                   {s}
@@ -995,31 +1016,29 @@ export default function Home() {
             </div>
           )}
 
-          {/* Input bar — hidden in lookup mode after report is shown */}
-          {!(mode === "lookup" && hasReport) && (
-            <div>
-              <InputBar
-                inputRef={inputRef}
-                value={input}
-                onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
-                onSubmit={handleSubmit}
-                onAddressSelect={(address) => sendMessage(address)}
-                mode={mode}
-                onModeChange={setMode}
-                placeholder={mode === "lookup"
-                  ? "Enter a property address..."
-                  : hasReport
-                    ? "Ask about this property's zoning..."
-                    : "Ask about zoning, density, or property data..."
-                }
-                disabled={isProcessing || !!pendingAddress || awaitingApproval}
-                isProcessing={isProcessing}
-              />
-              {inputError && (
-                <p className="mt-2 px-4 text-xs text-red-500">{inputError}</p>
-              )}
-            </div>
-          )}
+          {/* Input bar */}
+          <div>
+            <InputBar
+              inputRef={inputRef}
+              value={input}
+              onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
+              onSubmit={handleSubmit}
+              onAddressSelect={(address) => sendMessage(address)}
+              mode={mode}
+              onModeChange={handleModeChange}
+              placeholder={mode === "lookup"
+                ? "Enter a property address..."
+                : hasReport
+                  ? "Ask about this property's zoning..."
+                  : "Ask about zoning, density, or property data..."
+              }
+              disabled={isProcessing}
+              isProcessing={isProcessing}
+            />
+            {inputError && (
+              <p className="mt-2 px-4 text-xs text-red-500">{inputError}</p>
+            )}
+          </div>
 
         </div>
       </div>

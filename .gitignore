@@ -33,7 +33,7 @@ mlruns/
 # Frontend
 **/node_modules/
 .vercel
-.omx/
+/.omx/
 
 # Playwright and local capture artifacts
 .playwright-mcp/

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
 // ---------------------------------------------------------------------------
 // Helper: run analysis for a given address and wait for report
 // ---------------------------------------------------------------------------
@@ -37,16 +39,14 @@ async function analyzeAddress(
 // Pre-flight: verify backend + data before running UAT
 // ---------------------------------------------------------------------------
 test.beforeAll(async ({ request }) => {
-  const health = await request.get("http://localhost:8000/health");
+  const health = await request.get(`${API_BASE}/health`);
   expect(health.ok()).toBeTruthy();
   const body = await health.json();
   expect(body.status).toBe("healthy");
   expect(body.checks.database).toBe("ok");
 
   // Verify we have data for all test municipalities
-  const stats = await request.get(
-    "http://localhost:8000/api/v1/admin/chunks/stats",
-  );
+  const stats = await request.get(`${API_BASE}/api/v1/admin/chunks/stats`);
   const chunks = await stats.json();
   const municipalities = chunks.breakdown.map(
     (m: { municipality: string }) => m.municipality,
@@ -86,7 +86,7 @@ test.describe("Scenario 1: Welcome Screen", () => {
     ).toBeDisabled();
 
     // Capability chips (lookup mode)
-    for (const text of [/Houston, TX/, /Atlanta, GA/, /Miami Gardens, FL/]) {
+    for (const text of [/Miramar, FL/, /Miami Gardens, FL/, /Boca Raton, FL/]) {
       await expect(page.getByRole("button", { name: text })).toBeVisible();
     }
 
@@ -359,42 +359,75 @@ test.describe("Scenario 8: Save to Portfolio", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Scenario 9: Lookup Mode — Deal Type → Pipeline Approval → Tabbed Report
+// Scenario 9: Lookup Mode — Direct Address → Pipeline → Tabbed Report
 // ---------------------------------------------------------------------------
 test.describe("Scenario 9: Lookup Mode Flow", () => {
-  test("full lookup flow with deal type and pipeline approval", async ({ page }) => {
+  test("full lookup flow runs directly from address entry", async ({ page }) => {
     await page.goto("/");
 
     // Should start in lookup mode by default
     const input = page.getByRole("textbox", { name: /address|question/ });
     await expect(input).toBeVisible();
 
+    await page.route("**/api/v1/analyze/stream", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        body: [
+          `event: status\ndata: ${JSON.stringify({ step: "geocoding", message: "Resolving address...", complete: true })}\n\n`,
+          `event: result\ndata: ${JSON.stringify({
+            address: "7940 Plantation Blvd, Miramar, FL 33023",
+            formatted_address: "7940 Plantation Blvd, Miramar, FL 33023",
+            municipality: "Miramar",
+            county: "Broward",
+            lat: 26.025,
+            lng: -80.251,
+            zoning_district: "RS5",
+            zoning_description: "Single Family Residential",
+            allowed_uses: ["Single-family residential"],
+            conditional_uses: [],
+            prohibited_uses: [],
+            setbacks: { front: "25 ft", side: "7.5 ft", rear: "20 ft" },
+            max_height: "35 ft",
+            max_density: "8 du/ac",
+            floor_area_ratio: "0.5",
+            lot_coverage: "40%",
+            min_lot_size: "5,000 sqft",
+            parking_requirements: "2 spaces per dwelling unit",
+            property_record: null,
+            numeric_params: null,
+            density_analysis: {
+              max_units: 1,
+              governing_constraint: "Lot area per unit",
+              constraints: [],
+              lot_size_sqft: 5000,
+              buildable_area_sqft: null,
+              lot_width_ft: null,
+              lot_depth_ft: null,
+              max_gla_sqft: null,
+              confidence: "high",
+              notes: [],
+            },
+            comp_analysis: null,
+            pro_forma: null,
+            summary: "RS5 zoning supports one dwelling unit on this lot.",
+            sources: [],
+            confidence: "high",
+            source_refs: [],
+            confidence_warning: null,
+            suggested_next_steps: [],
+          })}\n\n`,
+        ].join(""),
+      });
+    });
+
     // Enter address
     await input.fill("7940 Plantation Blvd, Miramar, FL 33023");
     await page.getByRole("button", { name: "Send message" }).click();
 
-    // Deal type selector should appear
-    await expect(page.getByText("Land Deal")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("Wholesale")).toBeVisible();
-    await expect(page.getByText("Creative Finance")).toBeVisible();
-    await expect(page.getByText("Hybrid")).toBeVisible();
-
-    // Select "Land Deal"
-    await page.getByText("Land Deal").click();
-
-    // Pipeline approval gate should appear
-    await expect(page.getByText("Pipeline Plan")).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByText("Zoning Search")).toBeVisible();
-    await expect(page.getByText("AI Analysis")).toBeVisible();
-    await expect(page.getByText("Density Calculation")).toBeVisible();
-    await expect(page.getByText("Comparable Sales")).toBeVisible();
-    await expect(page.getByText("Pro Forma")).toBeVisible();
-
-    // Click "Run Analysis"
-    await page.getByRole("button", { name: "Run Analysis" }).click();
-
     // Pipeline should start
     await expect(page.getByText("Geocoding")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("What type of deal are you evaluating?")).toHaveCount(0);
 
     // Wait for report to render (tabbed report)
     await expect(page.getByRole("tab", { name: /Property/i }).or(page.getByText("RS5").first())).toBeVisible({
@@ -445,7 +478,7 @@ test.describe("Scenario 11: Mode Switching", () => {
     await page.goto("/");
 
     // Start in lookup mode — should show address example chips
-    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
 
     // Switch to agent mode
     const modeToggle = page.locator("[data-mode-toggle]").or(
@@ -467,6 +500,6 @@ test.describe("Scenario 11: Mode Switching", () => {
     }
 
     // Should show address chips again
-    await expect(page.getByText("Houston, TX")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Miramar, FL")).toBeVisible({ timeout: 5_000 });
   });
 });

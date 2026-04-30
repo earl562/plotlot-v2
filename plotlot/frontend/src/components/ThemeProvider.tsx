@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -71,6 +71,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function ThemeToggle() {
   const { resolved, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  const showDark = mounted && resolved === "dark";
 
   return (
     <button
@@ -78,7 +85,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(resolved === "dark" ? "light" : "dark")}
       className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-raised)] active:scale-[0.95]"
     >
-      {resolved === "dark" ? (
+      {showDark ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-secondary)" }}>
           <circle cx="12" cy="12" r="5" />
           <line x1="12" y1="1" x2="12" y2="3" />

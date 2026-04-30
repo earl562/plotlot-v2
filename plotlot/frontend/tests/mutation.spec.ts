@@ -37,6 +37,7 @@ test.describe("Canonical mutation lane", () => {
       page.getByText("Please enter a street address to run a lookup analysis"),
     ).toBeVisible();
     await expect(page.getByTestId("deal-type-selector")).toHaveCount(0);
+    await expect(page.getByTestId("pipeline-approval-card")).toHaveCount(0);
   });
 
   test("lookup backend unavailable shows actionable degraded message", async ({ page }) => {
@@ -86,6 +87,80 @@ test.describe("Canonical mutation lane", () => {
       .poll(() => analyzeCalls, { timeout: 15_000 })
       .toBe(2);
     await expect(page.getByTestId("report-retry-button")).toBeVisible();
+  });
+
+  test("lookup recovers with sync fallback after stream connection failure", async ({ page }) => {
+    await gotoHome(page);
+
+    await page.route("**/health", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          status: "healthy",
+          capabilities: { db_backed_analysis_ready: true },
+        }),
+      });
+    });
+
+    await page.route("**/api/v1/analyze/stream", async (route) => {
+      await route.abort("failed");
+    });
+
+    await page.route("**/api/v1/analyze", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          address: "7940 Plantation Blvd, Miramar, FL 33023",
+          formatted_address: "7940 Plantation Blvd, Miramar, FL 33023",
+          municipality: "Miramar",
+          county: "Broward",
+          lat: 26.025,
+          lng: -80.251,
+          zoning_district: "RS5",
+          zoning_description: "Single Family Residential",
+          allowed_uses: ["Single-family residential"],
+          conditional_uses: [],
+          prohibited_uses: [],
+          setbacks: { front: "25 ft", side: "7.5 ft", rear: "20 ft" },
+          max_height: "35 ft",
+          max_density: "8 du/ac",
+          floor_area_ratio: "0.5",
+          lot_coverage: "40%",
+          min_lot_size: "5,000 sqft",
+          parking_requirements: "2 spaces per dwelling unit",
+          property_record: null,
+          numeric_params: null,
+          density_analysis: {
+            max_units: 1,
+            governing_constraint: "Lot area per unit",
+            constraints: [],
+            lot_size_sqft: 5000,
+            buildable_area_sqft: null,
+            lot_width_ft: null,
+            lot_depth_ft: null,
+            max_gla_sqft: null,
+            confidence: "high",
+            notes: [],
+          },
+          comp_analysis: null,
+          pro_forma: null,
+          summary: "Recovered via sync fallback after stream connection failure.",
+          sources: [],
+          confidence: "high",
+          source_refs: [],
+          confidence_warning: null,
+          suggested_next_steps: [],
+        }),
+      });
+    });
+
+    await runLookupFlow(page, "7940 Plantation Blvd, Miramar, FL 33023");
+
+    await expect(page.getByTestId("report-root")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Miramar, Broward County")).toBeVisible();
+    await expect(page.getByText(/i couldn't analyze that address/i)).toHaveCount(0);
   });
 
   test("agent chat error stays deterministic", async ({ page }) => {

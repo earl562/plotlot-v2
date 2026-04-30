@@ -4,12 +4,12 @@ Requires: running PostgreSQL with ingested data, API keys for geocoding
 and LLM providers. Scores live pipeline output against golden expectations.
 
 Run:
-    uv run pytest tests/eval/test_eval_live.py -m "eval and e2e" -v
+    PLOTLOT_RUN_LIVE_EVAL=1 uv run pytest tests/eval/test_eval_live.py -m "eval and e2e" -v
 """
 
 from dataclasses import fields
+import os
 
-import mlflow.genai
 import pytest
 
 from plotlot.core.types import ZoningReport
@@ -48,12 +48,22 @@ def report_to_outputs(report: ZoningReport) -> dict:
 @pytest.mark.eval
 @pytest.mark.e2e
 @pytest.mark.integration
+@pytest.mark.live
 class TestLiveEval:
     """Run the full pipeline for each golden address and score results."""
 
     @pytest.mark.asyncio
     async def test_live_pipeline(self, golden_data, all_scorers):
         """Run pipeline for each golden address, evaluate against expectations."""
+        if os.environ.get("PLOTLOT_RUN_LIVE_EVAL") != "1":
+            pytest.skip(
+                "Set PLOTLOT_RUN_LIVE_EVAL=1 to enable live eval (requires DB + live credentials)."
+            )
+
+        mlflow_genai = pytest.importorskip(
+            "mlflow.genai", reason="Live eval requires mlflow[genai]"
+        )
+
         live_data = []
 
         for sample in golden_data:
@@ -84,7 +94,7 @@ class TestLiveEval:
                 }
             )
 
-        result = mlflow.genai.evaluate(data=live_data, scorers=all_scorers)
+        result = mlflow_genai.evaluate(data=live_data, scorers=all_scorers)
 
         # Core identity fields must match
         for key in ["zoning_district_match/mean", "municipality_match/mean"]:

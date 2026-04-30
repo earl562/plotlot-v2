@@ -37,6 +37,9 @@ dev = [
     "ruff>=0.5",
     "mypy>=1.10",
 ]
+mutation = [
+    "mutmut>=3.3",
+]
 mlflow = ["mlflow>=2.16", "psycopg2-binary>=2.9"]
 eval = [
     "jsonschema>=4.21",
@@ -75,3 +78,35 @@ ignore_missing_imports = true
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+
+[tool.mutmut]
+paths_to_mutate = ["src/plotlot"]
+pytest_add_cli_args_test_selection = [
+    "tests/unit/test_harness_runtime.py",
+    "tests/unit/test_agent_tool_policy.py",
+    "tests/unit/test_land_use_tool_contracts.py",
+    "tests/unit/test_land_use_evidence_models.py",
+    "tests/unit/test_tools_api.py",
+]
+also_copy = ["tests/"]
+do_not_mutate = [
+    "tests/*",
+    "src/plotlot/__init__.py",
+    "src/plotlot/cli.py",
+    "src/plotlot/config.py",
+    "src/plotlot/api/*",
+    "src/plotlot/api/tools.py",
+    "src/plotlot/clauses/*",
+    "src/plotlot/core/*",
+    "src/plotlot/documents/*",
+    "src/plotlot/ingestion/*",
+    "src/plotlot/oauth/*",
+    "src/plotlot/observability/*",
+    "src/plotlot/pipeline/*",
+    "src/plotlot/property/*",
+    "src/plotlot/retrieval/*",
+    "src/plotlot/rendering/*",
+    "src/plotlot/storage/*",
+]
+mutate_only_covered_lines = false
+debug = true

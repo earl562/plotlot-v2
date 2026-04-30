@@ -23,18 +23,20 @@ test.describe("Canonical cross-mode lane", () => {
     test.skip(!dbPreflight.healthy, dbPreflight.reason);
   });
 
-  test("pending lookup clears when switching modes", async ({ page }) => {
+  test("lookup flow stays clean when switching modes", async ({ page }) => {
     await gotoHome(page);
 
     await page.getByTestId("lookup-input").fill("7940 Plantation Blvd, Miramar, FL 33023");
     await page.getByTestId("send-button").click();
-    await expect(page.getByTestId("deal-type-selector")).toBeVisible();
+    await expect(page.getByTestId("pipeline-stepper")).toBeVisible();
 
     await switchToAgent(page);
     await expect(page.getByTestId("deal-type-selector")).toHaveCount(0);
+    await expect(page.getByTestId("pipeline-approval-card")).toHaveCount(0);
 
     await switchToLookup(page);
     await expect(page.getByTestId("deal-type-selector")).toHaveCount(0);
+    await expect(page.getByTestId("pipeline-approval-card")).toHaveCount(0);
     await expect(page.getByTestId("lookup-input")).toBeVisible();
   });
 

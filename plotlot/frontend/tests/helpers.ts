@@ -11,13 +11,14 @@ export interface BackendPreflight {
   body: Record<string, unknown>;
 }
 
-const HEALTH_URL = "http://127.0.0.1:8000/health";
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+const HEALTH_URL = new URL("/health", BACKEND_BASE_URL).toString();
 
 async function parseHealthResponse(
   health: Response | { ok(): boolean; status(): number; json(): Promise<unknown> },
 ): Promise<BackendPreflight> {
-  const ok = "ok" in health ? health.ok : health.ok();
-  const statusCode = "status" in health ? health.status : health.status();
+  const ok = typeof health.ok === "function" ? health.ok() : health.ok;
+  const statusCode = typeof health.status === "function" ? health.status() : health.status;
 
   if (!ok) {
     return {
@@ -104,7 +105,6 @@ export async function switchToLookup(page: Page) {
 export async function runLookupFlow(
   page: Page,
   address: string,
-  dealType: "land" | "wholesale" | "creative-finance" | "hybrid" = "land",
 ) {
   const input = page.getByTestId("lookup-input");
   const sendButton = page.getByTestId("send-button");
@@ -120,16 +120,6 @@ export async function runLookupFlow(
   await expect(input).toHaveValue(address, { timeout: 10_000 });
   await expect(sendButton).toBeEnabled({ timeout: 10_000 });
   await sendButton.click();
-
-  await expect(page.getByTestId("deal-type-selector")).toBeVisible({
-    timeout: 10_000,
-  });
-  await page.getByTestId(`deal-type-${dealType}`).click();
-
-  await expect(page.getByTestId("pipeline-approval-card")).toBeVisible({
-    timeout: 5_000,
-  });
-  await page.getByTestId("pipeline-run-button").click();
 }
 
 export async function waitForReport(page: Page) {

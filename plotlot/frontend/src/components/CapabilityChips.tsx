@@ -8,9 +8,9 @@ interface ChipDef {
 }
 
 const LOOKUP_CHIPS: ChipDef[] = [
-  { label: "Houston, TX", prompt: "1400 Smith St, Houston, TX 77002" },
-  { label: "Atlanta, GA", prompt: "100 Peachtree St NW, Atlanta, GA 30303" },
+  { label: "Miramar, FL", prompt: "7940 Plantation Blvd, Miramar, FL 33023" },
   { label: "Miami Gardens, FL", prompt: "18901 NW 27th Ave, Miami Gardens, FL 33056" },
+  { label: "Boca Raton, FL", prompt: "200 E Palmetto Park Rd, Boca Raton, FL 33432" },
 ];
 
 const AGENT_CHIPS: ChipDef[] = [

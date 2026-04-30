@@ -193,12 +193,14 @@ async def analyze_stream(request: AnalyzeRequest):
                 lookup_property(request.address, county, lat=lat, lng=lng)
             )
             prop_record = None
+            prop_lookup_error: Exception | None = None
             for _tick in range(4):  # 4 × 10s = 40s max
                 done, _ = await asyncio.wait({prop_task}, timeout=10)
                 if done:
                     try:
                         prop_record = prop_task.result()
                     except Exception as e:
+                        prop_lookup_error = e
                         logger.warning("Property lookup failed: %s", e)
                     break
                 # Heartbeat keeps SSE connection alive through Render proxy
@@ -213,6 +215,18 @@ async def analyze_stream(request: AnalyzeRequest):
                 # Timed out — cancel and proceed without property record
                 prop_task.cancel()
                 logger.warning("Property lookup timed out for: %s", request.address)
+
+            if prop_lookup_error:
+                detail, error_type = _describe_pipeline_error(prop_lookup_error)
+                if error_type == "backend_unavailable":
+                    yield _sse_event(
+                        "error",
+                        {
+                            "detail": detail,
+                            "error_type": error_type,
+                        },
+                    )
+                    return
 
             if prop_record and prop_record.municipality:
                 pa_muni = prop_record.municipality.strip().title()
@@ -301,7 +315,7 @@ async def analyze_stream(request: AnalyzeRequest):
                 )
 
                 report = None
-                for _tick in range(6):  # 6 × 15s = 90s max
+                for _tick in range(3):  # 3 × 15s = 45s max; leave room before client timeout
                     done, _ = await asyncio.wait({analysis_task}, timeout=15)
                     if done:
                         try:
@@ -322,6 +336,14 @@ async def analyze_stream(request: AnalyzeRequest):
                     if not analysis_task.done():
                         analysis_task.cancel()
                     logger.error("LLM analysis timed out for: %s", request.address)
+                    yield _sse_event(
+                        "status",
+                        {
+                            "step": "analysis",
+                            "message": "Using estimated zoning report",
+                            "complete": True,
+                        },
+                    )
                     from plotlot.pipeline.lookup import _build_fallback_report
 
                     report = _build_fallback_report(
@@ -329,6 +351,7 @@ async def analyze_stream(request: AnalyzeRequest):
                         geo,
                         prop_record,
                         [f"{r.section} — {r.section_title}" for r in search_results if r.section],
+                        search_results,
                     )
 
                 # Log analysis metrics inside the MLflow run
