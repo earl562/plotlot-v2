@@ -40,6 +40,10 @@ test.describe("Canonical db-backed agent lane", () => {
     await expect(page.getByText("Miramar zoning context is loaded")).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText("Used report_context")).toBeVisible();
+    await expect(
+      page
+        .getByText("Using report context")
+        .or(page.getByText("Used report_context")),
+    ).toBeVisible();
   });
 });

@@ -352,9 +352,92 @@ async def _handle_generate_document(args: dict[str, Any], context: ToolContext) 
     }
 
 
+async def _handle_draft_google_doc(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    """Create an internal document draft (no external connector write)."""
+
+    title = str(args.get("title", "")).strip() or "Untitled Draft"
+    content = str(args.get("content", "") or "").strip()
+    evidence_ids = args.get("evidence_ids") or []
+    if not isinstance(evidence_ids, list):
+        evidence_ids = []
+
+    draft_id = f"draft_doc_{uuid.uuid4()}"
+    preview = content[:240]
+
+    return {
+        "status": "drafted",
+        "draft": {
+            "draft_id": draft_id,
+            "title": title,
+            "content_preview": preview,
+            "evidence_ids": evidence_ids,
+        },
+        "artifacts": {
+            "document": {
+                "document_type": "google_doc_draft",
+                "status": "draft",
+                "metadata_json": {
+                    "draft_id": draft_id,
+                    "title": title,
+                    "content": content,
+                    "evidence_ids": evidence_ids,
+                    "workspace_id": context.workspace_id,
+                    "project_id": context.project_id,
+                    "site_id": context.site_id,
+                },
+            }
+        },
+    }
+
+
+async def _handle_draft_email(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    """Create an internal outreach email draft (no external connector write)."""
+
+    to_raw = args.get("to") or []
+    to_list = to_raw if isinstance(to_raw, list) else [str(to_raw)]
+    to_list = [str(addr).strip() for addr in to_list if str(addr).strip()]
+    subject = str(args.get("subject", "") or "").strip()
+    body = str(args.get("body", "") or "").strip()
+    evidence_ids = args.get("evidence_ids") or []
+    if not isinstance(evidence_ids, list):
+        evidence_ids = []
+
+    draft_id = f"draft_email_{uuid.uuid4()}"
+    preview = body[:240]
+
+    return {
+        "status": "drafted",
+        "draft": {
+            "draft_id": draft_id,
+            "to": to_list,
+            "subject": subject,
+            "body_preview": preview,
+            "evidence_ids": evidence_ids,
+        },
+        "artifacts": {
+            "document": {
+                "document_type": "email_draft",
+                "status": "draft",
+                "metadata_json": {
+                    "draft_id": draft_id,
+                    "to": to_list,
+                    "subject": subject,
+                    "body": body,
+                    "evidence_ids": evidence_ids,
+                    "workspace_id": context.workspace_id,
+                    "project_id": context.project_id,
+                    "site_id": context.site_id,
+                },
+            }
+        },
+    }
+
+
 def build_default_runtime() -> HarnessRuntime:
     policy = HarnessPolicyEngine(
-        policy=ToolPolicy(internal_write_tools=frozenset({"generate_document"}))
+        policy=ToolPolicy(
+            internal_write_tools=frozenset({"draft_email", "draft_google_doc", "generate_document"})
+        )
     )
     runtime = HarnessRuntime(policy=policy)
     runtime.register("geocode_address", _handle_geocode_address)
@@ -362,6 +445,8 @@ def build_default_runtime() -> HarnessRuntime:
     runtime.register("search_zoning_ordinance", _handle_search_zoning_ordinance)
     runtime.register("search_municode_live", _handle_search_municode_live)
     runtime.register("discover_open_data_layers", _handle_discover_open_data_layers)
+    runtime.register("draft_google_doc", _handle_draft_google_doc)
+    runtime.register("draft_email", _handle_draft_email)
     runtime.register("generate_document", _handle_generate_document)
     return runtime
 

@@ -578,6 +578,67 @@ class OpenDataToolPort:
         ...
 ```
 
+### 7.4 Connector tool ports (draft + approval)
+
+Connectors must be expressed as **typed tool ports** with explicit risk classes. The default policy is:
+
+- draft/prepare actions: `WRITE_INTERNAL` (allowed when allowlisted; no external side effects)
+- commit/send actions: `WRITE_EXTERNAL` (requires explicit approval)
+
+Example contract sketches:
+
+```python
+from enum import StrEnum
+from pydantic import BaseModel, Field
+
+
+class ConnectorProvider(StrEnum):
+    GOOGLE_WORKSPACE = "google_workspace"
+    GMAIL = "gmail"
+    GOOGLE_CALENDAR = "google_calendar"
+    CRM = "crm"
+
+
+class ConnectorAccountStatus(StrEnum):
+    CONNECTED = "connected"
+    MISSING = "missing"
+    LIMITED = "limited"
+    ERROR = "error"
+
+
+class ConnectorAccount(BaseModel):
+    id: str
+    provider: ConnectorProvider
+    scopes: list[str] = Field(default_factory=list)
+    status: ConnectorAccountStatus
+    label: str | None = None
+
+
+class DraftEmailArgs(BaseModel):
+    to: list[str]
+    subject: str
+    body: str
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+class DraftEmailResult(BaseModel):
+    draft_id: str
+    preview: str
+
+
+class GmailSendDraftArgs(BaseModel):
+    draft_id: str
+
+
+class ConnectorToolPort:
+    async def draft_email(self, args: DraftEmailArgs, ctx: ToolContext) -> DraftEmailResult:
+        ...
+
+    async def gmail_send_draft(self, args: GmailSendDraftArgs, ctx: ToolContext) -> dict:
+        # WRITE_EXTERNAL — requires approval + connector account readiness
+        ...
+```
+
 ## 8. REST route sketch
 
 ```python
@@ -604,6 +665,32 @@ async def discover_open_data_layers(req: DiscoverLayersRequest, ctx: ToolContext
 @router.get("/analyses/{analysis_id}/evidence")
 async def list_evidence(analysis_id: str):
     return await evidence_service.list_for_analysis(analysis_id)
+
+
+@router.get("/connectors/providers")
+async def list_connector_providers():
+    return [{"id": "google_workspace"}, {"id": "gmail"}, {"id": "google_calendar"}, {"id": "crm"}]
+
+
+@router.get("/connectors/accounts")
+async def list_connector_accounts(workspace_id: str):
+    return await connector_service.list_accounts(workspace_id)
+
+
+@router.post("/tools/draft-email")
+async def draft_email(req: DraftEmailArgs, ctx: ToolContext = Depends(tool_context)):
+    return await connector_tool.draft_email(req, ctx)
+
+
+@router.post("/tools/gmail-send-draft")
+async def gmail_send_draft(req: GmailSendDraftArgs, ctx: ToolContext = Depends(tool_context)):
+    # Will return approval_required unless ctx includes an approved approval_id.
+    return await connector_tool.gmail_send_draft(req, ctx)
+
+
+@router.post("/approvals/{approval_id}/decision")
+async def decide_approval(approval_id: str, body: ApprovalDecisionRequest):
+    return await approvals_service.decide(approval_id, body)
 ```
 
 ## 9. MCP adapter sketch
@@ -624,6 +711,20 @@ async def mcp_search_ordinances(jurisdiction: dict, query: str, limit: int = 8):
 async def mcp_discover_open_data_layers(county: str, state: str, layer_type: str = "parcel"):
     ctx = mcp_tool_context(read_only=True)
     return [layer.model_dump(mode="json") for layer in await open_data_tool.discover_layers(county, state, layer_type, ctx)]
+
+
+@mcp.tool(name="plotlot.draft_email")
+async def mcp_draft_email(to: list[str], subject: str, body: str):
+    ctx = mcp_tool_context(read_only=False)
+    args = DraftEmailArgs(to=to, subject=subject, body=body)
+    return (await connector_tool.draft_email(args, ctx)).model_dump(mode="json")
+
+
+@mcp.tool(name="plotlot.gmail_send_draft")
+async def mcp_gmail_send_draft(draft_id: str):
+    ctx = mcp_tool_context(read_only=False)
+    args = GmailSendDraftArgs(draft_id=draft_id)
+    return await connector_tool.gmail_send_draft(args, ctx)
 ```
 
 MCP write tools should either be omitted from default config or return an approval-required envelope:

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import ChatHistory from "@/components/ChatHistory";
 import type { ChatSession } from "@/lib/sessions";
@@ -23,15 +24,16 @@ type NavItem = {
   label: string;
   icon: string;
   mode?: AppMode;
+  href?: string;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "site-finder", label: "Site Finder", icon: "⌖", mode: "lookup" },
-  { id: "analyses", label: "Analyses", icon: "◫" },
-  { id: "evidence", label: "Evidence", icon: "◉" },
-  { id: "reports", label: "Reports", icon: "☰" },
-  { id: "harness-workspace", label: "Harness Workspace", icon: "✳", mode: "agent" },
-  { id: "connectors", label: "Connectors", icon: "◎" },
+  { id: "site-finder", label: "Site Finder", icon: "⌖", mode: "lookup", href: "/" },
+  { id: "analyses", label: "Analyses", icon: "◫", href: "/analyses" },
+  { id: "evidence", label: "Evidence", icon: "◉", href: "/evidence" },
+  { id: "reports", label: "Reports", icon: "☰", href: "/reports" },
+  { id: "harness-workspace", label: "Harness Workspace", icon: "✳", mode: "agent", href: "/" },
+  { id: "connectors", label: "Connectors", icon: "◎", href: "/connectors" },
 ];
 
 export default function Sidebar({
@@ -43,8 +45,14 @@ export default function Sidebar({
   onSelectSession,
   onDeleteSession,
 }: SidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [search, setSearch] = useState("");
-  const [activeNavId, setActiveNavId] = useState<string>("site-finder");
+  const [activeNavId, setActiveNavId] = useState<string>(() => {
+    if (!pathname || pathname === "/") return "site-finder";
+    const match = NAV_ITEMS.find((item) => item.href === pathname);
+    return match ? match.id : "site-finder";
+  });
 
   const filtered = search.trim()
     ? sessions.filter((s) => s.title.toLowerCase().includes(search.trim().toLowerCase()))
@@ -80,11 +88,17 @@ export default function Sidebar({
     return () => window.removeEventListener("plotlot:mode-changed", handler);
   }, []);
 
-  const handleNavClick = useCallback((item: NavItem) => {
-    setActiveNavId(item.id);
-    if (!item.mode) return;
-    window.dispatchEvent(new CustomEvent("plotlot:mode-change", { detail: { mode: item.mode } }));
-  }, []);
+  const handleNavClick = useCallback(
+    (item: NavItem) => {
+      setActiveNavId(item.id);
+      if (item.href) router.push(item.href);
+      if (!item.mode) return;
+      window.dispatchEvent(
+        new CustomEvent("plotlot:mode-change", { detail: { mode: item.mode } }),
+      );
+    },
+    [router],
+  );
 
   return (
     <>

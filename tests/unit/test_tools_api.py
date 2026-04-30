@@ -212,3 +212,60 @@ async def test_tools_call_generate_document_persists_artifacts(client):
     assert data["status"] == "ok"
     assert "report_id" in data["artifact_ids"]
     assert "document_id" in data["artifact_ids"]
+
+
+@pytest.mark.asyncio
+async def test_tools_call_draft_email_is_allowed_and_persists_document_artifact(client):
+    fake_session = FakeSession()
+    with patch("plotlot.api.tools.get_session", new=AsyncMock(return_value=fake_session)):
+        resp = await client.post(
+            "/api/v1/tools/call",
+            json={
+                "tool_name": "draft_email",
+                "arguments": {
+                    "to": ["owner@example.com"],
+                    "subject": "Site feasibility follow-up",
+                    "body": "Hi — sharing a draft note for review.",
+                    "evidence_ids": ["ev_1"],
+                },
+                "workspace_id": "ws_test",
+                "run_id": "run_test_draft_1",
+            },
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert data["result"]["status"] == "drafted"
+    assert "document_id" in data["artifact_ids"]
+
+
+@pytest.mark.asyncio
+async def test_tools_call_gmail_send_draft_requires_approval_and_persists_request(client):
+    from plotlot.storage.models import ApprovalRequest
+
+    fake_session = FakeSession()
+    with patch("plotlot.api.tools.get_session", new=AsyncMock(return_value=fake_session)):
+        resp = await client.post(
+            "/api/v1/tools/call",
+            json={
+                "tool_name": "gmail_send_draft",
+                "arguments": {"draft_id": "draft_email_123"},
+                "workspace_id": "ws_test",
+                "run_id": "run_test_send_1",
+            },
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "pending_approval"
+    assert data["decision"]["approval_required"] is True
+    assert data["decision"]["approval_id"]
+
+    approvals = [obj for obj in fake_session.added if isinstance(obj, ApprovalRequest)]
+    assert len(approvals) == 1
+    approval = approvals[0]
+    assert approval.workspace_id == "ws_test"
+    assert approval.action_name == "gmail_send_draft"
+    assert approval.risk_class == "write_external"
+    assert approval.status == "pending"
+    assert approval.request_json["tool"] == "gmail_send_draft"

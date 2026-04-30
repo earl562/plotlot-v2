@@ -92,6 +92,41 @@ async def tools_call(body: MCPCallRequest) -> dict[str, Any]:
         context=body.context,
         approval_id=body.approval_id,
     )
+
+    if result.status == "pending_approval" and result.decision.approval_id:
+        session = await get_session()
+        try:
+            existing = await session.get(ApprovalRequest, result.decision.approval_id)
+            if existing is None:
+                session.add(
+                    ApprovalRequest(
+                        id=result.decision.approval_id,
+                        workspace_id=body.context.workspace_id,
+                        project_id=body.context.project_id,
+                        analysis_run_id=body.context.analysis_run_id,
+                        tool_run_id=body.context.tool_run_id,
+                        status="pending",
+                        risk_class=risk_class,
+                        action_name=body.name,
+                        reason=result.decision.reason,
+                        request_json={
+                            "tool": body.name,
+                            "args": body.arguments,
+                            "run_id": body.context.run_id,
+                        },
+                        response_json={},
+                        requested_by=body.context.actor_user_id,
+                    )
+                )
+                await session.commit()
+        except Exception:
+            logger.warning("Failed to persist approval request from MCP call", exc_info=True)
+            try:
+                await session.rollback()
+            except Exception:
+                logger.warning("Rollback failed", exc_info=True)
+        finally:
+            await session.close()
     return {
         "tool_name": result.tool_name,
         "status": result.status,

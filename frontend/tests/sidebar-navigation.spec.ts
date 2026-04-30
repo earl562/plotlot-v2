@@ -11,9 +11,21 @@ test.describe("sidebar navigation", () => {
     await expect(page.getByTestId("agent-input")).toBeVisible();
     await expect(harnessWorkspace).toHaveAttribute("aria-current", "page");
 
+    const analyses = page.getByTestId("sidebar-nav-analyses");
+    await analyses.click();
+    await expect(page).toHaveURL(/\/analyses$/);
+    await expect(page.getByRole("heading", { name: "Analyses" })).toBeVisible();
+    await expect(analyses).toHaveAttribute("aria-current", "page");
+
     const siteFinder = page.getByTestId("sidebar-nav-site-finder");
     await siteFinder.click();
     await expect(page.getByTestId("lookup-input")).toBeVisible();
     await expect(siteFinder).toHaveAttribute("aria-current", "page");
+
+    const connectors = page.getByTestId("sidebar-nav-connectors");
+    await connectors.click();
+    await expect(page).toHaveURL(/\/connectors$/);
+    await expect(page.getByRole("heading", { name: "Connectors" })).toBeVisible();
+    await expect(connectors).toHaveAttribute("aria-current", "page");
   });
 });

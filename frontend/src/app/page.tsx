@@ -1016,31 +1016,29 @@ export default function Home() {
             </div>
           )}
 
-          {/* Input bar — hidden in lookup mode after report is shown */}
-          {!(mode === "lookup" && hasReport) && (
-            <div>
-              <InputBar
-                inputRef={inputRef}
-                value={input}
-                onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
-                onSubmit={handleSubmit}
-                onAddressSelect={(address) => sendMessage(address)}
-                mode={mode}
-                onModeChange={handleModeChange}
-                placeholder={mode === "lookup"
-                  ? "Enter a property address..."
-                  : hasReport
-                    ? "Ask about this property's zoning..."
-                    : "Ask about zoning, density, or property data..."
-                }
-                disabled={isProcessing}
-                isProcessing={isProcessing}
-              />
-              {inputError && (
-                <p className="mt-2 px-4 text-xs text-red-500">{inputError}</p>
-              )}
-            </div>
-          )}
+          {/* Input bar */}
+          <div>
+            <InputBar
+              inputRef={inputRef}
+              value={input}
+              onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
+              onSubmit={handleSubmit}
+              onAddressSelect={(address) => sendMessage(address)}
+              mode={mode}
+              onModeChange={handleModeChange}
+              placeholder={mode === "lookup"
+                ? "Enter a property address..."
+                : hasReport
+                  ? "Ask about this property's zoning..."
+                  : "Ask about zoning, density, or property data..."
+              }
+              disabled={isProcessing}
+              isProcessing={isProcessing}
+            />
+            {inputError && (
+              <p className="mt-2 px-4 text-xs text-red-500">{inputError}</p>
+            )}
+          </div>
 
         </div>
       </div>
