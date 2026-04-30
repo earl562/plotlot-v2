@@ -78,6 +78,12 @@ class Settings(BaseSettings):
     rate_limit_max_requests: int = 30
     rate_limit_window_seconds: int = 60
 
+    # Tool governance (agentic chat)
+    tool_permission_mode: str = Field(
+        default="read_only",
+        validation_alias="PLOTLOT_TOOL_PERMISSION_MODE",
+    )  # read_only|allow_writes
+
     # API keys
     geocodio_api_key: str = ""
     hf_token: str = ""

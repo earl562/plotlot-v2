@@ -6,9 +6,10 @@ This backlog turns reviewed research into shippable harness modules.
 
 - [x] Durable chat transcript + tool-call audit tables (`chat_messages`, `chat_tool_calls`).
 - [x] Read APIs for transcript + tool calls.
-- [ ] Tool permission modes (deny-by-default external writes)
-  - Modes: `read_only`, `ask_to_write`, `auto`
-  - Enforce at tool boundary; log decisions to audit trail.
+- [x] Tool permission modes (deny-by-default external writes)
+  - Implemented: `PLOTLOT_TOOL_PERMISSION_MODE=read_only|allow_writes`
+  - Enforced at tool boundary + logged to tool-call audit trail.
+  - TODO: interactive approvals (`ask_to_write`) for client UIs.
 - [ ] Admission control / action governance (ACP-style)
   - deterministic rules keyed by tool+scope
   - cooldown/escalation on repeated denials/anomalies

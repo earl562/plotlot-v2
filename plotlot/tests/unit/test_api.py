@@ -725,12 +725,15 @@ async def test_portfolio_not_found(client):
 
 
 @pytest.mark.asyncio
-async def test_chat_create_spreadsheet_tool(client):
+async def test_chat_create_spreadsheet_tool(client, monkeypatch):
     """Chat agent creates a spreadsheet via tool call."""
-    from plotlot.api.chat import _sessions
+    from plotlot.api.chat import _sessions, settings
 
     _sessions._conversations.clear()
     _sessions._last_access.clear()
+
+    # Allow write tools for this test (default policy is deny-by-default)
+    monkeypatch.setattr(settings, "tool_permission_mode", "allow_writes")
 
     tool_response = {
         "content": "",
@@ -781,12 +784,15 @@ async def test_chat_create_spreadsheet_tool(client):
 
 
 @pytest.mark.asyncio
-async def test_chat_create_document_tool(client):
+async def test_chat_create_document_tool(client, monkeypatch):
     """Chat agent creates a document via tool call."""
-    from plotlot.api.chat import _sessions
+    from plotlot.api.chat import _sessions, settings
 
     _sessions._conversations.clear()
     _sessions._last_access.clear()
+
+    # Allow write tools for this test (default policy is deny-by-default)
+    monkeypatch.setattr(settings, "tool_permission_mode", "allow_writes")
 
     tool_response = {
         "content": "",
@@ -909,14 +915,17 @@ async def test_chat_search_properties(client):
 
 
 @pytest.mark.asyncio
-async def test_chat_export_dataset(client):
+async def test_chat_export_dataset(client, monkeypatch):
     """Agent exports dataset to Google Sheets."""
-    from plotlot.api.chat import _sessions
+    from plotlot.api.chat import _sessions, settings
     from plotlot.retrieval.bulk_search import DatasetInfo
 
     _sessions._conversations.clear()
     _sessions._datasets.clear()
     _sessions._last_access.clear()
+
+    # Allow write tools for this test (default policy is deny-by-default)
+    monkeypatch.setattr(settings, "tool_permission_mode", "allow_writes")
 
     # Pre-populate a dataset for session "test-export"
     _sessions.set_dataset(

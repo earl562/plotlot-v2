@@ -35,6 +35,8 @@ This repo is evolving PlotLot v2 into an **agentic harness**: the surrounding in
   - `chat_messages` table + hydration on session resume
 - Tool-call audit trail:
   - `chat_tool_calls` table + writes on each tool execution
+- Tool governance (deny-by-default external writes):
+  - `PLOTLOT_TOOL_PERMISSION_MODE=read_only|allow_writes`
 - Retrieval endpoints (backend source of truth):
   - `GET /api/v1/chat/sessions/{session_id}/transcript`
   - `GET /api/v1/chat/sessions/{session_id}/tool-calls`

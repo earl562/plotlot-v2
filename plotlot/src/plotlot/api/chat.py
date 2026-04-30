@@ -61,6 +61,14 @@ MAX_TOKENS_PER_SESSION = 50_000  # Cost cap — prevent runaway token spend
 MAX_SESSIONS = 100  # Max concurrent sessions in memory (Render 512MB)
 SESSION_TTL_SECONDS = 3600  # Evict sessions idle for 1 hour
 
+# Tool governance: external-write tools should be gated behind explicit policy.
+WRITE_TOOLS = {
+    "create_spreadsheet",
+    "create_document",
+    "export_dataset",
+    "generate_document",
+}
+
 
 class SessionStore:
     """Bounded in-memory session store with LRU eviction and TTL.
@@ -1656,20 +1664,36 @@ async def chat(request: ChatRequest):
                         },
                     )
 
-                    tool_status = "complete"
-                    try:
-                        result = await _execute_tool(fn_name, fn_args, session_id=session_id)
-                        # Heuristic: tools generally return JSON with {status: "success"|"error"}
+                    # Tool governance gate (deny-by-default external writes)
+                    if (
+                        settings.tool_permission_mode == "read_only"
+                        and fn_name in WRITE_TOOLS
+                    ):
+                        tool_status = "blocked"
+                        result = json.dumps(
+                            {
+                                "status": "error",
+                                "message": (
+                                    f"Tool '{fn_name}' is blocked by policy (tool_permission_mode=read_only). "
+                                    "Set PLOTLOT_TOOL_PERMISSION_MODE=allow_writes to enable external write tools."
+                                ),
+                            }
+                        )
+                    else:
+                        tool_status = "complete"
                         try:
-                            parsed = json.loads(result)
-                            if isinstance(parsed, dict) and parsed.get("status") == "error":
-                                tool_status = "error"
-                        except Exception:
-                            pass
-                    except Exception as exc:
-                        logger.exception("Tool execution error: %s", exc)
-                        result = json.dumps({"status": "error", "message": str(exc)})
-                        tool_status = "error"
+                            result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                            # Heuristic: tools generally return JSON with {status: "success"|"error"}
+                            try:
+                                parsed = json.loads(result)
+                                if isinstance(parsed, dict) and parsed.get("status") == "error":
+                                    tool_status = "error"
+                            except Exception:
+                                pass
+                        except Exception as exc:
+                            logger.exception("Tool execution error: %s", exc)
+                            result = json.dumps({"status": "error", "message": str(exc)})
+                            tool_status = "error"
 
                     yield _sse_event(
                         "tool_result",
