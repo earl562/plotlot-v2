@@ -1,0 +1,23 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: plotlot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: plotlot
+      POSTGRES_USER: plotlot
+      POSTGRES_PASSWORD: plotlot
+    ports:
+      - "5433:5432"
+    volumes:
+      - plotlot-postgres-data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plotlot -d plotlot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  plotlot-postgres-data:
