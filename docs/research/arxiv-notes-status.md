@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **100**
-Reviewed: **21**
-Stub: **79**
+Reviewed: **22**
+Stub: **78**
 
 ## Reviewed
 
@@ -24,6 +24,7 @@ Stub: **79**
 - [2603.29199v1](docs/research/arxiv-notes/2603.29199v1.md) — AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction
 - [2604.07833v2](docs/research/arxiv-notes/2604.07833v2.md) — Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution
 - [2604.08224v1](docs/research/arxiv-notes/2604.08224v1.md) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering
+- [2604.11548v1](docs/research/arxiv-notes/2604.11548v1.md) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering
 - [2604.13630v1](docs/research/arxiv-notes/2604.13630v1.md) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment
 - [2604.14228v1](docs/research/arxiv-notes/2604.14228v1.md) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems
 - [2604.18071v1](docs/research/arxiv-notes/2604.18071v1.md) — Architectural Design Decisions in AI Agent Harnesses
@@ -93,7 +94,6 @@ Stub: **79**
 - [2604.08756v1](docs/research/arxiv-notes/2604.08756v1.md) — Artifacts as Memory Beyond the Agent Boundary
 - [2604.11378v1](docs/research/arxiv-notes/2604.11378v1.md) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution
 - [2604.11535v1](docs/research/arxiv-notes/2604.11535v1.md) — Problem Reductions at Scale: Agentic Integration of Computationally Hard Problems
-- [2604.11548v1](docs/research/arxiv-notes/2604.11548v1.md) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering
 - [2604.11784v1](docs/research/arxiv-notes/2604.11784v1.md) — ClawGUI: A Unified Framework for Training, Evaluating, and Deploying GUI Agents
 - [2604.11811v1](docs/research/arxiv-notes/2604.11811v1.md) — M$^\\star$: Every Task Deserves Its Own Memory Harness
 - [2604.12064v1](docs/research/arxiv-notes/2604.12064v1.md) — LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests
