@@ -35,6 +35,12 @@ from plotlot.retrieval.bulk_search import (
 from plotlot.retrieval.google_workspace import create_document, create_spreadsheet
 from plotlot.retrieval.llm import call_llm
 from plotlot.retrieval.search import hybrid_search
+from plotlot.storage.chat_store import (
+    append_chat_message,
+    append_tool_call,
+    delete_chat_session,
+    load_chat_messages,
+)
 from plotlot.storage.db import get_session
 from plotlot.observability.prompts import get_active_prompt
 from plotlot.observability.tracing import start_span
@@ -1493,21 +1499,52 @@ async def chat(request: ChatRequest):
 
             messages = [{"role": "system", "content": system_content}]
 
-            # Load conversation memory (bounded by SessionStore)
+            # Load conversation memory (bounded by SessionStore, optionally hydrated from DB)
             memory = _sessions.get_messages(session_id)
+
+            if not memory:
+                # Prefer backend-owned transcript if available
+                try:
+                    db_msgs = await load_chat_messages(session_id, limit=MAX_MEMORY_MESSAGES)
+                    if db_msgs:
+                        memory.extend(db_msgs)
+                except Exception as exc:
+                    logger.warning(
+                        "Chat transcript load failed (falling back to in-memory): %s", exc
+                    )
+
+            if not memory and request.history:
+                # Seed durable transcript once from client-provided history (when DB is empty)
+                seed = [
+                    {"role": m.role, "content": m.content}
+                    for m in request.history[-MAX_MEMORY_MESSAGES:]
+                ]
+                if seed:
+                    memory.extend(seed)
+                    for m in seed:
+                        try:
+                            await append_chat_message(session_id, m["role"], m["content"])
+                        except Exception as exc:
+                            logger.warning("Chat transcript seed write failed: %s", exc)
+                            break
+
             if memory:
                 # Include last N messages from memory for context
                 messages.extend(memory[-20:])
-
-            # Add conversation history from this page session
-            for msg in request.history:
-                messages.append({"role": msg.role, "content": msg.content})
+            else:
+                # Add conversation history from this page session (client-provided)
+                for msg in request.history:
+                    messages.append({"role": msg.role, "content": msg.content})
 
             # Add current user message
             messages.append({"role": "user", "content": request.message})
 
-            # Save user message to memory
+            # Save user message to memory + durable transcript
             memory.append({"role": "user", "content": request.message})
+            try:
+                await append_chat_message(session_id, "user", request.message)
+            except Exception as exc:
+                logger.warning("Chat transcript write failed: %s", exc)
 
             # MLflow span for the entire chat request (Notion replay pattern)
             _span_ctx = start_span(name="chat_request", span_type="CHAIN")
@@ -1565,6 +1602,10 @@ async def chat(request: ChatRequest):
                     if content:
                         yield _sse_event("token", {"content": content})
                         memory.append({"role": "assistant", "content": content})
+                        try:
+                            await append_chat_message(session_id, "assistant", content)
+                        except Exception as exc:
+                            logger.warning("Chat transcript write failed: %s", exc)
                     yield _sse_event("done", {"full_content": content})
 
                     # Trim memory if too long
@@ -1614,16 +1655,40 @@ async def chat(request: ChatRequest):
                         },
                     )
 
-                    # Execute tool
-                    result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                    tool_status = "complete"
+                    try:
+                        result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                        # Heuristic: tools generally return JSON with {status: "success"|"error"}
+                        try:
+                            parsed = json.loads(result)
+                            if isinstance(parsed, dict) and parsed.get("status") == "error":
+                                tool_status = "error"
+                        except Exception:
+                            pass
+                    except Exception as exc:
+                        logger.exception("Tool execution error: %s", exc)
+                        result = json.dumps({"status": "error", "message": str(exc)})
+                        tool_status = "error"
 
                     yield _sse_event(
                         "tool_result",
                         {
                             "tool": fn_name,
-                            "status": "complete",
+                            "status": tool_status,
                         },
                     )
+
+                    try:
+                        await append_tool_call(
+                            session_id,
+                            tool_name=fn_name,
+                            tool_args=fn_args,
+                            tool_result=result,
+                            tool_call_id=tc_id or None,
+                            status=tool_status,
+                        )
+                    except Exception as exc:
+                        logger.warning("Tool call audit write failed: %s", exc)
 
                     messages.append(
                         {
@@ -1644,6 +1709,15 @@ async def chat(request: ChatRequest):
                 )
             yield _sse_event("token", {"content": final_content})
             memory.append({"role": "assistant", "content": final_content})
+            try:
+                await append_chat_message(session_id, "assistant", final_content)
+            except Exception as exc:
+                logger.warning("Chat transcript write failed: %s", exc)
+
+            # Trim memory if too long
+            if len(memory) > MAX_MEMORY_MESSAGES:
+                del memory[:-MAX_MEMORY_MESSAGES]
+
             yield _sse_event("done", {"full_content": final_content})
 
         except Exception as e:
@@ -1679,6 +1753,15 @@ async def list_sessions():
 @router.delete("/chat/sessions/{session_id}")
 async def clear_session(session_id: str):
     """Clear conversation memory and dataset for a session."""
-    if _sessions.delete_session(session_id):
+
+    cleared_in_memory = _sessions.delete_session(session_id)
+    cleared_in_db = False
+    try:
+        await delete_chat_session(session_id)
+        cleared_in_db = True
+    except Exception as exc:
+        logger.warning("Failed to delete durable chat session data: %s", exc)
+
+    if cleared_in_memory or cleared_in_db:
         return {"status": "cleared", "session_id": session_id}
     return {"status": "not_found"}

@@ -146,3 +146,34 @@ class UserSubscription(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+
+class ChatMessageRecord(Base):
+    """Durable chat transcript message (user/assistant).
+
+    PlotLot's chat endpoint historically relied on in-memory session state.
+    This table provides durable, backend-owned transcript persistence.
+    """
+
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String(32), nullable=False, index=True)
+    role = Column(String(16), nullable=False)  # user|assistant
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class ChatToolCallRecord(Base):
+    """Append-only audit log of tool calls made during chat runs."""
+
+    __tablename__ = "chat_tool_calls"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String(32), nullable=False, index=True)
+    tool_call_id = Column(String(64), nullable=True)
+    tool_name = Column(String(100), nullable=False)
+    tool_args = Column(JSON, nullable=False, default=dict)
+    tool_result = Column(Text, nullable=True)
+    status = Column(String(20), nullable=False, default="complete")  # complete|error
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

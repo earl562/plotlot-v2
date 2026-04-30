@@ -497,17 +497,21 @@ async def test_chat_session_memory(client):
     _sessions._conversations.clear()
     _sessions._last_access.clear()
 
+    import uuid
+
+    session_id = f"test-session-{uuid.uuid4().hex[:8]}"
+
     mock_response = {"content": "I'll remember that!", "tool_calls": []}
     with patch("plotlot.api.chat.call_llm", new_callable=AsyncMock, return_value=mock_response):
         resp = await client.post(
             "/api/v1/chat",
-            json={"message": "My name is Earl", "session_id": "test-session"},
+            json={"message": "My name is Earl", "session_id": session_id},
         )
     assert resp.status_code == 200
     # Check that the session event was emitted
-    assert "test-session" in resp.text
+    assert session_id in resp.text
     # Memory should have the user message + assistant response
-    assert len(_sessions._conversations.get("test-session", [])) == 2
+    assert len(_sessions._conversations.get(session_id, [])) == 2
 
 
 # ---------------------------------------------------------------------------
