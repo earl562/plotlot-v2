@@ -149,6 +149,25 @@ try:
         if etype == "extension_ui_request":
             method = evt.get("method")
             req_id = evt.get("id")
+
+            # Surface notifications (and use them as a termination signal when Ralph stops via the extension).
+            if method == "notify":
+                msg = str(evt.get("message") or "")
+                sys.stderr.write(f"[pi-ui] {msg}\n")
+                sys.stderr.flush()
+                if any(
+                    s in msg.lower()
+                    for s in [
+                        "ralph complete",
+                        "ralph blocked",
+                        "ralph stopped",
+                        "ralph hit max iterations",
+                    ]
+                ):
+                    sys.stderr.write("[pi-ralph] ralph termination notify detected; exiting.\n")
+                    sys.stderr.flush()
+                    break
+
             if not req_id:
                 continue
 
