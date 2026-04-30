@@ -1,4 +1,4 @@
-.PHONY: install install-local-tools auth-readiness auth-bootstrap live-agent-e2e mutation test verify-local lint fmt discover ingest db-up db-down clean
+.PHONY: install install-local-tools auth-readiness auth-bootstrap live-agent-e2e mutation test verify-local verify-local-no-browser lint fmt discover ingest db-up db-down clean
 
 install:  ## Install all dependencies (including dev)
 	uv sync --extra dev
@@ -24,6 +24,9 @@ test:  ## Run test suite
 
 verify-local:  ## Run deterministic backend + frontend local success gates
 	bash scripts/verify_local_success.sh
+
+verify-local-no-browser:  ## Local success gate without Playwright browser tests (useful in port-restricted sandboxes)
+	bash scripts/verify_local_success.sh --skip-browser
 
 lint:  ## Run ruff linter
 	uv run ruff check src/ tests/

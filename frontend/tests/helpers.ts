@@ -11,7 +11,8 @@ export interface BackendPreflight {
   body: Record<string, unknown>;
 }
 
-const HEALTH_URL = "http://127.0.0.1:8000/health";
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+const HEALTH_URL = new URL("/health", BACKEND_BASE_URL).toString();
 
 async function parseHealthResponse(
   health: Response | { ok(): boolean; status(): number; json(): Promise<unknown> },
