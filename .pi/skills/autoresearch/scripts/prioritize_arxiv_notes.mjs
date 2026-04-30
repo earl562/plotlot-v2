@@ -109,7 +109,19 @@ function mdRow(item, notePath, status, score, p) {
 
 const args = parseArgs(process.argv);
 const abstracts = JSON.parse(fs.readFileSync(args.abstracts, "utf-8"));
-const items = (abstracts.items || []).filter((x) => x.status === "ok");
+
+// Dedupe by arXiv ID (some sources contain repeated URLs/entries)
+const rawItems = (abstracts.items || []).filter((x) => x.status === "ok");
+const items = [];
+const seenIds = new Set();
+for (const it of rawItems) {
+  const id = it.arxivId;
+  if (!id) continue;
+  if (seenIds.has(id)) continue;
+  seenIds.add(id);
+  items.push(it);
+}
+const dupesDropped = rawItems.length - items.length;
 
 // Map arxivId -> note status
 const noteFiles = fs
@@ -157,6 +169,7 @@ const lines = [];
 lines.push("# arXiv Top-Down Review Queue\n");
 lines.push(`Generated from: \`${path.basename(args.abstracts)}\``);
 lines.push(`Total papers: **${items.length}**`);
+if (dupesDropped > 0) lines.push(`Duplicates dropped: **${dupesDropped}**`);
 lines.push(`Reviewed: **${reviewed.length}**`);
 lines.push(`Remaining: **${stubs.length}**`);
 lines.push("");
