@@ -1,0 +1,384 @@
+# Obsidian URL Map
+
+Generated from: `obsidian-urls.json`
+Total URLs: **316**
+
+## Buckets
+
+- **arxiv**: 166
+- **github**: 88
+- **ieee**: 1
+- **other**: 28
+- **ssrn**: 1
+- **techrxiv**: 1
+- **vendor-blog**: 26
+- **x**: 5
+
+## Top hosts
+
+- arxiv.org: 166
+- github.com: 87
+- openai.com: 19
+- r.jina.ai: 7
+- x.com: 5
+- camo.githubusercontent.com: 4
+- blog.langchain.com: 3
+- www.langchain.com: 3
+- blog.cloudflare.com: 2
+- github.blog: 2
+- alexzhang13.github.io: 1
+- brendanhogan.github.io: 1
+- chatgpt.com: 1
+- docs.github.com: 1
+- docs.langchain.com: 1
+- git: 1
+- holosai.io: 1
+- ieeexplore.ieee.org: 1
+- memorytransfer.github.io: 1
+- microsoft.github.io: 1
+- openaifoundation.org: 1
+- papers.ssrn.com: 1
+- smolmachines.com: 1
+- trendshift.io: 1
+- ucp.dev: 1
+
+## arxiv (166)
+
+- http://arxiv.org/abs/2508.00828  _(sources: Harness info.md)_
+- https://arxiv.org/abs/2311.02018  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2408.01667  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2504.19413  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2505.02279  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2506.08119  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2507.18755  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2507.23361  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2508.00007  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2508.00828  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2508.20465  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2509.19349  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2509.23206  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2511.07568  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2512.03627  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2512.04535  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2512.16301  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2512.24601v1  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- https://arxiv.org/abs/2601.03192  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.03204  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.07372  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.08670  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.08773  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.10338  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.10971  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.20412  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.21123  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.21545  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.21684  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2601.22773  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.02007  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.02474  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.06025  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.08004  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.08603  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.10498  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.10652  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.11304  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.12430  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.12670  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.14878  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.16069  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.19008  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.19672  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.20867  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2602.22680  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.01493  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.02176  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.02239  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.03212  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.03329  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.05344  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.07379  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.07670  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.08616  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.12658  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.18829  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.18897  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.19347  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.20075  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.20380  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.20939  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.21019  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.22148  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.25723  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.26778  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.26996  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.27813  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.28052  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.28088  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2603.29199  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.00362  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.02334  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.03088  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.03610  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.07833  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.08224  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.08590  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.08756  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.11378  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.11535  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.11548  _(sources: Harness info.md, arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.11784  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.11811  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.12064  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.12162  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13018  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13151  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13282  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13318  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13346  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13630  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.13759  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.14004  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.14228  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.15034  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.18071  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.19572  _(sources: arxiv-metadata.json)_
+- https://arxiv.org/abs/2604.20779  _(sources: Harness info.md)_
+- https://arxiv.org/html/2512.16301v3  _(sources: Harness info.md)_
+- https://arxiv.org/html/2603.21019v1  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2504.19413  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2505.02279  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2506.08119  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2507.23361  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2508.00007  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2509.23206  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2511.07568  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2512.03627  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.03192  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.07372  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.08670  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.08773  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.10338  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.20412  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.21123  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.21545  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.21684  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2601.22773  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.02007  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.02474  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.06025  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.08004  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.08603  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.10498  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.10652  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.12430  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.12670  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.14878  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.19008  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.19672  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2602.20867  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.01493  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.02176  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.05344  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.07379  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.07670  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.10664  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.12658  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.18829  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.18897  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.20939  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.22148  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.26778  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2603.27813  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.02334  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.08756  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.11378  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.11535  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.11548  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.11784  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.11811  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.12064  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.12162  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13018v1  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13151  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13282  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13318  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13346  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13630  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.13759  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.14004  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.14228  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.15034  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.18071  _(sources: Harness info.md)_
+- https://arxiv.org/pdf/2604.21003  _(sources: Harness info.md)_
+
+## github (88)
+
+- http://github.com/  _(sources: github-and-project-snapshots.json)_
+- http://github.com/NousResearch/autoreason#start-of-content  _(sources: github-and-project-snapshots.json)_
+- http://github.com/OpenHands/OpenHands#start-of-content  _(sources: github-and-project-snapshots.json)_
+- http://github.com/aaif-goose/goose#start-of-content  _(sources: github-and-project-snapshots.json)_
+- http://github.com/bytedance/UI-TARS-desktop#start-of-content  _(sources: github-and-project-snapshots.json)_
+- http://github.com/bytedance/deer-flow#-deerflow---20  _(sources: github-and-project-snapshots.json)_
+- http://github.com/bytedance/deer-flow#official-website  _(sources: github-and-project-snapshots.json)_
+- http://github.com/lobehub/lobehub#start-of-content  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FNousResearch%2Fautoreason  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FOpenHands%2FOpenHands  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Faaif-goose%2Fgoose  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fbytedance%2FUI-TARS-desktop  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Flobehub%2Flobehub  _(sources: github-and-project-snapshots.json)_
+- http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fmindfold-ai%2FTrellis  _(sources: github-and-project-snapshots.json)_
+- http://github.com/mindfold-ai/Trellis#start-of-content  _(sources: github-and-project-snapshots.json)_
+- https://docs.github.com/  _(sources: github-and-project-snapshots.json)_
+- https://github.com/AltimateAI/altimate-code  _(sources: Harness info.md)_
+- https://github.com/ChenglinPoly/infiAgent  _(sources: arxiv-metadata.json)_
+- https://github.com/CodingThrust/problem-reductions  _(sources: arxiv-metadata.json)_
+- https://github.com/DVampire/Autogenesis  _(sources: arxiv-metadata.json)_
+- https://github.com/HKUDS/OpenHarness  _(sources: Harness info.md, non-arxiv-snapshots-core.json)_
+- https://github.com/MemTensor/MemRL  _(sources: arxiv-metadata.json)_
+- https://github.com/NousResearch/autoreason  _(sources: GTM Harness Deep Research Synthesis (v1).md, github-and-project-snapshots.json)_
+- https://github.com/NousResearch/autoreason/blob/main/paper/autoreason.pdf  _(sources: Harness info.md)_
+- https://github.com/OpenHands/OpenHands  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/YurenHao0426/VARS  _(sources: arxiv-metadata.json)_
+- https://github.com/aaif-goose/goose  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/aiming-lab/WebXSkill  _(sources: arxiv-metadata.json)_
+- https://github.com/alexzhang13/rlm  _(sources: non-arxiv-snapshots-core.json, Sandbox info.md)_
+- https://github.com/amazon-science/sop-bench  _(sources: arxiv-metadata.json)_
+- https://github.com/anthropics/skills  _(sources: Harness info.md)_
+- https://github.com/borislavmavrin/harmonyagent.git  _(sources: arxiv-metadata.json)_
+- https://github.com/bytedance/UI-TARS-desktop  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/LICENSE  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/Makefile  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/README_fr.md  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/README_ja.md  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/README_ru.md  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/README_zh.md  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/blob/main/backend/pyproject.toml  _(sources: github-and-project-snapshots.json)_
+- https://github.com/bytedance/deer-flow/tree/main-1.x  _(sources: github-and-project-snapshots.json)_
+- https://github.com/chelof100/acp-framework-en  _(sources: arxiv-metadata.json)_
+- https://github.com/containers/libkrun?tab=readme-ov-file  _(sources: Sandbox info.md)_
+- https://github.com/douyipu/ajar  _(sources: arxiv-metadata.json)_
+- https://github.com/dtcxzyw/llvm-autofix  _(sources: arxiv-metadata.json)_
+- https://github.com/emcie-co/parlant  _(sources: Harness info.md, non-arxiv-snapshots-core.json)_
+- https://github.com/enterprise  _(sources: github-and-project-snapshots.json)_
+- https://github.com/enterprise/startups  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/actions  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/code-review  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/codespaces  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/copilot  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/issues  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/models  _(sources: github-and-project-snapshots.json)_
+- https://github.com/features/spark  _(sources: github-and-project-snapshots.json)_
+- https://github.com/jayluxferro/llm-redactor  _(sources: arxiv-metadata.json)_
+- https://github.com/jiayuww/SkillOrchestra  _(sources: arxiv-metadata.json)_
+- https://github.com/jjj-madison/measurable-explore-exploit}{here}  _(sources: arxiv-metadata.json)_
+- https://github.com/keli-wen/agentic-harness-patterns-skill  _(sources: Harness info.md)_
+- https://github.com/langchain-ai/deepagents  _(sources: Harness info.md, non-arxiv-snapshots-core.json)_
+- https://github.com/letta-ai/letta  _(sources: Harness info.md, non-arxiv-snapshots-core.json)_
+- https://github.com/lobehub/lobehub  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/marketplace  _(sources: github-and-project-snapshots.json)_
+- https://github.com/math-ai-org/mathcode  _(sources: Harness info.md)_
+- https://github.com/mcp  _(sources: github-and-project-snapshots.json)_
+- https://github.com/mindfold-ai/Trellis  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, github-and-project-snapshots.json)_
+- https://github.com/nomic-ai/aec-bench  _(sources: arxiv-metadata.json)_
+- https://github.com/s  _(sources: github-and-project-snapshots.json)_
+- https://github.com/scienceaix/agentskills  _(sources: arxiv-metadata.json)_
+- https://github.com/security/advanced-security  _(sources: github-and-project-snapshots.json)_
+- https://github.com/security/advanced-security/code-security  _(sources: github-and-project-snapshots.json)_
+- https://github.com/security/advanced-security/secret-protection  _(sources: github-and-project-snapshots.json)_
+- https://github.com/smol-machines/smolvm/tree/main  _(sources: Sandbox info.md)_
+- https://github.com/solutions/industry/nonprofits  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-c  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-cas  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/ap  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/app-modernization  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/ci-cd  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/devops  _(sources: github-and-project-snapshots.json)_
+- https://github.com/solutions/use-case/devsecops  _(sources: github-and-project-snapshots.json)_
+- https://github.com/team  _(sources: github-and-project-snapshots.json)_
+- https://github.com/why-github  _(sources: github-and-project-snapshots.json)_
+- https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools  _(sources: Harness info.md)_
+- https://github.com/ynulihao/AgentSkillOS  _(sources: arxiv-metadata.json)_
+
+## ieee (1)
+
+- https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11394729  _(sources: Harness info.md)_
+
+## other (28)
+
+- https://alexzhang13.github.io/blog/2025/rlm/  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://blog.cloudflare.com/dynamic-workers/  _(sources: Sandbox info.md)_
+- https://blog.cloudflare.com/welcome-to-agents-week/?utm_campaign=cf_blog&utm_content=20260412&utm_medium=organic_social&utm_source=twitter/  _(sources: Sandbox info.md)_
+- https://brendanhogan.github.io/alphalab-paper/  _(sources: arxiv-metadata.json)_
+- https://camo.githubusercontent.com/835ea254dc5caba36e1d1893d42771368fc1019fccb4cc1b927fc61eaaccc47a/68747470733a2f2f7472656e6473686966742e696f2f6170692f62616467652f7265706f7369746f726965732f3134363939  _(sources: github-and-project-snapshots.json)_
+- https://camo.githubusercontent.com/adec7e84690db6124e0da58740afb1e8cef270e71ea1b69491ce0df84a6da3f2/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4e6f64652e6a732d32322532422d3333393933333f6c6f676f3d6e6f64652e6a73266c6f676f436f6c6f723d7768697465  _(sources: github-and-project-snapshots.json)_
+- https://camo.githubusercontent.com/e2337c6b4f23911b9f1f859fff1f6c8a4ec941df0da216710b24662e2931bf20/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f507974686f6e2d332e31322532422d3337373641423f6c6f676f3d707974686f6e266c6f676f436f6c6f723d7768697465  _(sources: github-and-project-snapshots.json)_
+- https://camo.githubusercontent.com/fdf2982b9f5d7489dcf44570e714e3a15fce6253e0cc6b5aa61a075aac2ff71b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4c6963656e73652d4d49542d79656c6c6f772e737667  _(sources: github-and-project-snapshots.json)_
+- https://chatgpt.com/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- https://git  _(sources: github-and-project-snapshots.json)_
+- https://github.blog/  _(sources: github-and-project-snapshots.json)_
+- https://github.blog/changelog  _(sources: github-and-project-snapshots.json)_
+- https://holosai.io  _(sources: arxiv-metadata.json)_
+- https://memorytransfer.github.io/  _(sources: arxiv-metadata.json)_
+- https://microsoft.github.io/cua_skill/  _(sources: arxiv-metadata.json)_
+- https://openaifoundation.org/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- https://r.jina.ai/http://github.com/NousResearch/autoreason  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/OpenHands/OpenHands  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/aaif-goose/goose  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/bytedance/UI-TARS-desktop  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/bytedance/deer-flow  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/lobehub/lobehub  _(sources: github-and-project-snapshots.json)_
+- https://r.jina.ai/http://github.com/mindfold-ai/Trellis  _(sources: github-and-project-snapshots.json)_
+- https://smolmachines.com/  _(sources: Sandbox info.md)_
+- https://trendshift.io/repositories/14699  _(sources: github-and-project-snapshots.json)_
+- https://ucp.dev/documentation/ucp-and-ap2/  _(sources: Harness info.md)_
+- https://vercel.com/blog/vercel-sandbox-is-now-generally-available  _(sources: Sandbox info.md)_
+- https://www.frontierswe.com/blog  _(sources: Harness info.md)_
+
+## ssrn (1)
+
+- https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6170126  _(sources: Harness info.md)_
+
+## techrxiv (1)
+
+- https://www.techrxiv.org/doi/pdf/10.36227/techrxiv.176857932.25697838/v1  _(sources: Harness info.md)_
+
+## vendor-blog (26)
+
+- http://openai.com/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- http://openai.com/about/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- http://openai.com/api/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- http://openai.com/business/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#agent-legibility-is-the-goal  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#enforcing-architecture-and-taste  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#entropy-and-garbage-collection  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#increasing-application-legibility  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#increasing-levels-of-autonomy  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#main  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#redefining-the-role-of-the-engineer  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#throughput-changes-the-merge-philosophy  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#we-made-repository-knowledge-the-system-of-record  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#we-started-with-an-empty-git-repository  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#what-agent-generated-actually-means  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/index/harness-engineering/#what-were-still-learning  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/news/engineering/  _(sources: non-arxiv-snapshots-core.json)_
+- http://openai.com/research/index/  _(sources: GTM Harness Deep Research Synthesis (v1).md, non-arxiv-snapshots-core.json)_
+- https://blog.langchain.com/deep-agents-v0-5/  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://blog.langchain.com/how-middleware-lets-you-customize-your-agent-harness/  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://blog.langchain.com/the-anatomy-of-an-agent-harness/  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://docs.langchain.com/oss/python/deepagents/deploy#subagents  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://openai.com/index/harness-engineering/  _(sources: GTM Harness Deep Research Synthesis (v1).md, Harness info.md, non-arxiv-snapshots-core.json)_
+- https://www.langchain.com/blog/deep-agents-v0-5  _(sources: non-arxiv-snapshots-core.json)_
+- https://www.langchain.com/blog/how-middleware-lets-you-customize-your-agent-harness  _(sources: non-arxiv-snapshots-core.json)_
+- https://www.langchain.com/blog/the-anatomy-of-an-agent-harness  _(sources: non-arxiv-snapshots-core.json)_
+
+## x (5)
+
+- https://x.com/Vtrivedy10/status/2031408954517971368  _(sources: Harness info.md)_
+- https://x.com/Vtrivedy10/status/2041927488918413589  _(sources: Harness info.md)_
+- https://x.com/_lopopolo/status/2045245935228510213  _(sources: Harness info.md)_
+- https://x.com/sydneyrunkle/status/2037184580143243751  _(sources: Harness info.md)_
+- https://x.com/zuchka_/status/2042666023405699113  _(sources: Harness info.md)_
+

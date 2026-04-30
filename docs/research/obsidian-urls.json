@@ -1,0 +1,1973 @@
+{
+  "extractedAt": "2026-04-30T19:27:53.540Z",
+  "fileCount": 6,
+  "urlCount": 316,
+  "items": [
+    {
+      "url": "http://arxiv.org/abs/2508.00828",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "http://github.com/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/NousResearch/autoreason#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/OpenHands/OpenHands#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/aaif-goose/goose#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/bytedance/UI-TARS-desktop#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/bytedance/deer-flow#-deerflow---20",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/bytedance/deer-flow#official-website",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/lobehub/lobehub#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FNousResearch%2Fautoreason",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FOpenHands%2FOpenHands",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Faaif-goose%2Fgoose",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fbytedance%2FUI-TARS-desktop",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Flobehub%2Flobehub",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fmindfold-ai%2FTrellis",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://github.com/mindfold-ai/Trellis#start-of-content",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/about/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/api/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/business/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#agent-legibility-is-the-goal",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#enforcing-architecture-and-taste",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#entropy-and-garbage-collection",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#increasing-application-legibility",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#increasing-levels-of-autonomy",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#main",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#redefining-the-role-of-the-engineer",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#throughput-changes-the-merge-philosophy",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#we-made-repository-knowledge-the-system-of-record",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#we-started-with-an-empty-git-repository",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#what-agent-generated-actually-means",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/index/harness-engineering/#what-were-still-learning",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/news/engineering/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "http://openai.com/research/index/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://alexzhang13.github.io/blog/2025/rlm/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2311.02018",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2408.01667",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2504.19413",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2505.02279",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2506.08119",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2507.18755",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2507.23361",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2508.00007",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2508.00828",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2508.20465",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2509.19349",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2509.23206",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2511.07568",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2512.03627",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2512.04535",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2512.16301",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2512.24601v1",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.03192",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.03204",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.07372",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.08670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.08773",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.10338",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.10971",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.20412",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.21123",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.21545",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.21684",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.22773",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.02007",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.02474",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.06025",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.08004",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.08603",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.10498",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.10652",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.11304",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.12430",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.12670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.14878",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.16069",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.19008",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.19672",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.20867",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.22680",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.01493",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.02176",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.02239",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.03212",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.03329",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.05344",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.07379",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.07670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.08616",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.12658",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.18829",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.18897",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.19347",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.20075",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.20380",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.20939",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.21019",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.22148",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.25723",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.26778",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.26996",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.27813",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.28052",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.28088",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.29199",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.00362",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.02334",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.03088",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.03610",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.07833",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.08224",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.08590",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.08756",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11378",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11535",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11548",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11784",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11811",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.12064",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.12162",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13018",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13151",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13282",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13318",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13346",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13630",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.13759",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.14004",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.14228",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.15034",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.18071",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.19572",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.20779",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/html/2512.16301v3",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/html/2603.21019v1",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2504.19413",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2505.02279",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2506.08119",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2507.23361",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2508.00007",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2509.23206",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2511.07568",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2512.03627",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.03192",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.07372",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.08670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.08773",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.10338",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.20412",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21123",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21545",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21684",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.22773",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.02007",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.02474",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.06025",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.08004",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.08603",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.10498",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.10652",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.12430",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.12670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.14878",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.19008",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.19672",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.20867",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.01493",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.02176",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.05344",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.07379",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.07670",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.10664",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.12658",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.18829",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.18897",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.20939",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.22148",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.26778",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.27813",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.02334",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.08756",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11378",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11535",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11548",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11784",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11811",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.12064",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.12162",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13018v1",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13151",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13282",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13318",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13346",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13630",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13759",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.14004",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.14228",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.15034",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.18071",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.21003",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://blog.cloudflare.com/dynamic-workers/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://blog.cloudflare.com/welcome-to-agents-week/?utm_campaign=cf_blog&utm_content=20260412&utm_medium=organic_social&utm_source=twitter/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://blog.langchain.com/deep-agents-v0-5/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://blog.langchain.com/how-middleware-lets-you-customize-your-agent-harness/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://blog.langchain.com/the-anatomy-of-an-agent-harness/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://brendanhogan.github.io/alphalab-paper/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://camo.githubusercontent.com/835ea254dc5caba36e1d1893d42771368fc1019fccb4cc1b927fc61eaaccc47a/68747470733a2f2f7472656e6473686966742e696f2f6170692f62616467652f7265706f7369746f726965732f3134363939",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://camo.githubusercontent.com/adec7e84690db6124e0da58740afb1e8cef270e71ea1b69491ce0df84a6da3f2/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4e6f64652e6a732d32322532422d3333393933333f6c6f676f3d6e6f64652e6a73266c6f676f436f6c6f723d7768697465",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://camo.githubusercontent.com/e2337c6b4f23911b9f1f859fff1f6c8a4ec941df0da216710b24662e2931bf20/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f507974686f6e2d332e31322532422d3337373641423f6c6f676f3d707974686f6e266c6f676f436f6c6f723d7768697465",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://camo.githubusercontent.com/fdf2982b9f5d7489dcf44570e714e3a15fce6253e0cc6b5aa61a075aac2ff71b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4c6963656e73652d4d49542d79656c6c6f772e737667",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://chatgpt.com/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://docs.github.com/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/deepagents/deploy#subagents",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://git",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.blog/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.blog/changelog",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/AltimateAI/altimate-code",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/ChenglinPoly/infiAgent",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/CodingThrust/problem-reductions",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/DVampire/Autogenesis",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/HKUDS/OpenHarness",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://github.com/MemTensor/MemRL",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/NousResearch/autoreason",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/NousResearch/autoreason/blob/main/paper/autoreason.pdf",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/OpenHands/OpenHands",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/YurenHao0426/VARS",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/aaif-goose/goose",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/aiming-lab/WebXSkill",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/alexzhang13/rlm",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/amazon-science/sop-bench",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/anthropics/skills",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/borislavmavrin/harmonyagent.git",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/UI-TARS-desktop",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/LICENSE",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/Makefile",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/README_fr.md",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/README_ja.md",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/README_ru.md",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/README_zh.md",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/blob/main/backend/pyproject.toml",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow/tree/main-1.x",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/chelof100/acp-framework-en",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/containers/libkrun?tab=readme-ov-file",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/douyipu/ajar",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/dtcxzyw/llvm-autofix",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/emcie-co/parlant",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://github.com/enterprise",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/enterprise/startups",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/actions",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/code-review",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/codespaces",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/copilot",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/issues",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/models",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/features/spark",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/jayluxferro/llm-redactor",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/jiayuww/SkillOrchestra",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/jjj-madison/measurable-explore-exploit}{here}",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/keli-wen/agentic-harness-patterns-skill",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/langchain-ai/deepagents",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://github.com/letta-ai/letta",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://github.com/lobehub/lobehub",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/marketplace",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/math-ai-org/mathcode",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/mcp",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/mindfold-ai/Trellis",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/nomic-ai/aec-bench",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/s",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/scienceaix/agentskills",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://github.com/security/advanced-security",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/security/advanced-security/code-security",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/security/advanced-security/secret-protection",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/smol-machines/smolvm/tree/main",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/industry/nonprofits",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-c",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-cas",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/ap",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/app-modernization",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/ci-cd",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/devops",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/solutions/use-case/devsecops",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/team",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/why-github",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://github.com/ynulihao/AgentSkillOS",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://holosai.io",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11394729",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://memorytransfer.github.io/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://microsoft.github.io/cua_skill/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/arxiv-metadata.json"
+      ]
+    },
+    {
+      "url": "https://openai.com/index/harness-engineering/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://openaifoundation.org/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/GTM Harness Deep Research Synthesis (v1).md",
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6170126",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/NousResearch/autoreason",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/OpenHands/OpenHands",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/aaif-goose/goose",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/bytedance/UI-TARS-desktop",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/bytedance/deer-flow",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/lobehub/lobehub",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://r.jina.ai/http://github.com/mindfold-ai/Trellis",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://smolmachines.com/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://trendshift.io/repositories/14699",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/github-and-project-snapshots.json"
+      ]
+    },
+    {
+      "url": "https://ucp.dev/documentation/ucp-and-ap2/",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://vercel.com/blog/vercel-sandbox-is-now-generally-available",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Sandboxes/Sandbox info.md"
+      ]
+    },
+    {
+      "url": "https://www.frontierswe.com/blog",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://www.langchain.com/blog/deep-agents-v0-5",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://www.langchain.com/blog/how-middleware-lets-you-customize-your-agent-harness",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://www.langchain.com/blog/the-anatomy-of-an-agent-harness",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/non-arxiv-snapshots-core.json"
+      ]
+    },
+    {
+      "url": "https://www.techrxiv.org/doi/pdf/10.36227/techrxiv.176857932.25697838/v1",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://x.com/Vtrivedy10/status/2031408954517971368",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://x.com/Vtrivedy10/status/2041927488918413589",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://x.com/_lopopolo/status/2045245935228510213",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://x.com/sydneyrunkle/status/2037184580143243751",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    },
+    {
+      "url": "https://x.com/zuchka_/status/2042666023405699113",
+      "sources": [
+        "/Users/earlperry/Documents/AgenticHarnesses/Sandboxes/Harnesses/Harness info.md"
+      ]
+    }
+  ]
+}
