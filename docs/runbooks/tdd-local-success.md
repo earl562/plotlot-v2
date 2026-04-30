@@ -99,7 +99,7 @@ bash scripts/verify_local_success.sh --skip-browser
 ## 6. Known local caveats
 
 - Playwright browser tests use `127.0.0.1:3003` by default to avoid reusing a stale developer server; override with `PLAYWRIGHT_PORT` or `PLAYWRIGHT_BASE_URL` when needed.
-- `npm run build` may need network access for `next/font/google` fonts unless they are already cached.
+- Some sandboxed environments disallow binding to localhost ports. In that case Playwright lanes will fail with `EPERM` and you should rerun the gate with `--skip-browser`, then run Playwright on a normal dev machine.
 - DB/live-service e2e tests are intentionally not part of the default local success gate. Run them explicitly when touching DB-backed or live-integration behavior.
 
 ## 7. Authenticated/live completion
