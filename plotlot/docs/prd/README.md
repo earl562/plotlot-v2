@@ -6,6 +6,8 @@ Canonical working PRD for this branch lives in:
 
 - `.omx/plans/prd-agentic-land-use-harness.md`
 
+Note: Paths in PRDs and specs are relative to the PlotLot app root (`plotlot/` in this repository).
+
 Executive summary (product + engineering + business framing):
 
 - `docs/prd/agentic-land-use-harness-executive-summary.md`

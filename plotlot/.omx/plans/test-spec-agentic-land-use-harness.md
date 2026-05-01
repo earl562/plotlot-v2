@@ -4,6 +4,8 @@ Date: 2026-04-30
 Source PRD: `.omx/plans/prd-agentic-land-use-harness.md`  
 Branch: `codex/dev-branch-pipeline`
 
+Note: All paths in this document are relative to the PlotLot app root (`plotlot/` in this repository).
+
 ## 1. Test philosophy
 
 PlotLot is moving into a trust-critical consultant workflow. Tests must prove not only that endpoints respond, but that the agent produces **structured, cited, replayable, governable evidence**.

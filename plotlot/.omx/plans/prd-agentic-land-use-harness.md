@@ -9,6 +9,8 @@ Research trace: `docs/prd/2026-04-30-agentic-research-trace.md`
 Executive summary: `docs/prd/agentic-land-use-harness-executive-summary.md`
 Connector contracts: `docs/connector-contracts/municode.md`, `docs/connector-contracts/opendata-arcgis-socrata.md`, `docs/connector-contracts/workspace-connectors.md`
 
+Note: All paths in this document are relative to the PlotLot app root (`plotlot/` in this repository).
+
 ## 1. Product thesis
 
 PlotLot should evolve from an AI zoning identification app into an **agentic land-use and site-feasibility consultant harness**: a governed workspace where users evaluate sites, assemble evidence, reason through ordinances/open data, and produce defensible reports/documents.
