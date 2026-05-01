@@ -1,0 +1,86 @@
+{
+  "nodes": [
+    {
+      "name": "Executable Specification",
+      "type": "primitive",
+      "sources": ["2603.25723v1", "2604.11378v1", "2604.13346v1"],
+      "bullets": [
+        "Keep harness control flow in a repo-owned artifact instead of burying it in controller code.",
+        "Branches, loops, parallelism, retries, and handoffs should be inspectable and diffable as product logic.",
+        "For PlotLot, the zoning/site-feasibility workflow should be editable as a stage graph: intake -> retrieve -> extract -> verify -> calculate -> report -> review."
+      ],
+      "links": ["Harness Runtime", "Step-Bounded Context", "Workflow Module Interface", "Replayable Trajectory"]
+    },
+    {
+      "name": "Step-Bounded Context",
+      "type": "primitive",
+      "sources": ["2603.20380v1", "2604.13346v1"],
+      "bullets": [
+        "Context should be granted per step, not inherited by default from one ever-growing transcript.",
+        "Fresh-task vs persistent-step semantics let the harness decide when to isolate context and when to preserve it.",
+        "For PlotLot, ordinance extraction should see only the parcel facts and cited ordinance sections needed for that extraction lane."
+      ],
+      "links": ["Context Broker", "Executable Specification", "Workflow Verification"]
+    },
+    {
+      "name": "Workflow Module Interface",
+      "type": "primitive",
+      "sources": ["2602.20867v1", "2603.25723v1", "2604.13346v1"],
+      "bullets": [
+        "Treat skills, tools, and subagents as workflow modules with named parameters and typed return values.",
+        "A reusable module boundary is the unit of delegation, testing, and replacement.",
+        "PlotLot modules should include parcel facts, zoning retrieval, dimensional extraction, conflict resolution, deterministic calculation, and evidence review."
+      ],
+      "links": ["Harness Runtime", "Executable Specification", "Evidence Ledger"]
+    },
+    {
+      "name": "Replayable Trajectory",
+      "type": "primitive",
+      "sources": ["2604.03610v1", "2604.13346v1"],
+      "bullets": [
+        "Checkpoint after each stage with step id, context snapshot, metrics, tool outputs, and sandbox/workspace state.",
+        "Selective replay lets you hold upstream evidence constant while changing a downstream prompt or verifier.",
+        "For PlotLot, replay should avoid redoing GIS and ordinance fetches when only extraction, report, or review logic changes."
+      ],
+      "links": ["Harness Runtime", "Evidence Ledger", "Workflow Verification"]
+    },
+    {
+      "name": "Workflow Verification",
+      "type": "primitive",
+      "sources": ["2604.07833v2", "2604.13630v1", "2604.13346v1"],
+      "bullets": [
+        "Define preconditions and postconditions at the workflow-step level so runs are testable as trajectories, not just final answers.",
+        "Use both static checks over the plan and dynamic checks over the realized execution trace.",
+        "For PlotLot, verification means every extracted zoning number is unit-normalized, source-cited, and reproducible by deterministic calculators."
+      ],
+      "links": ["Evidence Ledger", "Governance Middleware", "Step-Bounded Context", "Replayable Trajectory"]
+    }
+  ],
+  "overviewConnections": [
+    {
+      "title": "AgentSPEX (2604.13346v1) synthesis",
+      "bullets": [
+        "Connects [[Harness Runtime]] to [[Executable Specification]]: the harness becomes an interpreter/executor for a repo-owned workflow artifact.",
+        "Connects [[Context Broker]] to [[Step-Bounded Context]]: task-vs-step semantics make context scope an explicit engineering choice.",
+        "Connects [[Evidence Ledger]] to [[Workflow Verification]] and [[Replayable Trajectory]]: the same saved artifacts that support replay also support post-hoc audit and deterministic recomputation.",
+        "For PlotLot, this paper sharpens the target architecture for a land-use/site-feasibility harness: modular workflow stages, explicit evidence gates, and replayable vertical runs."
+      ]
+    }
+  ],
+  "sourceConnections": {
+    "2604.13346v1": {
+      "wikilinks": [
+        "Executable Specification",
+        "Step-Bounded Context",
+        "Workflow Module Interface",
+        "Replayable Trajectory",
+        "Workflow Verification"
+      ],
+      "bullets": [
+        "AgentSPEX is the clearest reviewed paper so far on converting harness logic into an executable, human-editable workflow spec.",
+        "Its strongest contribution for PlotLot is not the YAML syntax itself, but the combination of explicit context boundaries, checkpointed execution, and replayable downstream experimentation.",
+        "Its main gap relative to other reviewed governance papers is weak policy language; PlotLot should pair this workflow style with stronger approval and least-privilege controls."
+      ]
+    }
+  }
+}
