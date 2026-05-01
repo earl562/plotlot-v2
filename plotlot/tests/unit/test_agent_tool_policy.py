@@ -9,6 +9,7 @@ def _context(**overrides):
         "actor_user_id": "user_1",
         "run_id": "run_1",
         "risk_budget_cents": 0,
+        "live_network_allowed": True,
         "approved_approval_ids": set(),
     }
     values.update(overrides)
@@ -44,6 +45,24 @@ def test_expensive_reads_require_budget_or_approval():
 
     allowed = policy.authorize(contract, _context(risk_budget_cents=25))
     assert allowed.allowed is True
+
+
+def test_live_network_disallowed_blocks_live_tools_even_with_budget_or_approval():
+    policy = ToolPolicy()
+
+    expensive = policy.authorize(
+        _tool("bulk_layer_scan", ToolRiskClass.EXPENSIVE_READ, budget_cents=25),
+        _context(live_network_allowed=False, risk_budget_cents=25),
+    )
+    assert expensive.allowed is False
+    assert expensive.approval_required is False
+
+    write_tool = policy.authorize(
+        _tool("gmail.send_draft", ToolRiskClass.WRITE_EXTERNAL),
+        _context(live_network_allowed=False, approved_approval_ids={"apr_run_1_gmail_send_draft"}),
+    )
+    assert write_tool.allowed is False
+    assert write_tool.approval_required is False
 
 
 def test_external_writes_and_execution_require_explicit_approval():

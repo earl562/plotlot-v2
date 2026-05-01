@@ -63,6 +63,9 @@ class HarnessRuntime:
     def register(self, tool_name: str, handler: ToolHandler) -> None:
         self._handlers[tool_name] = handler
 
+    def has_handler(self, tool_name: str) -> bool:
+        return tool_name in self._handlers
+
     async def call_tool(
         self,
         *,
@@ -72,9 +75,10 @@ class HarnessRuntime:
         approval_id: str | None = None,
         events: list[HarnessEvent] | None = None,
     ) -> ToolCallResult:
+        arg_keys = sorted(tool_args.keys())
         self._emit(
             kind="tool_call",
-            payload={"tool_name": tool_name, "args": tool_args, "run_id": context.run_id},
+            payload={"tool_name": tool_name, "arg_keys": arg_keys, "run_id": context.run_id},
             buffer=events,
         )
         if not tool_exists(tool_name):
@@ -83,6 +87,21 @@ class HarnessRuntime:
                 decision=PolicyDecision(allowed=False, reason="unknown tool"),
                 status="unknown_tool",
                 message=f"Unknown tool: {tool_name}",
+            )
+            self._emit(
+                kind="tool_result",
+                payload={"tool_name": tool_name, "status": result.status, "message": result.message},
+                buffer=events,
+            )
+            return result
+
+        handler = self._handlers.get(tool_name)
+        if handler is None:
+            result = ToolCallResult(
+                tool_name=tool_name,
+                decision=PolicyDecision(allowed=False, reason="tool is not implemented in this runtime"),
+                status="unavailable",
+                message=f"No handler registered for {tool_name}",
             )
             self._emit(
                 kind="tool_result",
@@ -120,21 +139,6 @@ class HarnessRuntime:
                 decision=decision,
                 status="blocked",
                 message=decision.reason,
-            )
-            self._emit(
-                kind="tool_result",
-                payload={"tool_name": tool_name, "status": result.status, "message": result.message},
-                buffer=events,
-            )
-            return result
-
-        handler = self._handlers.get(tool_name)
-        if handler is None:
-            result = ToolCallResult(
-                tool_name=tool_name,
-                decision=decision,
-                status="unavailable",
-                message=f"No handler registered for {tool_name}",
             )
             self._emit(
                 kind="tool_result",

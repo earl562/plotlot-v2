@@ -1,7 +1,8 @@
 # Architecture — Agentic Land-Use and Site-Feasibility Consultant Harness
 
 - Date: 2026-04-30
-- Branch: `feature/opencode-visual-ralph`
+- Updated: 2026-05-01
+- Canonical branch: `codex/dev-branch-pipeline`
 - Related PRD: `.omx/plans/prd-agentic-land-use-harness.md`
 - Related test spec: `.omx/plans/test-spec-agentic-land-use-harness.md`
 - Research trace: `docs/prd/2026-04-30-agentic-research-trace.md`

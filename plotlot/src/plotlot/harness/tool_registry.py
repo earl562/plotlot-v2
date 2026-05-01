@@ -83,6 +83,7 @@ _TOOL_CONTRACTS: dict[str, ToolContract] = {
             "type": "object",
             "properties": {
                 "municipality": {"type": "string", "minLength": 2},
+                "state": {"type": "string", "minLength": 2, "maxLength": 2},
                 "query": {"type": "string", "minLength": 1},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 25},
             },
@@ -110,7 +111,7 @@ _TOOL_CONTRACTS: dict[str, ToolContract] = {
                 "lat": {"type": "number"},
                 "lng": {"type": "number"},
             },
-            "required": ["county", "lat", "lng"],
+            "required": ["county", "state", "lat", "lng"],
         },
         output_schema={
             "type": "object",

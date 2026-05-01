@@ -28,6 +28,13 @@ from plotlot.land_use.policy import ToolPolicy
 def _ev_id() -> str:
     return str(uuid.uuid4())
 
+def _default_project_id(workspace_id: str) -> str:
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"plotlot:{workspace_id}:default_project"))
+
+
+def _project_id(context: ToolContext) -> str:
+    return context.project_id or _default_project_id(context.workspace_id)
+
 
 async def _handle_geocode_address(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
     from plotlot.retrieval.geocode import geocode_address
@@ -50,7 +57,7 @@ async def _handle_geocode_address(args: dict[str, Any], context: ToolContext) ->
     evidence_item = EvidenceItem(
         id=ev_id,
         workspace_id=context.workspace_id,
-        project_id=context.project_id or "prj_unknown",
+        project_id=_project_id(context),
         site_id=context.site_id,
         analysis_id=context.analysis_id,
         analysis_run_id=context.analysis_run_id,
@@ -117,7 +124,7 @@ async def _handle_lookup_property_info(args: dict[str, Any], context: ToolContex
     evidence_item = EvidenceItem(
         id=ev_id,
         workspace_id=context.workspace_id,
-        project_id=context.project_id or "prj_unknown",
+        project_id=_project_id(context),
         site_id=context.site_id,
         analysis_id=context.analysis_id,
         analysis_run_id=context.analysis_run_id,
@@ -182,7 +189,7 @@ async def _handle_search_zoning_ordinance(args: dict[str, Any], context: ToolCon
             evidence_item = EvidenceItem(
                 id=ev_id,
                 workspace_id=context.workspace_id,
-                project_id=context.project_id or "prj_unknown",
+                project_id=_project_id(context),
                 site_id=context.site_id,
                 analysis_id=context.analysis_id,
                 analysis_run_id=context.analysis_run_id,
@@ -209,13 +216,36 @@ async def _handle_search_zoning_ordinance(args: dict[str, Any], context: ToolCon
 
 async def _handle_search_municode_live(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
     from plotlot.land_use.ordinances.service import search_municode_live
+    from plotlot.ingestion.discovery import get_municode_configs
 
     municipality = str(args.get("municipality", "")).strip()
     query = str(args.get("query", "")).strip()
+    configs = await get_municode_configs()
+    key = municipality.lower().replace("-", "_").replace(" ", "_")
+    config = configs.get(key)
+    if config is None:
+        candidates = [cfg for cfg in configs.values() if cfg.municipality.lower() == municipality.lower()]
+        config = candidates[0] if candidates else None
+    if config is None:
+        return {
+            "status": "no_results",
+            "results": [],
+            "evidence": [],
+            "message": f"No Municode authority configured for {municipality}",
+        }
+
+    state = str(args.get("state") or config.state or "").strip().upper()
+    if not state:
+        return {
+            "status": "error",
+            "results": [],
+            "evidence": [],
+            "message": "state is required (two-letter code)",
+        }
 
     results = await search_municode_live(
         OrdinanceSearchArgs(
-            jurisdiction=OrdinanceJurisdiction(state="FL", municipality=municipality),
+            jurisdiction=OrdinanceJurisdiction(state=state, municipality=municipality),
             query=query,
             limit=int(args.get("limit", 8) or 8),
         )
@@ -230,7 +260,7 @@ async def _handle_search_municode_live(args: dict[str, Any], context: ToolContex
         evidence_item = EvidenceItem(
             id=ev_id,
             workspace_id=context.workspace_id,
-            project_id=context.project_id or "prj_unknown",
+            project_id=_project_id(context),
             site_id=context.site_id,
             analysis_id=context.analysis_id,
             analysis_run_id=context.analysis_run_id,
@@ -257,7 +287,14 @@ async def _handle_discover_open_data_layers(args: dict[str, Any], context: ToolC
     from plotlot.land_use.models import LayerCandidate
 
     county = str(args.get("county", "")).strip()
-    state = str(args.get("state", "FL")).strip() or "FL"
+    state = str(args.get("state") or "").strip().upper()
+    if not state:
+        return {
+            "status": "error",
+            "results": [],
+            "evidence": [],
+            "message": "state is required (two-letter code)",
+        }
     lat = float(args.get("lat"))
     lng = float(args.get("lng"))
 
@@ -272,7 +309,7 @@ async def _handle_discover_open_data_layers(args: dict[str, Any], context: ToolC
         evidence_item = EvidenceItem(
             id=ev_id,
             workspace_id=context.workspace_id,
-            project_id=context.project_id or "prj_unknown",
+            project_id=_project_id(context),
             site_id=context.site_id,
             analysis_id=context.analysis_id,
             analysis_run_id=context.analysis_run_id,

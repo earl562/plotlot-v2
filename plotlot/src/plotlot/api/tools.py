@@ -143,7 +143,8 @@ async def _ensure_project(session, *, workspace_id: str, project_id: str | None)
 
 @router.get("")
 async def list_tools() -> list[dict[str, Any]]:
-    return [tool.model_dump() for tool in list_tool_contracts()]
+    runtime = get_default_runtime()
+    return [tool.model_dump() for tool in list_tool_contracts() if runtime.has_handler(tool.name)]
 
 
 @router.post("/call", response_model=ToolCallResponse)

@@ -8,6 +8,8 @@ Canonical PRD: `.omx/plans/prd-agentic-land-use-harness.md`
 Architecture spec: `docs/architecture/agentic-land-use-harness.md`  
 Test spec: `.omx/plans/test-spec-agentic-land-use-harness.md`
 
+Note: All paths in this document are relative to the PlotLot app root (`plotlot/` in this repository).
+
 PlotLot is evolving from an **AI zoning lookup application** into a **workspace-native, agentic land‑use and site‑feasibility consultant harness**.
 
 The bigger product is not just zoning identification. The bigger product is a system that helps users answer:
@@ -344,17 +346,18 @@ An external agent adapter (not the internal architecture). Expose selected PlotL
 
 Deterministic functions/capabilities (safe and typed).
 
-Examples:
+Examples (current branch tool contracts):
 
 - `geocode_address`
-- `lookup_property`
-- `search_ordinance`
-- `extract_zoning_rules`
-- `intersect_flood_layer`
-- `query_gmail_threads`
-- `create_calendar_event`
-- `sync_crm_record`
-- `generate_report_artifact`
+- `lookup_property_info`
+- `search_zoning_ordinance` (local indexed ordinance chunks)
+- `search_municode_live` (live Municode fallback)
+- `discover_open_data_layers`
+- `generate_document`
+- `draft_google_doc`
+- `draft_email`
+
+Future/illustrative tools (not necessarily implemented yet on this branch) may include: `intersect_flood_layer`, `query_gmail_threads`, `create_calendar_event`, `sync_crm_record`.
 
 ### Skills
 
@@ -393,9 +396,9 @@ Agent asks zoning question
   → Skill loads zoning workflow
     → resolve_jurisdiction
     → get_parcel_zoning
-    → search_ordinance
+    → search_zoning_ordinance (local) / search_municode_live (live)
     → get_relevant_sections
-    → extract_zoning_rules
+    → extract_rules (LLM + deterministic validators)
     → validate_rule_sources
     → compute_feasibility
 ```
@@ -505,7 +508,7 @@ Evidence item (illustrative):
   "source_type": "municode",
   "source_url": "...",
   "source_title": "RU-1 District Regulations",
-  "tool_name": "extract_zoning_rules",
+  "tool_name": "search_zoning_ordinance",
   "confidence": "high",
   "retrieved_at": "2026-05-01T00:00:00Z"
 }
@@ -731,8 +734,11 @@ POST   /api/v1/ordinances/extract-rules
 GET    /api/v1/zoning-rules
 POST   /api/v1/evidence/validate-claim
 
-POST   /api/v1/mcp/tools/list
-POST   /api/v1/mcp/tools/invoke
+GET    /api/v1/tools
+POST   /api/v1/tools/call
+
+GET    /api/v1/mcp/tools/list
+POST   /api/v1/mcp/tools/call
 ```
 
 See: `docs/architecture/agentic-land-use-harness.md` (“REST route sketch”) for the branch’s working route plan.
@@ -937,4 +943,3 @@ Moat components:
 One-sentence summary:
 
 > PlotLot is evolving from an AI zoning lookup app into a workspace-native, evidence-backed, agentic land-use and site-feasibility harness that combines zoning intelligence, GIS data, connected workflow systems, deterministic tools, repo-owned skills, sandboxed execution, and (where useful) multi-agent reasoning to help users find, evaluate, document, and act on development opportunities.
-

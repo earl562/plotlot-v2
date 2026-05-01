@@ -289,6 +289,10 @@ class ChatRequest(BaseModel):
         ge=0,
         description="Budget for expensive reads during a chat turn (governance control)",
     )
+    live_network_allowed: bool = Field(
+        default=True,
+        description="Whether live network connectors (e.g. Municode/OpenData) may be used during this chat turn.",
+    )
     workspace_id: str = Field(
         default="default-workspace",
         description="Optional workspace selector for harness governance",

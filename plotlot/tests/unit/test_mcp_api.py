@@ -104,10 +104,7 @@ async def test_mcp_tools_call_write_external_requires_approval_and_persists_requ
 
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "pending_approval"
-    assert data["decision"]["approval_required"] is True
-    assert data["decision"]["approval_id"]
+    assert data["status"] == "unavailable"
 
     approvals = [obj for obj in fake_session.added if isinstance(obj, ApprovalRequest)]
-    assert len(approvals) == 1
-    assert approvals[0].action_name == "gmail_send_draft"
+    assert len(approvals) == 0

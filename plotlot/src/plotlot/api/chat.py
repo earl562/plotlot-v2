@@ -1916,6 +1916,7 @@ async def chat(request: ChatRequest, http_request: Request):
                         actor_user_id=actor_user_id,
                         run_id=session_id,
                         risk_budget_cents=request.risk_budget_cents,
+                        live_network_allowed=request.live_network_allowed,
                         approved_approval_ids=validated_approvals,
                     )
                     policy_engine = HarnessPolicyEngine(

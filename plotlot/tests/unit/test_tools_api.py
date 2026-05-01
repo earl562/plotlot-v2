@@ -112,6 +112,7 @@ async def test_tools_call_expensive_read_requires_approval(client):
                 "arguments": {"municipality": "Example", "query": "parking"},
                 "workspace_id": "ws_test",
                 "risk_budget_cents": 0,
+                "live_network_allowed": True,
                 "run_id": "run_test_2",
             },
         )
@@ -257,15 +258,7 @@ async def test_tools_call_gmail_send_draft_requires_approval_and_persists_reques
 
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "pending_approval"
-    assert data["decision"]["approval_required"] is True
-    assert data["decision"]["approval_id"]
+    assert data["status"] == "unavailable"
 
     approvals = [obj for obj in fake_session.added if isinstance(obj, ApprovalRequest)]
-    assert len(approvals) == 1
-    approval = approvals[0]
-    assert approval.workspace_id == "ws_test"
-    assert approval.action_name == "gmail_send_draft"
-    assert approval.risk_class == "write_external"
-    assert approval.status == "pending"
-    assert approval.request_json["tool"] == "gmail_send_draft"
+    assert len(approvals) == 0
