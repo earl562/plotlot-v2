@@ -24,6 +24,27 @@ At the top of your response:
 
 - `[RALPH ITERATION <i>/<max>]`
 
+Then include the following sections (in this order):
+
+1) `## Current task`
+- The single concrete task you are completing *this* iteration.
+
+2) `## Spec-driven plan`
+- A short, checklist-style plan referencing the relevant spec/contract/tests/docs you’re driving from.
+
+3) `## Reasoning summary`
+- A brief, high-level explanation of why this step is the right next step.
+- Do **not** include hidden chain-of-thought; keep it to decisions + tradeoffs.
+
+4) `## Execution details`
+- Bullet list of the concrete actions taken (commands run, files edited, key outputs).
+
+5) `## Verification`
+- Exactly what you ran/checked and the result.
+
+6) `## Deltas`
+- Paths changed this iteration.
+
 At the end of your response, include **exactly one** status line:
 
 - `RALPH_STATUS: COMPLETE` — goal fully met + verified
@@ -35,12 +56,17 @@ Do **not** ask “Continue?” — the harness will decide whether to enqueue an
 
 ## One-iteration steps
 
-1. Restate the goal as **acceptance criteria** (tight, verifiable).
-2. Plan the **smallest increment** you can complete now.
-3. Execute changes.
+1. Pick **one** small task that meaningfully advances the goal.
+2. Write a **spec-driven plan** (checklist) tied to contracts/tests/docs.
+3. Execute changes with concrete, inspectable steps.
 4. Verify with the tightest checks available.
-5. Summarize what changed + what remains.
+5. Record deltas (paths changed) and what remains.
 6. Emit `RALPH_STATUS`.
+
+## Steering
+
+When the user provides steering (via `/ralph steer ...`), incorporate it into the **Spec-driven plan** for the next iteration.
+If steering conflicts with safety/governance rules, emit `RALPH_STATUS: BLOCKED` and ask for clarification.
 
 ## Research-specific rule (arXiv)
 
