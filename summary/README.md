@@ -11,6 +11,7 @@ This folder contains short, date-stamped summaries of what was accomplished in t
 - `2026-05-01-architect-fixes.md` — Follow-up fixes after architect review (governance hardening + spec alignment).
 - `2026-05-01-chat-tool-contract-alignment.md` — Aligned chat tool schema with harness contract (open-data state required).
 - `2026-05-01-auth-readiness.md` — Snapshot of which credentials are required for live served E2E lanes.
+- `2026-05-01-ordinance-tool-contracts.md` — Added canonical ordinance tool ports and improved local citation/provenance.
 
 ## Conventions
 

@@ -1,7 +1,7 @@
 # 2026-05-01 — Verification evidence (post exec-summary doc update)
 
 Branch: `codex/dev-branch-pipeline`  
-Commit verified: `c221e4c`
+Commit verified: `180dade`
 
 This file records the verification lanes rerun after the executive-summary documentation updates.
 
@@ -13,7 +13,7 @@ This file records the verification lanes rerun after the executive-summary docum
 - Unit tests (passed)
   - Command:
     - `env PYTHONPATH=plotlot/src MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns ./.venv/bin/python -m pytest plotlot/tests/unit -q`
-  - Result: `780 passed, 1 warning` (MLflow filesystem-store deprecation warning)
+  - Result: `781 passed, 1 warning` (MLflow filesystem-store deprecation warning)
 
 ## Frontend (`plotlot/frontend`)
 
