@@ -42,6 +42,12 @@ Do **not** ask “Continue?” — the harness will decide whether to enqueue an
 5. Summarize what changed + what remains.
 6. Emit `RALPH_STATUS`.
 
+## Research-specific rule (arXiv)
+
+If the iteration involves “reviewing an arXiv paper”, do **not** rely only on the abstract. Use:
+- the full PDF text in `docs/research/_cache/arxiv/<id>.txt` (regenerate via `download_arxiv_papers.mjs`), and/or
+- the arXiv HTML view when available.
+
 ## Verification defaults
 
 Choose the narrowest verification that matches what you changed:

@@ -70,7 +70,7 @@ node .pi/skills/autoresearch/scripts/extract_arxiv_urls_from_dir.mjs \
   --output "docs/research/arxiv-urls.txt"
 ```
 
-## Helper: download PDFs + extract text
+## Helper: download full PDFs + extract text (required for “full paper” review)
 
 ```bash
 node .pi/skills/autoresearch/scripts/download_arxiv_papers.mjs \
@@ -78,6 +78,10 @@ node .pi/skills/autoresearch/scripts/download_arxiv_papers.mjs \
   --out-dir "docs/research/_cache/arxiv" \
   --concurrency 2
 ```
+
+Notes:
+- This downloads the **full PDF** for each arXiv ID and runs `pdftotext` to produce `docs/research/_cache/arxiv/<id>.txt`.
+- The `_cache/` directory is gitignored; commit only the derived, human-reviewed summaries/notes.
 
 Outputs (gitignored):
 - `docs/research/_cache/arxiv/<id>.pdf`
