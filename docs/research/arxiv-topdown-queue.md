@@ -3,8 +3,8 @@
 Generated from: `arxiv-abstracts.json`
 Total papers: **100**
 Duplicates dropped: **3**
-Reviewed: **26**
-Remaining: **74**
+Reviewed: **27**
+Remaining: **73**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -15,7 +15,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _stub_
 - **P0** (25) [2602.19672v1](https://arxiv.org/abs/2602.19672v1) — SkillOrchestra: Learning to Route Agents via Skill Transfer  — [note](docs/research/arxiv-notes/2602.19672v1.md) — _stub_
 - **P0** (22) [2604.13151v1](https://arxiv.org/abs/2604.13151v1) — Exploration and Exploitation Errors Are Measurable for Language Model Agents  — [note](docs/research/arxiv-notes/2604.13151v1.md) — _stub_
 - **P0** (21) [2604.13018v1](https://arxiv.org/abs/2604.13018v1) — Toward Autonomous Long-Horizon Engineering for ML Research  — [note](docs/research/arxiv-notes/2604.13018v1.md) — _stub_
@@ -75,9 +74,11 @@ Priority tiers:
 - **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
 - **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
 - **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
+- **P2** (10) [2603.12658v1](https://arxiv.org/abs/2603.12658v1) — Continual Learning in Large Language Models: Methods, Challenges, and Opportunities  — [note](docs/research/arxiv-notes/2603.12658v1.md) — _stub_
 
 ## Already reviewed
 
+- **✅** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _reviewed_
 - **✅** (26) [2505.02279v2](https://arxiv.org/abs/2505.02279v2) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)  — [note](docs/research/arxiv-notes/2505.02279v2.md) — _reviewed_
 - **✅** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _reviewed_
 - **✅** (30) [2601.10338v1](https://arxiv.org/abs/2601.10338v1) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale  — [note](docs/research/arxiv-notes/2601.10338v1.md) — _reviewed_

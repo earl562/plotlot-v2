@@ -87,6 +87,50 @@
         "For PlotLot, stable ordinance search, extraction, or review specialists should be promoted into reusable modules callable by the main harness."
       ],
       "links": ["Workflow Module Interface", "Harness Runtime", "Agent-Supervised Tool Adaptation"]
+    },
+    {
+      "name": "Explicit-to-Implicit Translation",
+      "type": "primitive",
+      "sources": ["2408.01667v2"],
+      "bullets": [
+        "Convert directly observed artifacts into model-legible signals before the agent starts searching or planning.",
+        "Keep static translation tools outside the active agent loop; they reduce ambiguity without spending tool budget.",
+        "For PlotLot, translate parcel/zoning pages, ordinance PDFs, tables, and map legends into normalized jurisdiction, code, and evidence candidates before LLM synthesis."
+      ],
+      "links": ["Context Broker", "Workflow Module Interface", "Evidence Ledger", "Dynamic Reference Expansion"]
+    },
+    {
+      "name": "Dynamic Reference Expansion",
+      "type": "primitive",
+      "sources": ["2408.01667v2"],
+      "bullets": [
+        "When a static registry is incomplete, the harness should actively discover additional references during execution.",
+        "Reference expansion should be budgeted, queryable, and evidence-producing rather than free-form browsing.",
+        "For PlotLot, discover official parcel, zoning, and ordinance hosts from jurisdiction clues instead of assuming complete prior coverage."
+      ],
+      "links": ["Harness Runtime", "Budgeted Tool Loop", "Entity-to-Authority Verification"]
+    },
+    {
+      "name": "Entity-to-Authority Verification",
+      "type": "primitive",
+      "sources": ["2408.01667v2"],
+      "bullets": [
+        "Predict the governing entity, then verify that the source boundary is official before trusting downstream claims.",
+        "Authority verification should absorb domain variants and mirrors while still distinguishing official hosts from lookalikes.",
+        "For PlotLot, after predicting city/county/ordinance authority, verify official municipal, county, ArcGIS, or Municode domains before accepting zoning facts."
+      ],
+      "links": ["Governance Middleware", "Evidence Ledger", "Dynamic Reference Expansion"]
+    },
+    {
+      "name": "Budgeted Tool Loop",
+      "type": "primitive",
+      "sources": ["2408.01667v2"],
+      "bullets": [
+        "Dynamic discovery improves accuracy, but the harness must explicitly limit retrieval rounds, latency, and spend.",
+        "Tool loops should expose cost/benefit tradeoffs and stop conditions rather than silently accumulating work.",
+        "For PlotLot, ordinance retrieval and evidence resolution should run under explicit budgets for tool calls, tokens, and wall-clock time."
+      ],
+      "links": ["Harness Runtime", "Dynamic Reference Expansion", "Governance Middleware"]
     }
   ],
   "overviewConnections": [
@@ -107,17 +151,20 @@
         "Connects [[Workflow Module Interface]] to [[Graduated Subagent]]: once a specialist proves reliable, it should be frozen behind a typed interface and reused across runs.",
         "For PlotLot, this paper supports a frozen-core / adaptive-periphery architecture for the land-use/site-feasibility harness."
       ]
+    },
+    {
+      "title": "Automated Phishing Detection using URLs and Webpages (2408.01667v2) synthesis",
+      "bullets": [
+        "Connects [[Context Broker]] to [[Explicit-to-Implicit Translation]]: before context selection, the harness should translate raw artifacts into higher-order signals.",
+        "Connects [[Harness Runtime]] to [[Dynamic Reference Expansion]] and [[Budgeted Tool Loop]]: dynamic discovery beats static coverage, but only if retrieval budgets are explicit.",
+        "Connects [[Governance Middleware]] and [[Evidence Ledger]] to [[Entity-to-Authority Verification]]: first verify the official source boundary, then accept downstream claims.",
+        "For PlotLot, the direct analogue is jurisdiction/source discovery: predict the governing city/county plus ordinance host, verify official domains, then cache trusted references for future site-feasibility runs."
+      ]
     }
   ],
   "sourceConnections": {
     "2604.13346v1": {
-      "wikilinks": [
-        "Executable Specification",
-        "Step-Bounded Context",
-        "Workflow Module Interface",
-        "Replayable Trajectory",
-        "Workflow Verification"
-      ],
+      "wikilinks": ["Executable Specification", "Step-Bounded Context", "Workflow Module Interface", "Replayable Trajectory", "Workflow Verification"],
       "bullets": [
         "AgentSPEX is the clearest reviewed paper so far on converting harness logic into an executable, human-editable workflow spec.",
         "Its strongest contribution for PlotLot is not the YAML syntax itself, but the combination of explicit context boundaries, checkpointed execution, and replayable downstream experimentation.",
@@ -125,17 +172,19 @@
       ]
     },
     "2512.16301v3": {
-      "wikilinks": [
-        "Agent-Supervised Tool Adaptation",
-        "Adaptation Signal Design",
-        "Graduated Subagent",
-        "Workflow Module Interface",
-        "Evidence Ledger"
-      ],
+      "wikilinks": ["Agent-Supervised Tool Adaptation", "Adaptation Signal Design", "Graduated Subagent", "Workflow Module Interface", "Evidence Ledger"],
       "bullets": [
         "This is the clearest reviewed paper so far on where adaptation should live in an agentic system.",
         "For PlotLot, its most important consequence is strategic: freeze the orchestrator, and improve the surrounding retrieval, memory, review, and evidence modules.",
         "Use dense execution signals wherever possible inside the land-use harness, and reserve holistic judging for truly end-to-end synthesis quality."
+      ]
+    },
+    "2408.01667v2": {
+      "wikilinks": ["Explicit-to-Implicit Translation", "Dynamic Reference Expansion", "Entity-to-Authority Verification", "Budgeted Tool Loop", "Context Broker", "Evidence Ledger"],
+      "bullets": [
+        "The paper matters less for phishing per se than for its harness decomposition: static signal translation -> budgeted discovery -> authority verification.",
+        "Its most transferable primitive for PlotLot is replacing exhaustive prior registries with on-run reference expansion backed by official-source verification.",
+        "Its main warning is operational: dynamic discovery improved accuracy dramatically but paid ~20s/sample and depended on brittle external services, so PlotLot needs caching, fallback routes, and strict retrieval budgets."
       ]
     }
   }

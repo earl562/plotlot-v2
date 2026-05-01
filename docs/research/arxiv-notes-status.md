@@ -1,11 +1,12 @@
 # arXiv Notes Status
 
 Total: **100**
-Reviewed: **26**
-Stub: **74**
+Reviewed: **27**
+Stub: **73**
 
 ## Reviewed
 
+- [2408.01667v2](docs/research/arxiv-notes/2408.01667v2.md) — Automated Phishing Detection Using URLs and Webpages
 - [2505.02279v2](docs/research/arxiv-notes/2505.02279v2.md) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)
 - [2512.16301v3](docs/research/arxiv-notes/2512.16301v3.md) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills
 - [2601.10338v1](docs/research/arxiv-notes/2601.10338v1.md) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale
@@ -36,7 +37,6 @@ Stub: **74**
 ## Stubs (to review)
 
 - [2311.02018v1](docs/research/arxiv-notes/2311.02018v1.md) — Active Reasoning in an Open-World Environment
-- [2408.01667v2](docs/research/arxiv-notes/2408.01667v2.md) — Automated Phishing Detection Using URLs and Webpages
 - [2504.19413v1](docs/research/arxiv-notes/2504.19413v1.md) — Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory
 - [2506.08119v2](docs/research/arxiv-notes/2506.08119v2.md) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents
 - [2507.18755v1](docs/research/arxiv-notes/2507.18755v1.md) — Agentic Program Repair from Test Failures at Scale: A Neuro-symbolic approach with static analysis and test execution feedback
