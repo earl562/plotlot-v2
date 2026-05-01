@@ -350,7 +350,9 @@ Examples (current branch tool contracts):
 
 - `geocode_address`
 - `lookup_property_info`
-- `search_zoning_ordinance` (local indexed ordinance chunks)
+- `search_ordinances` (local indexed ordinance chunks; canonical contract)
+- `fetch_ordinance_section` (fetch a specific locally indexed ordinance chunk)
+- `search_zoning_ordinance` (legacy/local lookup tool; kept for compatibility)
 - `search_municode_live` (live Municode fallback)
 - `discover_open_data_layers`
 - `generate_document`
@@ -396,7 +398,7 @@ Agent asks zoning question
   → Skill loads zoning workflow
     → resolve_jurisdiction
     → get_parcel_zoning
-    → search_zoning_ordinance (local) / search_municode_live (live)
+    → search_ordinances (local) / search_municode_live (live)
     → get_relevant_sections
     → extract_rules (LLM + deterministic validators)
     → validate_rule_sources
