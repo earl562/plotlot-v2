@@ -76,6 +76,25 @@ clean_playwright_artifacts() {
   rm -rf frontend/test-results frontend/playwright-report
 }
 
+can_listen_locally() {
+  python3 - <<'PY' >/dev/null 2>&1
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    s.bind(("127.0.0.1", 0))
+    s.listen(1)
+except OSError:
+    raise SystemExit(1)
+finally:
+    try:
+        s.close()
+    except Exception:
+        pass
+PY
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --install) RUN_INSTALL=1 ;;
@@ -99,6 +118,11 @@ require_cli uv
 require_cli node
 require_cli npm
 require_cli npx
+
+if [[ "$RUN_BROWSER" -eq 1 ]] && ! can_listen_locally; then
+  log "Playwright browser tests disabled: environment blocks localhost port binding (rerun without --skip-browser on a normal dev machine)"
+  RUN_BROWSER=0
+fi
 
 if [[ "$RUN_INSTALL" -eq 1 ]]; then
   log "Syncing existing backend toolchain"

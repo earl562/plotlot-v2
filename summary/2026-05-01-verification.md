@@ -40,3 +40,12 @@ Not rerun in this lane. Use:
 - `verify_local_success.sh` (passed)
   - Command: `cd plotlot && bash scripts/verify_local_success.sh --skip-browser`
   - Coverage: repo hygiene, backend ruff+unit, frontend lint+tsc+vitest, frontend production build
+
+## Playwright browser lane (served Next dev server)
+
+- Browser tests are **blocked in this Codex sandbox** due to a port bind restriction (`listen EPERM`).
+- `scripts/verify_local_success.sh` now auto-detects this and **skips Playwright** when it can’t bind localhost ports.
+
+Run browser E2E on a normal dev machine:
+- `make verify-local` (includes Playwright design-system tests)
+- `make live-agent-e2e` (served agent E2E; requires secrets)
