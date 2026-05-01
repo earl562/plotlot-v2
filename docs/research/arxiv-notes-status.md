@@ -1,12 +1,13 @@
 # arXiv Notes Status
 
 Total: **100**
-Reviewed: **24**
-Stub: **76**
+Reviewed: **26**
+Stub: **74**
 
 ## Reviewed
 
 - [2505.02279v2](docs/research/arxiv-notes/2505.02279v2.md) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)
+- [2512.16301v3](docs/research/arxiv-notes/2512.16301v3.md) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills
 - [2601.10338v1](docs/research/arxiv-notes/2601.10338v1.md) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale
 - [2601.10971v2](docs/research/arxiv-notes/2601.10971v2.md) — AJAR: Adaptive Jailbreak Architecture for Red-teaming
 - [2602.02474v1](docs/research/arxiv-notes/2602.02474v1.md) — MemSkill: Learning and Evolving Memory Skills for Self-Evolving Agents
@@ -27,6 +28,7 @@ Stub: **76**
 - [2604.08224v1](docs/research/arxiv-notes/2604.08224v1.md) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering
 - [2604.11378v1](docs/research/arxiv-notes/2604.11378v1.md) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution
 - [2604.11548v1](docs/research/arxiv-notes/2604.11548v1.md) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering
+- [2604.13346v1](docs/research/arxiv-notes/2604.13346v1.md) — AgentSPEX: An Agent SPecification and EXecution Language
 - [2604.13630v1](docs/research/arxiv-notes/2604.13630v1.md) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment
 - [2604.14228v1](docs/research/arxiv-notes/2604.14228v1.md) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems
 - [2604.18071v1](docs/research/arxiv-notes/2604.18071v1.md) — Architectural Design Decisions in AI Agent Harnesses
@@ -47,7 +49,6 @@ Stub: **76**
 - [2511.07568v1](docs/research/arxiv-notes/2511.07568v1.md) — Procedural Knowledge Improves Agentic LLM Workflows
 - [2512.03627v1](docs/research/arxiv-notes/2512.03627v1.md) — MemVerse: Multimodal Memory for Lifelong Learning Agents
 - [2512.04535v2](docs/research/arxiv-notes/2512.04535v2.md) — GTM: Simulating the World of Tools for AI Agents
-- [2512.16301v3](docs/research/arxiv-notes/2512.16301v3.md) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills
 - [2512.24601v1](docs/research/arxiv-notes/2512.24601v1.md) — Recursive Language Models
 - [2601.03192v2](docs/research/arxiv-notes/2601.03192v2.md) — MemRL: Self-Evolving Agents via Runtime Reinforcement Learning on Episodic Memory
 - [2601.03204v1](docs/research/arxiv-notes/2601.03204v1.md) — InfiAgent: An Infinite-Horizon Framework for General-Purpose Autonomous Agents
@@ -102,7 +103,6 @@ Stub: **76**
 - [2604.13151v1](docs/research/arxiv-notes/2604.13151v1.md) — Exploration and Exploitation Errors Are Measurable for Language Model Agents
 - [2604.13282v1](docs/research/arxiv-notes/2604.13282v1.md) — Agentic MR sequence development: leveraging LLMs with MR skills for automatic physics-informed sequence development
 - [2604.13318v1](docs/research/arxiv-notes/2604.13318v1.md) — WebXSkill: Skill Learning for Autonomous Web Agents
-- [2604.13346v1](docs/research/arxiv-notes/2604.13346v1.md) — AgentSPEX: An Agent SPecification and EXecution Language
 - [2604.13759v1](docs/research/arxiv-notes/2604.13759v1.md) — The cognitive companion: a lightweight parallel monitoring architecture for detecting and recovering from reasoning degradation in LLM agents
 - [2604.14004v1](docs/research/arxiv-notes/2604.14004v1.md) — Memory Transfer Learning: How Memories are Transferred Across Domains in Coding Agents
 - [2604.15034v2](docs/research/arxiv-notes/2604.15034v2.md) — Autogenesis: A Self-Evolving Agent Protocol

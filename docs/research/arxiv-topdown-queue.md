@@ -3,8 +3,8 @@
 Generated from: `arxiv-abstracts.json`
 Total papers: **100**
 Duplicates dropped: **3**
-Reviewed: **24**
-Remaining: **76**
+Reviewed: **26**
+Remaining: **74**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -15,8 +15,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (32) [2604.13346v1](https://arxiv.org/abs/2604.13346v1) — AgentSPEX: An Agent SPecification and EXecution Language  — [note](docs/research/arxiv-notes/2604.13346v1.md) — _stub_
-- **P0** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _stub_
 - **P0** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _stub_
 - **P0** (25) [2602.19672v1](https://arxiv.org/abs/2602.19672v1) — SkillOrchestra: Learning to Route Agents via Skill Transfer  — [note](docs/research/arxiv-notes/2602.19672v1.md) — _stub_
 - **P0** (22) [2604.13151v1](https://arxiv.org/abs/2604.13151v1) — Exploration and Exploitation Errors Are Measurable for Language Model Agents  — [note](docs/research/arxiv-notes/2604.13151v1.md) — _stub_
@@ -75,10 +73,13 @@ Priority tiers:
 - **P2** (19) [2603.26996v1](https://arxiv.org/abs/2603.26996v1) — FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?  — [note](docs/research/arxiv-notes/2603.26996v1.md) — _stub_
 - **P2** (16) [2602.14878v2](https://arxiv.org/abs/2602.14878v2) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions  — [note](docs/research/arxiv-notes/2602.14878v2.md) — _stub_
 - **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
+- **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
+- **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
 
 ## Already reviewed
 
 - **✅** (26) [2505.02279v2](https://arxiv.org/abs/2505.02279v2) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)  — [note](docs/research/arxiv-notes/2505.02279v2.md) — _reviewed_
+- **✅** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _reviewed_
 - **✅** (30) [2601.10338v1](https://arxiv.org/abs/2601.10338v1) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale  — [note](docs/research/arxiv-notes/2601.10338v1.md) — _reviewed_
 - **✅** (60) [2601.10971v2](https://arxiv.org/abs/2601.10971v2) — AJAR: Adaptive Jailbreak Architecture for Red-teaming  — [note](docs/research/arxiv-notes/2601.10971v2.md) — _reviewed_
 - **✅** (31) [2602.02474v1](https://arxiv.org/abs/2602.02474v1) — MemSkill: Learning and Evolving Memory Skills for Self-Evolving Agents  — [note](docs/research/arxiv-notes/2602.02474v1.md) — _reviewed_
@@ -99,6 +100,7 @@ Priority tiers:
 - **✅** (60) [2604.08224v1](https://arxiv.org/abs/2604.08224v1) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering  — [note](docs/research/arxiv-notes/2604.08224v1.md) — _reviewed_
 - **✅** (25) [2604.11378v1](https://arxiv.org/abs/2604.11378v1) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution  — [note](docs/research/arxiv-notes/2604.11378v1.md) — _reviewed_
 - **✅** (27) [2604.11548v1](https://arxiv.org/abs/2604.11548v1) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering  — [note](docs/research/arxiv-notes/2604.11548v1.md) — _reviewed_
+- **✅** (32) [2604.13346v1](https://arxiv.org/abs/2604.13346v1) — AgentSPEX: An Agent SPecification and EXecution Language  — [note](docs/research/arxiv-notes/2604.13346v1.md) — _reviewed_
 - **✅** (24) [2604.13630v1](https://arxiv.org/abs/2604.13630v1) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment  — [note](docs/research/arxiv-notes/2604.13630v1.md) — _reviewed_
 - **✅** (51) [2604.14228v1](https://arxiv.org/abs/2604.14228v1) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems  — [note](docs/research/arxiv-notes/2604.14228v1.md) — _reviewed_
 - **✅** (49) [2604.18071v1](https://arxiv.org/abs/2604.18071v1) — Architectural Design Decisions in AI Agent Harnesses  — [note](docs/research/arxiv-notes/2604.18071v1.md) — _reviewed_
