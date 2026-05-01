@@ -17,14 +17,23 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
  * - /research <query>             : run autoresearch via skill
  */
 
+type RalphPhase = "running" | "paused" | "verification_pending" | "blocked" | "complete" | "stopped" | "maxed";
+
 type RalphState = {
   active: boolean;
   paused?: boolean;
+  pendingContinuation?: boolean;
+  phase?: RalphPhase;
   goal: string;
   iteration: number;
   maxIterations: number;
   startedAt: string;
+  stoppedAt?: string;
   lastStatus?: string;
+  lastTask?: string;
+  lastPlan?: string;
+  lastVerification?: string;
+  lastDeltas?: string;
   steering?: string[];
 };
 
@@ -45,9 +54,24 @@ function extractText(content: unknown): string {
 }
 
 function extractRalphStatus(text: string): string | null {
-  const matches = [...text.matchAll(/RALPH_STATUS:\s*([A-Z]+)/gi)];
+  const matches = [...text.matchAll(/RALPH_STATUS:\s*([A-Z_]+)/gi)];
   if (matches.length === 0) return null;
   return (matches[matches.length - 1][1] || "").toUpperCase();
+}
+
+function extractSection(text: string, heading: string): string | undefined {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^##\\s+${escaped}\\s*$([\\s\\S]*?)(?=^##\\s+|^RALPH_STATUS:|$)`, "im");
+  const m = text.match(re);
+  const value = m?.[1]?.trim();
+  return value || undefined;
+}
+
+function updateStateFromAssistantText(state: RalphState, text: string) {
+  state.lastTask = extractSection(text, "Current task") || state.lastTask;
+  state.lastPlan = extractSection(text, "Spec-driven plan") || state.lastPlan;
+  state.lastVerification = extractSection(text, "Verification") || state.lastVerification;
+  state.lastDeltas = extractSection(text, "Deltas") || state.lastDeltas;
 }
 
 function parseRalphArgs(rawArgs: string): {
@@ -125,7 +149,35 @@ export default function (pi: ExtensionAPI) {
       ctx.ui.setStatus("ralph", undefined);
       return;
     }
-    ctx.ui.setStatus("ralph", `ralph ${ralph.iteration}/${ralph.maxIterations}`);
+    const phase = ralph.paused ? "paused" : ralph.pendingContinuation ? "queued" : ralph.phase || "running";
+    ctx.ui.setStatus("ralph", `ralph ${ralph.iteration}/${ralph.maxIterations} ${phase}`);
+  }
+
+  function persistAndRender(ctx?: any) {
+    persistState();
+    if (ctx) setStatusLine(ctx);
+  }
+
+  function enqueueIteration(ctx: any, iteration: number, extraLines: string[] = []) {
+    if (!ralph?.active) return;
+    const steering = (ralph.steering || []).slice();
+    ralph.steering = [];
+    ralph.pendingContinuation = true;
+    ralph.phase = "running";
+    persistAndRender(ctx);
+
+    const prompt = [
+      `[RALPH ITERATION ${iteration}/${ralph.maxIterations}]`,
+      "Continue working on the same goal. Do not restart from scratch.",
+      `Goal: ${ralph.goal}`,
+      steering.length ? `Steering updates (apply now):\n- ${steering.join("\n- ")}` : "",
+      ...extraLines,
+      "Remember: end your response with exactly one RALPH_STATUS line.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    pi.sendUserMessage(`/skill:ralph-loop ${prompt}`);
   }
 
   // Restore state across /reload and session resume.
@@ -140,77 +192,83 @@ export default function (pi: ExtensionAPI) {
       }
       break;
     }
-    setStatusLine(ctx);
+    if (ralph?.active && !ralph.phase) ralph.phase = ralph.paused ? "paused" : "running";
+    persistAndRender(ctx);
+    if (ralph?.active) {
+      ctx.ui.notify(
+        `Ralph restored: ${ralph.iteration}/${ralph.maxIterations}${ralph.paused ? " (paused)" : ""}. Use /ralph status or /ralph resume.`,
+        "info"
+      );
+    }
   });
 
   // Auto-continue Ralph after each agent run until COMPLETE/BLOCKED/MAXED or iteration budget exhausted.
   pi.on("agent_end", async (event, ctx) => {
     if (!ralph?.active) return;
-    if (ralph.paused) return;
 
     const assistantText = (event.messages || [])
       .filter((m: any) => m?.role === "assistant")
       .map((m: any) => extractText(m.content))
       .join("\n");
 
+    if (!assistantText.trim()) return;
+
+    ralph.pendingContinuation = false;
+    updateStateFromAssistantText(ralph, assistantText);
+
     const status = extractRalphStatus(assistantText);
     ralph.lastStatus = status || ralph.lastStatus;
 
     if (status === "COMPLETE") {
       ralph.active = false;
-      persistState();
-      setStatusLine(ctx);
+      ralph.phase = "complete";
+      ralph.stoppedAt = new Date().toISOString();
+      persistAndRender(ctx);
       ctx.ui.notify("Ralph complete.", "info");
       return;
     }
 
     if (status === "BLOCKED") {
       ralph.active = false;
-      persistState();
-      setStatusLine(ctx);
+      ralph.phase = "blocked";
+      ralph.stoppedAt = new Date().toISOString();
+      persistAndRender(ctx);
       ctx.ui.notify("Ralph blocked (needs user input).", "warning");
       return;
     }
 
     if (status === "MAXED") {
       ralph.active = false;
-      persistState();
-      setStatusLine(ctx);
+      ralph.phase = "maxed";
+      ralph.stoppedAt = new Date().toISOString();
+      persistAndRender(ctx);
       ctx.ui.notify("Ralph stopped (MAXED).", "warning");
+      return;
+    }
+
+    if (ralph.paused) {
+      ralph.phase = "paused";
+      persistAndRender(ctx);
       return;
     }
 
     if (ralph.iteration >= ralph.maxIterations) {
       ralph.active = false;
+      ralph.phase = "maxed";
       ralph.lastStatus = "MAXED";
-      persistState();
-      setStatusLine(ctx);
+      ralph.stoppedAt = new Date().toISOString();
+      persistAndRender(ctx);
       ctx.ui.notify(`Ralph hit max iterations (${ralph.maxIterations}).`, "warning");
       return;
     }
 
     const next = ralph.iteration + 1;
     ralph.iteration = next;
-    persistState();
-    setStatusLine(ctx);
+    ralph.phase = "verification_pending";
+    persistAndRender(ctx);
 
     const missingStatus = status == null;
-    const steering = (ralph.steering || []).slice();
-    ralph.steering = [];
-    persistState();
-
-    const prompt = [
-      `[RALPH ITERATION ${next}/${ralph.maxIterations}]`,
-      "Continue working on the same goal. Do not restart from scratch.",
-      `Goal: ${ralph.goal}`,
-      steering.length ? `Steering updates (apply now):\n- ${steering.join("\n- ")}` : "",
-      missingStatus ? "(Your last iteration did not include a RALPH_STATUS line; include it this time.)" : "",
-      "Remember: end your response with exactly one RALPH_STATUS line.",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    pi.sendUserMessage(`/skill:ralph-loop ${prompt}`);
+    enqueueIteration(ctx, next, [missingStatus ? "(Your last iteration did not include a RALPH_STATUS line; include it this time.)" : ""]);
   });
 
   pi.registerCommand("ralph", {
@@ -219,13 +277,16 @@ export default function (pi: ExtensionAPI) {
       const parsed = parseRalphArgs(args || "");
 
       if (parsed.cmd === "status") {
-        if (!ralph?.active) {
-          ctx.ui.notify("Ralph is not active.", "info");
+        if (!ralph) {
+          ctx.ui.notify("Ralph has no saved state yet.", "info");
           return;
         }
         ctx.ui.notify(
-          `Ralph ${ralph.paused ? "(paused)" : "(active)"}: ${ralph.iteration}/${ralph.maxIterations}` +
+          `Ralph ${ralph.active ? "(active)" : "(inactive)"}: ${ralph.iteration}/${ralph.maxIterations}` +
+            `\nPhase: ${ralph.phase || (ralph.paused ? "paused" : "running")}` +
+            `\nPending continuation: ${ralph.pendingContinuation ? "yes" : "no"}` +
             `\nLast status: ${ralph.lastStatus || "(none)"}` +
+            `\nCurrent task: ${ralph.lastTask || "(unknown)"}` +
             `\nGoal: ${ralph.goal}`,
           "info"
         );
@@ -235,8 +296,8 @@ export default function (pi: ExtensionAPI) {
       if (parsed.cmd === "pause") {
         if (ralph?.active) {
           ralph.paused = true;
-          persistState();
-          setStatusLine(ctx);
+          ralph.phase = "paused";
+          persistAndRender(ctx);
         }
         ctx.ui.notify("Ralph paused. Use /ralph resume to continue.", "info");
         return;
@@ -245,9 +306,12 @@ export default function (pi: ExtensionAPI) {
       if (parsed.cmd === "resume") {
         if (ralph?.active) {
           ralph.paused = false;
-          persistState();
-          setStatusLine(ctx);
-          ctx.ui.notify("Ralph resumed (will continue after the next agent run).", "info");
+          ralph.phase = "running";
+          persistAndRender(ctx);
+          ctx.ui.notify("Ralph resumed.", "info");
+          if (!ralph.pendingContinuation) {
+            enqueueIteration(ctx, ralph.iteration, ["(Resume requested by user; continue from the current task and plan.)"]);
+          }
         } else {
           ctx.ui.notify("Ralph is not active.", "info");
         }
@@ -265,7 +329,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         ralph.steering = [...(ralph.steering || []), note];
-        persistState();
+        persistAndRender(ctx);
         ctx.ui.notify("Steering note queued for next Ralph iteration.", "info");
         return;
       }
@@ -281,7 +345,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         ralph.goal = newGoal;
-        persistState();
+        persistAndRender(ctx);
         ctx.ui.notify("Ralph goal updated.", "info");
         return;
       }
@@ -289,9 +353,12 @@ export default function (pi: ExtensionAPI) {
       if (parsed.cmd === "stop") {
         if (ralph?.active) {
           ralph.active = false;
+          ralph.paused = false;
+          ralph.pendingContinuation = false;
+          ralph.phase = "stopped";
           ralph.lastStatus = "STOPPED";
-          persistState();
-          setStatusLine(ctx);
+          ralph.stoppedAt = new Date().toISOString();
+          persistAndRender(ctx);
         }
         ctx.ui.notify("Ralph stopped.", "info");
         return;
@@ -319,17 +386,18 @@ export default function (pi: ExtensionAPI) {
       ralph = {
         active: true,
         paused: false,
+        pendingContinuation: false,
+        phase: "running",
         goal: expandedGoal,
         iteration: 1,
         maxIterations: parsed.maxIterations,
         startedAt: new Date().toISOString(),
         steering: [],
       };
-      persistState();
-      setStatusLine(ctx);
+      persistAndRender(ctx);
 
       // Run Ralph iteration 1 via the ralph-loop skill; the extension will auto-continue up to max iterations.
-      pi.sendUserMessage(`/skill:ralph-loop [RALPH ITERATION 1/${parsed.maxIterations}]\nGoal: ${expandedGoal}`);
+      enqueueIteration(ctx, 1);
     },
   });
 
