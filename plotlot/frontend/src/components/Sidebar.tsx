@@ -3,12 +3,31 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/ThemeProvider";
-import ChatHistory from "@/components/ChatHistory";
 import PortfolioPanel from "@/components/PortfolioPanel";
+import ProjectTree from "@/components/ProjectTree";
+import WorkspaceSelector from "@/components/WorkspaceSelector";
+import NewProjectModal from "@/components/NewProjectModal";
 import type { ChatSession } from "@/lib/sessions";
 import type { SavedAnalysis } from "@/lib/api";
+import {
+  runMigrationIfNeeded,
+  cleanOrphanedSites,
+  listWorkspaces,
+  createWorkspace,
+  listProjects,
+  createProject,
+  listAllSites,
+  type Workspace,
+  type Project,
+  type Site,
+  type ProjectDealType,
+} from "@/lib/workspace";
 
 export type { ChatSession };
+
+// ---------------------------------------------------------------------------
+// Props — identical to the original interface. SidebarLayout is untouched.
+// ---------------------------------------------------------------------------
 
 interface SidebarProps {
   sessions: ChatSession[];
@@ -32,18 +51,47 @@ export default function Sidebar({
   onDeleteSession,
   onSelectAnalysis,
 }: SidebarProps) {
-  const [activeTab, setActiveTab] = useState<"history" | "portfolio">("history");
+  const [activeTab, setActiveTab] = useState<"projects" | "portfolio">("projects");
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
-  /* Filter sessions by search term */
-  const filtered = search.trim()
-    ? sessions.filter((s) =>
-        s.title.toLowerCase().includes(search.trim().toLowerCase())
-      )
-    : sessions;
-  /* ── Keyboard shortcuts ─────────────────────────────────────────── */
+  // ── Workspace / Project / Site state (managed internally) ──────────
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+
+  // Load workspace data from localStorage
+  const loadWorkspaceData = useCallback(() => {
+    const wss = listWorkspaces();
+    const prjs = listProjects();
+    const sts = listAllSites();
+    setWorkspaces(wss);
+    setProjects(prjs);
+    setSites(sts);
+    setActiveWorkspaceId((prev) => prev ?? wss[0]?.id ?? null);
+  }, []);
+
+  // Mount: migrate once, clean orphans, load data
+  useEffect(() => {
+    runMigrationIfNeeded();
+    cleanOrphanedSites();
+    loadWorkspaceData();
+  }, [loadWorkspaceData]);
+
+  // Re-sync sites when sessions change (new analysis completed, session deleted)
+  useEffect(() => {
+    const handler = () => {
+      cleanOrphanedSites();
+      setSites(listAllSites());
+    };
+    window.addEventListener("plotlot:sessions-changed", handler);
+    return () => window.removeEventListener("plotlot:sessions-changed", handler);
+  }, []);
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -56,7 +104,7 @@ export default function Sidebar({
         onNewChat();
       }
     },
-    [onToggle, onNewChat]
+    [onToggle, onNewChat],
   );
 
   useEffect(() => {
@@ -64,10 +112,40 @@ export default function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // ── Workspace handlers ────────────────────────────────────────────
+  const handleSelectWorkspace = useCallback((id: string) => {
+    setActiveWorkspaceId(id);
+  }, []);
+
+  const handleCreateWorkspace = useCallback(
+    (name: string) => {
+      const ws = createWorkspace(name);
+      loadWorkspaceData();
+      setActiveWorkspaceId(ws.id);
+    },
+    [loadWorkspaceData],
+  );
+
+  // ── Project handlers ──────────────────────────────────────────────
+  const handleCreateProject = useCallback(
+    (name: string, dealType: ProjectDealType, description: string) => {
+      if (!activeWorkspaceId) return;
+      createProject(activeWorkspaceId, name, dealType, description);
+      loadWorkspaceData();
+      setShowNewProjectModal(false);
+    },
+    [activeWorkspaceId, loadWorkspaceData],
+  );
+
+  const handleRefreshSites = useCallback(() => {
+    setSites(listAllSites());
+  }, []);
+
   /* ── Shared panel content ───────────────────────────────────────── */
   const panelContent = (
     <div className="relative flex h-full flex-col overflow-hidden">
       <div className="pointer-events-none absolute inset-x-4 top-6 h-40 rounded-[2rem] bg-[radial-gradient(circle_at_top,var(--hero-glow-strong),transparent_70%)] opacity-80" />
+
       {/* Header — PlotLot branding + ThemeToggle */}
       <div className="relative z-10 px-4 pt-6">
         <div className="rounded-[2rem] border border-[var(--border-soft)] bg-[var(--bg-surface)]/92 p-2 shadow-[var(--shadow-panel)] backdrop-blur-xl">
@@ -140,7 +218,7 @@ export default function Sidebar({
       {/* Tab switcher */}
       <div className="relative z-10 px-4 pb-2">
         <div className="flex rounded-full border border-[var(--border-soft)] bg-[var(--bg-inset)] p-0.5">
-          {(["history", "portfolio"] as const).map((tab) => (
+          {(["projects", "portfolio"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -157,13 +235,25 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Search — only shown on history tab */}
-      {activeTab === "history" && (
+      {/* Workspace selector + search — only on projects tab */}
+      {activeTab === "projects" && (
         <div className="relative z-10 px-4 pb-3">
+          {/* Workspace selector */}
+          {workspaces.length > 0 && (
+            <div className="mb-2">
+              <WorkspaceSelector
+                workspaces={workspaces}
+                activeWorkspaceId={activeWorkspaceId}
+                onSelect={handleSelectWorkspace}
+                onCreate={handleCreateWorkspace}
+              />
+            </div>
+          )}
+          {/* Search */}
           <input
             ref={searchRef}
             type="text"
-            placeholder="Search conversations..."
+            placeholder="Search analyses…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:border-[var(--brand-soft-border)] focus:shadow-[var(--shadow-card)]"
@@ -174,12 +264,18 @@ export default function Sidebar({
 
       {/* Content — scrollable */}
       <div className="relative z-10 flex-1 overflow-y-auto px-3">
-        {activeTab === "history" ? (
-          <ChatHistory
-            sessions={filtered}
+        {activeTab === "projects" ? (
+          <ProjectTree
+            workspaceId={activeWorkspaceId}
+            projects={projects}
+            sites={sites}
+            sessions={sessions}
             activeSessionId={activeSessionId}
-            onSelect={onSelectSession}
-            onDelete={onDeleteSession}
+            search={search}
+            onSelectSession={onSelectSession}
+            onDeleteSession={onDeleteSession}
+            onNewProject={() => setShowNewProjectModal(true)}
+            onRefreshSites={handleRefreshSites}
           />
         ) : (
           <PortfolioPanel onSelectAnalysis={onSelectAnalysis} />
@@ -189,38 +285,46 @@ export default function Sidebar({
       {/* Footer — user account + plan link */}
       <div className="relative z-10 border-t border-[var(--border-soft)] px-4 py-4">
         <div className="flex items-center justify-between">
-        {clerkEnabled ? (
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-7 h-7",
-              },
-            }}
-          />
-        ) : (
-          <div
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold"
-            style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
-            aria-label="Guest mode"
-            title="Guest mode"
-          >
-            G
+          {clerkEnabled ? (
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "w-7 h-7",
+                },
+              }}
+            />
+          ) : (
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold"
+              style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
+              aria-label="Guest mode"
+              title="Guest mode"
+            >
+              G
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <a
+              href="/billing"
+              className="rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors hover:opacity-80"
+              style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
+            >
+              Free
+            </a>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+              104 municipalities
+            </span>
           </div>
-        )}
-        <div className="flex items-center gap-2">
-          <a
-            href="/billing"
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors hover:opacity-80"
-            style={{ background: "var(--bg-inset)", color: "var(--text-muted)" }}
-          >
-            Free
-          </a>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            104 municipalities
-          </span>
-        </div>
         </div>
       </div>
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <NewProjectModal
+          onClose={() => setShowNewProjectModal(false)}
+          onCreate={handleCreateProject}
+        />
+      )}
     </div>
   );
 
