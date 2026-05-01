@@ -74,7 +74,7 @@ def test_chat_tools_expose_live_tool_metadata():
 
     open_data = functions["discover_open_data_layers"]
     assert "ArcGIS/Open Data" in open_data["description"]
-    assert open_data["parameters"]["required"] == ["county", "lat", "lng"]
+    assert open_data["parameters"]["required"] == ["county", "state", "lat", "lng"]
     assert open_data["parameters"]["properties"]["county"]["type"] == "string"
     assert open_data["parameters"]["properties"]["lat"]["type"] == "number"
     assert open_data["parameters"]["properties"]["lng"]["type"] == "number"

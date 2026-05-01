@@ -502,7 +502,7 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                     },
                     "state": {
                         "type": "string",
-                        "description": "Two-letter state code (default FL)",
+                        "description": "Two-letter state code (e.g., 'FL', 'NC')",
                     },
                     "lat": {
                         "type": "number",
@@ -513,7 +513,7 @@ CHAT_TOOLS: list[dict[str, Any]] = [
                         "description": "Longitude for coverage validation",
                     },
                 },
-                "required": ["county", "lat", "lng"],
+                "required": ["county", "state", "lat", "lng"],
             },
         },
     },
@@ -1271,7 +1271,16 @@ async def _execute_open_data_discovery(county: str, state: str, lat: float, lng:
     from plotlot.property.hub_discovery import discover_datasets
 
     try:
-        parcels_ds, zoning_ds = await discover_datasets(lat, lng, county, state or "FL")
+        state = (state or "").strip().upper()
+        if not state:
+            return json.dumps(
+                {
+                    "status": "error",
+                    "message": "Open data discovery requires state (two-letter code).",
+                }
+            )
+
+        parcels_ds, zoning_ds = await discover_datasets(lat, lng, county, state)
 
         def _serialize(ds):
             if not ds:
@@ -1292,7 +1301,7 @@ async def _execute_open_data_discovery(county: str, state: str, lat: float, lng:
             {
                 "status": "success",
                 "county": county,
-                "state": state or "FL",
+                "state": state,
                 "parcels_dataset": _serialize(parcels_ds),
                 "zoning_dataset": _serialize(zoning_ds),
             }
@@ -1693,7 +1702,7 @@ async def _execute_tool(name: str, args: dict, session_id: str = "") -> str:
     elif name == "discover_open_data_layers":
         return await _execute_open_data_discovery(
             args.get("county", ""),
-            args.get("state", "FL"),
+            args.get("state", ""),
             args.get("lat", 0.0),
             args.get("lng", 0.0),
         )
