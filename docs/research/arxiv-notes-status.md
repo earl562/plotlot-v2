@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **100**
-Reviewed: **23**
-Stub: **77**
+Reviewed: **24**
+Stub: **76**
 
 ## Reviewed
 
@@ -22,6 +22,7 @@ Stub: **77**
 - [2603.25723v1](docs/research/arxiv-notes/2603.25723v1.md) — Natural-Language Agent Harnesses
 - [2603.28052v1](docs/research/arxiv-notes/2603.28052v1.md) — Meta-Harness: End-to-End Optimization of Model Harnesses
 - [2603.29199v1](docs/research/arxiv-notes/2603.29199v1.md) — AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction
+- [2604.03610v1](docs/research/arxiv-notes/2604.03610v1.md) — DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair
 - [2604.07833v2](docs/research/arxiv-notes/2604.07833v2.md) — Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution
 - [2604.08224v1](docs/research/arxiv-notes/2604.08224v1.md) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering
 - [2604.11378v1](docs/research/arxiv-notes/2604.11378v1.md) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution
@@ -90,7 +91,6 @@ Stub: **77**
 - [2604.00362v1](docs/research/arxiv-notes/2604.00362v1.md) — In harmony with gpt-oss
 - [2604.02334v1](docs/research/arxiv-notes/2604.02334v1.md) — Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web
 - [2604.03088v3](docs/research/arxiv-notes/2604.03088v3.md) — SkVM: Revisiting Language VM for Skills across Heterogenous LLMs and Harnesses
-- [2604.03610v1](docs/research/arxiv-notes/2604.03610v1.md) — DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair
 - [2604.08590v1](docs/research/arxiv-notes/2604.08590v1.md) — AlphaLab: Autonomous Multi-Agent Research Across Optimization Domains with Frontier LLMs
 - [2604.08756v1](docs/research/arxiv-notes/2604.08756v1.md) — Artifacts as Memory Beyond the Agent Boundary
 - [2604.11535v1](docs/research/arxiv-notes/2604.11535v1.md) — Problem Reductions at Scale: Agentic Integration of Computationally Hard Problems

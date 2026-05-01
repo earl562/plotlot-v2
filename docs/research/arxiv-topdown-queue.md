@@ -3,8 +3,8 @@
 Generated from: `arxiv-abstracts.json`
 Total papers: **100**
 Duplicates dropped: **3**
-Reviewed: **23**
-Remaining: **77**
+Reviewed: **24**
+Remaining: **76**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -15,7 +15,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (35) [2604.03610v1](https://arxiv.org/abs/2604.03610v1) — DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair  — [note](docs/research/arxiv-notes/2604.03610v1.md) — _stub_
 - **P0** (32) [2604.13346v1](https://arxiv.org/abs/2604.13346v1) — AgentSPEX: An Agent SPecification and EXecution Language  — [note](docs/research/arxiv-notes/2604.13346v1.md) — _stub_
 - **P0** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _stub_
 - **P0** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _stub_
@@ -75,6 +74,7 @@ Priority tiers:
 - **P2** (19) [2603.20075v1](https://arxiv.org/abs/2603.20075v1) — Agentic Harness for Real-World Compilers  — [note](docs/research/arxiv-notes/2603.20075v1.md) — _stub_
 - **P2** (19) [2603.26996v1](https://arxiv.org/abs/2603.26996v1) — FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?  — [note](docs/research/arxiv-notes/2603.26996v1.md) — _stub_
 - **P2** (16) [2602.14878v2](https://arxiv.org/abs/2602.14878v2) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions  — [note](docs/research/arxiv-notes/2602.14878v2.md) — _stub_
+- **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
 
 ## Already reviewed
 
@@ -94,6 +94,7 @@ Priority tiers:
 - **✅** (29) [2603.25723v1](https://arxiv.org/abs/2603.25723v1) — Natural-Language Agent Harnesses  — [note](docs/research/arxiv-notes/2603.25723v1.md) — _reviewed_
 - **✅** (14) [2603.28052v1](https://arxiv.org/abs/2603.28052v1) — Meta-Harness: End-to-End Optimization of Model Harnesses  — [note](docs/research/arxiv-notes/2603.28052v1.md) — _reviewed_
 - **✅** (37) [2603.29199v1](https://arxiv.org/abs/2603.29199v1) — AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction  — [note](docs/research/arxiv-notes/2603.29199v1.md) — _reviewed_
+- **✅** (35) [2604.03610v1](https://arxiv.org/abs/2604.03610v1) — DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair  — [note](docs/research/arxiv-notes/2604.03610v1.md) — _reviewed_
 - **✅** (39) [2604.07833v2](https://arxiv.org/abs/2604.07833v2) — Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution  — [note](docs/research/arxiv-notes/2604.07833v2.md) — _reviewed_
 - **✅** (60) [2604.08224v1](https://arxiv.org/abs/2604.08224v1) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering  — [note](docs/research/arxiv-notes/2604.08224v1.md) — _reviewed_
 - **✅** (25) [2604.11378v1](https://arxiv.org/abs/2604.11378v1) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution  — [note](docs/research/arxiv-notes/2604.11378v1.md) — _reviewed_

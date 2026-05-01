@@ -16,10 +16,15 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 
 ## DebugHarness (2604.03610v1)
 
-- **Signature-driven initialization**: parse incident/crash signature → inject type-specific troubleshooting heuristics + “rules of engagement”.
+- **Signature-driven initialization**: parse incident/crash signature → inject type-specific troubleshooting heuristics + explicit “rules of engagement” (require hypothesis + dynamic verification before edits).
 - **Interactive state introspection**: live debugger/tool control (GDB/pwndbg) + deterministic replay (rr) to test hypotheses against real runtime state.
 - **Static↔dynamic bridge**: LSP/clangd mapping from runtime frames/symbols → source locations/snippets.
 - **Context compaction**: summarize verbose tool outputs; allow sandboxed scripts over raw outputs to extract signal.
 - **Closed-loop validation**: patch → rebuild → rerun PoC + tests; distill failures back into context.
 - **Deterministic patch correction**: auto-repair malformed diffs to reduce wasted iterations.
 - **Tool abstraction + guardrails**: MCP (JSON-RPC) + command validation layers.
+
+PlotLot mapping:
+- Replace “crash signature” with an **analysis signature** (skill + jurisdiction + doc types + risk class) to load minimal tools + policies.
+- Replace debugger introspection with **evidence introspection** (ordinance sections, GIS attributes, tool-run replay).
+- Replace patch validation with **report/evidence validation** (schema + citations + scoring reproducibility).
