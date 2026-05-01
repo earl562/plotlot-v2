@@ -1,11 +1,12 @@
 # PRD — Agentic Land-Use and Site-Feasibility Consultant Harness
 
-Date: 2026-04-30  
-Branch: `feature/opencode-visual-ralph`  
+Date: 2026-04-30
+Branch: `codex/dev-branch-pipeline`
 Owner: PlotLot Ralph loop  
 Status: Draft implementation charter  
 Related local plans: `.omx/plans/prd-plotlot-workspace-harness.md`, `.omx/plans/test-spec-plotlot-workspace-harness.md`
 Research trace: `docs/prd/2026-04-30-agentic-research-trace.md`  
+Executive summary: `docs/prd/agentic-land-use-harness-executive-summary.md`
 Connector contracts: `docs/connector-contracts/municode.md`, `docs/connector-contracts/opendata-arcgis-socrata.md`, `docs/connector-contracts/workspace-connectors.md`
 
 ## 1. Product thesis

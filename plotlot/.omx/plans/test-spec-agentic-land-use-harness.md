@@ -2,7 +2,7 @@
 
 Date: 2026-04-30  
 Source PRD: `.omx/plans/prd-agentic-land-use-harness.md`  
-Branch: `feature/opencode-visual-ralph`
+Branch: `codex/dev-branch-pipeline`
 
 ## 1. Test philosophy
 
