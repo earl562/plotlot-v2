@@ -34,3 +34,9 @@ Not rerun in this lane. Use:
 
 - `make live-agent-e2e` (served frontend + backend; requires live creds)
 - `make verify-local-no-browser` (deterministic gate without browser tests)
+
+## Deterministic local success gate (no browser)
+
+- `verify_local_success.sh` (passed)
+  - Command: `cd plotlot && bash scripts/verify_local_success.sh --skip-browser`
+  - Coverage: repo hygiene, backend ruff+unit, frontend lint+tsc+vitest, frontend production build

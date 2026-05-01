@@ -51,12 +51,22 @@ run_ruff() {
     run "$ROOT_DIR/.venv/bin/ruff" "$@"
     return
   fi
+  if [[ -x "$ROOT_DIR/../.venv/bin/ruff" ]]; then
+    run "$ROOT_DIR/../.venv/bin/ruff" "$@"
+    return
+  fi
   run uv run ruff "$@"
 }
 
 run_pytest() {
   if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
-    run env MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns "$ROOT_DIR/.venv/bin/python" -m pytest "$@"
+    if "$ROOT_DIR/.venv/bin/python" -c 'import pytest' >/dev/null 2>&1; then
+      run env PYTHONPATH="$ROOT_DIR/src" MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns "$ROOT_DIR/.venv/bin/python" -m pytest "$@"
+      return
+    fi
+  fi
+  if [[ -x "$ROOT_DIR/../.venv/bin/python" ]]; then
+    run env PYTHONPATH="$ROOT_DIR/src" MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns "$ROOT_DIR/../.venv/bin/python" -m pytest "$@"
     return
   fi
   run env MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns uv run pytest "$@"
