@@ -1,7 +1,7 @@
 # 2026-05-01 — Verification evidence (post exec-summary doc update)
 
 Branch: `codex/dev-branch-pipeline`  
-Commit verified: `419cbca`
+Commit verified: `c221e4c`
 
 This file records the verification lanes rerun after the executive-summary documentation updates.
 
@@ -13,7 +13,7 @@ This file records the verification lanes rerun after the executive-summary docum
 - Unit tests (passed)
   - Command:
     - `env PYTHONPATH=plotlot/src MLFLOW_TRACKING_URI=file:///tmp/plotlot-mlruns ./.venv/bin/python -m pytest plotlot/tests/unit -q`
-  - Result: `779 passed, 1 warning` (MLflow filesystem-store deprecation warning)
+  - Result: `780 passed, 1 warning` (MLflow filesystem-store deprecation warning)
 
 ## Frontend (`plotlot/frontend`)
 
@@ -34,4 +34,3 @@ Not rerun in this lane. Use:
 
 - `make live-agent-e2e` (served frontend + backend; requires live creds)
 - `make verify-local-no-browser` (deterministic gate without browser tests)
-
