@@ -259,14 +259,16 @@ def _usable_response(result: dict | None) -> bool:
 
 
 def _get_openai_client() -> AsyncOpenAI:
+    api_key: str | Any
     if _using_nvidia_mainline():
-        api_key: str | Any = settings.nvidia_api_key
+        api_key = settings.nvidia_api_key
     elif settings.openai_api_key:
-        api_key: str | Any = settings.openai_api_key
+        api_key = settings.openai_api_key
     elif settings.use_codex_oauth:
+        # Provide a refreshable token provider.
         api_key = _get_codex_oauth_token
     else:
-        api_key = settings.openai_access_token
+        api_key = settings.openai_access_token or ""
 
     kwargs: dict = {
         "api_key": api_key,

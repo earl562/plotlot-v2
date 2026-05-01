@@ -16,6 +16,7 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from plotlot.harness.default_runtime import get_default_runtime
+from plotlot.harness.approvals import approval_request_id, approval_request_json, is_valid_approved_approval
 from plotlot.harness.tool_registry import list_tool_contracts, tool_risk_class
 from plotlot.harness.events import HarnessEvent
 from plotlot.land_use.evidence import persist_land_use_evidence
@@ -76,35 +77,8 @@ class ToolCallResponse(BaseModel):
     events: list[dict[str, Any]] = Field(default_factory=list)
 
 
-async def _validated_approved_ids(
-    *,
-    approval_ids: set[str],
-    workspace_id: str,
-) -> set[str]:
-    """Return subset actually approved in DB; fail-closed on DB errors."""
-
-    if not approval_ids:
-        return set()
-
-    session = await get_session()
-    try:
-        now = datetime.now(timezone.utc)
-        approved: set[str] = set()
-        for approval_id in approval_ids:
-            row = await session.get(ApprovalRequest, approval_id)
-            if (
-                row
-                and row.workspace_id == workspace_id
-                and row.status == "approved"
-                and (row.expires_at is None or row.expires_at > now)
-            ):
-                approved.add(approval_id)
-        return approved
-    except Exception:
-        logger.warning("Approval validation failed; failing closed", exc_info=True)
-        return set()
-    finally:
-        await session.close()
+def _effective_approval_id(*, tool_name: str, args: dict[str, Any], run_id: str, provided: str | None) -> str:
+    return provided or approval_request_id(tool_name=tool_name, run_id=run_id, args=args)
 
 
 async def _ensure_workspace(session, workspace_id: str, owner_user_id: str | None) -> None:
@@ -154,14 +128,33 @@ async def call_tool(req: ToolCallRequest, http_request: Request):
     actor_user_id = _actor_user_id(http_request)
     claimed_approvals = set(req.approved_approval_ids or [])
 
+    approval_id = _effective_approval_id(
+        tool_name=req.tool_name,
+        args=req.arguments,
+        run_id=run_id,
+        provided=req.approval_id,
+    )
+
     # Only treat approvals as valid if the DB says so (fail-closed).
     risk_class = tool_risk_class(req.tool_name)
     validated = claimed_approvals
     if risk_class in {"write_external", "execution", "write_internal", "expensive_read"}:
-        validated = await _validated_approved_ids(
-            approval_ids=claimed_approvals,
-            workspace_id=req.workspace_id,
-        )
+        validated = set()
+        if approval_id in claimed_approvals:
+            validation_session = await get_session()
+            try:
+                ok = await is_valid_approved_approval(
+                    approval_id=approval_id,
+                    workspace_id=req.workspace_id,
+                    tool_name=req.tool_name,
+                    args=req.arguments,
+                    run_id=run_id,
+                    session=validation_session,
+                )
+                if ok:
+                    validated = {approval_id}
+            finally:
+                await validation_session.close()
 
     session = await get_session()
     tool_run = None
@@ -199,7 +192,7 @@ async def call_tool(req: ToolCallRequest, http_request: Request):
             workspace_id=req.workspace_id,
             actor_user_id=actor_user_id,
             run_id=run_id,
-            tool_run_id=tool_run.id,
+            tool_run_id=str(tool_run.id),
             project_id=project_id,
             site_id=req.site_id,
             analysis_id=req.analysis_id,
@@ -214,7 +207,7 @@ async def call_tool(req: ToolCallRequest, http_request: Request):
             tool_name=req.tool_name,
             tool_args=req.arguments,
             context=context,
-            approval_id=req.approval_id,
+            approval_id=approval_id,
             events=event_buffer,
         )
 
@@ -223,32 +216,54 @@ async def call_tool(req: ToolCallRequest, http_request: Request):
         result_payload: dict[str, Any] | None = call_result.result
 
         if call_result.status == "pending_approval":
-            tool_run.status = "pending_approval"
-            tool_run.output_json = {
-                "status": "pending_approval",
-                "approval_id": call_result.decision.approval_id,
-                "reason": call_result.decision.reason,
-            }
-            approval = ApprovalRequest(
-                id=call_result.decision.approval_id or f"apr_{run_id}_{req.tool_name}",
-                workspace_id=req.workspace_id,
-                project_id=project_id,
-                analysis_run_id=req.analysis_run_id,
-                tool_run_id=tool_run.id,
-                status="pending",
-                risk_class=risk_class,
-                action_name=req.tool_name,
-                reason=call_result.decision.reason,
-                request_json={"tool": req.tool_name, "args": req.arguments, "run_id": run_id},
-                response_json={},
-                requested_by=actor_user_id,
+            setattr(tool_run, "status", "pending_approval")
+            setattr(
+                tool_run,
+                "output_json",
+                {
+                    "status": "pending_approval",
+                    "approval_id": call_result.decision.approval_id,
+                    "reason": call_result.decision.reason,
+                },
             )
-            session.add(approval)
+            approval_row_id = call_result.decision.approval_id or approval_id
+            desired_request = approval_request_json(tool_name=req.tool_name, args=req.arguments, run_id=run_id)
+            existing = await session.get(ApprovalRequest, approval_row_id)
+            if existing is None:
+                session.add(
+                    ApprovalRequest(
+                        id=approval_row_id,
+                        workspace_id=req.workspace_id,
+                        project_id=project_id,
+                        analysis_run_id=req.analysis_run_id,
+                        tool_run_id=str(tool_run.id),
+                        status="pending",
+                        risk_class=risk_class,
+                        action_name=req.tool_name,
+                        reason=call_result.decision.reason,
+                        request_json=desired_request,
+                        response_json={},
+                        requested_by=actor_user_id,
+                    )
+                )
+            else:
+                now = datetime.now(timezone.utc)
+                expired = existing.expires_at is not None and existing.expires_at <= now
+                if existing.status != "pending" or expired or existing.request_json != desired_request:
+                    setattr(existing, "status", "pending")
+                    setattr(existing, "reason", call_result.decision.reason)
+                    setattr(existing, "request_json", desired_request)
+                    setattr(existing, "response_json", {})
+                    setattr(existing, "requested_by", actor_user_id)
+                    setattr(existing, "decided_by", None)
+                    setattr(existing, "decided_at", None)
+                    if expired:
+                        setattr(existing, "expires_at", None)
         elif call_result.status == "ok":
-            tool_run.status = "ok"
-            tool_run.output_json = result_payload or {}
+            setattr(tool_run, "status", "ok")
+            setattr(tool_run, "output_json", result_payload or {})
 
-            evidence_payloads = []
+            evidence_payloads: list[Any] = []
             if isinstance(result_payload, dict):
                 evidence_payloads = result_payload.get("evidence", []) or []
 
@@ -297,16 +312,16 @@ async def call_tool(req: ToolCallRequest, http_request: Request):
                 await persist_land_use_evidence(session, evidence=evidence)
                 evidence_ids.append(evidence.id)
         else:
-            tool_run.status = call_result.status
-            tool_run.output_json = result_payload or {}
-            tool_run.error_message = call_result.message
+            setattr(tool_run, "status", call_result.status)
+            setattr(tool_run, "output_json", result_payload or {})
+            setattr(tool_run, "error_message", call_result.message)
 
-        tool_run.completed_at = datetime.now(timezone.utc)
+        setattr(tool_run, "completed_at", datetime.now(timezone.utc))
         await session.commit()
 
         return ToolCallResponse(
             run_id=run_id,
-            tool_run_id=tool_run.id,
+            tool_run_id=str(tool_run.id),
             tool_name=call_result.tool_name,
             status=call_result.status,
             decision=call_result.decision.model_dump(),

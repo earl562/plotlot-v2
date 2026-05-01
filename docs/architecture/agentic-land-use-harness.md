@@ -2,8 +2,9 @@
 
 - Date: 2026-04-30
 - Branch: `feature/opencode-visual-ralph`
-- Related PRD: `.omx/plans/prd-agentic-land-use-harness.md`
-- Related test spec: `.omx/plans/test-spec-agentic-land-use-harness.md`
+- Related PRD (execution slice): `.omx/plans/prd-plotlot-workspace-harness.md`
+- Related test spec: `.omx/plans/test-spec-plotlot-workspace-harness.md`
+- North-star product framing: `docs/prd/2026-04-30-plotlot-agentic-land-use-harness.md`
 - Research trace: `docs/prd/2026-04-30-agentic-research-trace.md`
 - Connector contracts: `docs/connector-contracts/*`
 

@@ -5,7 +5,21 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timezone
 
+from pydantic import HttpUrl, TypeAdapter
+
 from plotlot.land_use.models import EvidenceCitation, SourceType
+
+
+_HTTP_URL = TypeAdapter(HttpUrl)
+
+
+def _coerce_http_url(url: str | None) -> HttpUrl | None:
+    if not url:
+        return None
+    try:
+        return _HTTP_URL.validate_python(url)
+    except Exception:
+        return None
 
 
 def _sha256(text: str) -> str:
@@ -25,7 +39,7 @@ def ordinance_citation(
     return EvidenceCitation(
         source_type=SourceType.ORDINANCE,
         title=title,
-        url=url,
+        url=_coerce_http_url(url),
         jurisdiction=jurisdiction,
         path=list(path or []),
         retrieved_at=datetime.now(timezone.utc),
@@ -46,7 +60,7 @@ def arcgis_layer_citation(
     return EvidenceCitation(
         source_type=SourceType.ARCGIS_LAYER,
         title=title,
-        url=service_url,
+        url=_coerce_http_url(service_url),
         jurisdiction=jurisdiction,
         retrieved_at=datetime.now(timezone.utc),
         publisher=publisher,
@@ -66,7 +80,7 @@ def county_record_citation(
     return EvidenceCitation(
         source_type=SourceType.COUNTY_RECORD,
         title=title,
-        url=url,
+        url=_coerce_http_url(url),
         jurisdiction=jurisdiction,
         retrieved_at=datetime.now(timezone.utc),
         publisher=publisher,

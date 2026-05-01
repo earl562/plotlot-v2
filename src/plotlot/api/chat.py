@@ -46,6 +46,7 @@ from plotlot.land_use.policy import ToolPolicy
 from plotlot.harness.policy import HarnessPolicyEngine
 from plotlot.harness.tool_registry import get_tool_contract
 from plotlot.harness.default_runtime import get_default_runtime
+from plotlot.harness.approvals import approval_request_id, approval_request_json, is_valid_approved_approval
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +58,6 @@ def _actor_user_id(http_request: Request | None) -> str:
     if isinstance(user, dict) and user.get("user_id"):
         return str(user["user_id"])
     return "anonymous"
-
-
-def _expected_approval_id(*, tool_name: str, run_id: str) -> str:
-    """Match ToolPolicy's deterministic approval ID format."""
-
-    safe_tool = tool_name.replace(".", "_")
-    return f"apr_{run_id}_{safe_tool}"
 
 
 async def _persist_pending_approval(
@@ -111,12 +105,12 @@ async def _persist_pending_approval(
             workspace_id=context.workspace_id,
             project_id=context.project_id,
             analysis_run_id=None,
-            tool_run_id=tool_run.id,
+            tool_run_id=str(tool_run.id),
             status="pending",
             risk_class=risk_class,
             action_name=tool_name,
             reason=reason,
-            request_json={"tool": tool_name, "args": args, "run_id": context.run_id},
+            request_json=approval_request_json(tool_name=tool_name, args=args, run_id=context.run_id),
             response_json={},
             requested_by=context.actor_user_id,
         )
@@ -1900,16 +1894,34 @@ async def chat(request: ChatRequest, http_request: Request):
                     actor_user_id = _actor_user_id(http_request)
                     claimed_approvals = set(request.approved_approval_ids or [])
                     validated_approvals = claimed_approvals
+                    approval_id_for_call: str | None = None
                     if contract and contract.risk_class in {
                         "write_external",
                         "execution",
                         "write_internal",
                         "expensive_read",
                     }:
-                        validated_approvals = await _validated_approved_ids(
-                            approval_ids=claimed_approvals,
-                            workspace_id=request.workspace_id,
+                        approval_id_for_call = approval_request_id(
+                            tool_name=fn_name,
+                            run_id=session_id,
+                            args=fn_args,
                         )
+                        validated_approvals = set()
+                        if approval_id_for_call in claimed_approvals:
+                            validation_session = await get_session()
+                            try:
+                                ok = await is_valid_approved_approval(
+                                    approval_id=approval_id_for_call,
+                                    workspace_id=request.workspace_id,
+                                    tool_name=fn_name,
+                                    args=fn_args,
+                                    run_id=session_id,
+                                    session=validation_session,
+                                )
+                                if ok:
+                                    validated_approvals = {approval_id_for_call}
+                            finally:
+                                await validation_session.close()
 
                     context = ToolContext(
                         workspace_id=request.workspace_id,
@@ -1924,10 +1936,14 @@ async def chat(request: ChatRequest, http_request: Request):
                     if contract is None:
                         decision = policy_engine.authorize(tool_name="gateway.execute", context=context)
                     else:
-                        decision = policy_engine.authorize(tool_name=fn_name, context=context)
+                        decision = policy_engine.authorize(
+                            tool_name=fn_name,
+                            context=context,
+                            approval_id=approval_id_for_call,
+                        )
 
                     if decision.approval_required:
-                        approval_id = decision.approval_id
+                        approval_id = decision.approval_id or approval_id_for_call
                         risk_class = contract.risk_class if contract else "execution"
                         await _persist_pending_approval(
                             approval_id=approval_id or "",
@@ -1971,15 +1987,6 @@ async def chat(request: ChatRequest, http_request: Request):
                         )
                     else:
                         # Execute tool (allowed)
-                        if contract and contract.risk_class in {
-                            "write_external",
-                            "expensive_read",
-                            "write_internal",
-                        }:
-                            expected = _expected_approval_id(tool_name=fn_name, run_id=session_id)
-                            if expected in context.approved_approval_ids:
-                                fn_args["approval_id"] = expected
-
                         # Route core tools through the shared harness runtime.
                         if fn_name in {
                             "geocode_address",
@@ -1994,7 +2001,7 @@ async def chat(request: ChatRequest, http_request: Request):
                                 tool_name=fn_name,
                                 tool_args=fn_args,
                                 context=context,
-                                approval_id=fn_args.get("approval_id"),
+                                approval_id=approval_id_for_call,
                             )
                             # Preserve chat session behaviors.
                             if fn_name == "geocode_address" and tool_result.result:

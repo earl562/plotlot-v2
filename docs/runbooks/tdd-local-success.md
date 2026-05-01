@@ -127,11 +127,17 @@ Use mutation testing to validate that the test suite would catch subtle regressi
 
 PlotLot uses `mutmut` for backend mutation testing. This is intentionally **not** part of the default local success gate because it is slow.
 
-Run:
+Run (recommended on macOS):
 
 ```bash
-make mutation
+PYTHONFAULTHANDLER=1 uv run --python python3.12 --extra mutation --extra dev --extra mlflow mutmut run --max-children 1
 ```
+
+Notes:
+
+- On macOS, `mutmut` uses multiprocessing + `fork`, which can trigger `worker exit code -11` (SIGSEGV) depending on imports and concurrency.
+- This repo sets `use_setproctitle = false` in `[tool.mutmut]` to avoid known fork-safety crashes.
+- If you see widespread `-11` across many mutants, treat it as an infra problem (not a meaningful “killed mutant” result); reduce concurrency and narrow mutation scope.
 
 Then inspect survivors (mutants that tests did not kill):
 

@@ -76,35 +76,43 @@ async def _handle_lookup_property_info(args: dict[str, Any], context: ToolContex
 
     address = str(args.get("address", "")).strip()
     county = str(args.get("county", "")).strip()
-    lat = args.get("lat")
-    lng = args.get("lng")
+
+    def _to_float_or_none(value: Any) -> float | None:
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    lat = _to_float_or_none(args.get("lat"))
+    lng = _to_float_or_none(args.get("lng"))
 
     try:
-        record = await lookup_property(address, county, lat=float(lat), lng=float(lng))
+        record = await lookup_property(address, county, lat=lat, lng=lng)
     except Exception as e:
         return {"status": "error", "message": f"Property lookup failed: {type(e).__name__}: {e}"}
     if not record:
         return {"status": "not_found", "result": {}}
 
-    result = {
-        "status": "success",
-        "result": {
-            "folio": record.folio,
-            "address": record.address,
-            "municipality": record.municipality,
-            "county": record.county,
-            "owner": record.owner,
-            "zoning_code": record.zoning_code,
-            "zoning_description": record.zoning_description,
-            "lot_size_sqft": record.lot_size_sqft,
-            "lot_dimensions": record.lot_dimensions,
-            "year_built": record.year_built,
-            "assessed_value": record.assessed_value,
-            "lat": record.lat,
-            "lng": record.lng,
-            "zoning_layer_url": record.zoning_layer_url,
-        },
+    payload: dict[str, Any] = {
+        "folio": record.folio,
+        "address": record.address,
+        "municipality": record.municipality,
+        "county": record.county,
+        "owner": record.owner,
+        "zoning_code": record.zoning_code,
+        "zoning_description": record.zoning_description,
+        "lot_size_sqft": record.lot_size_sqft,
+        "lot_dimensions": record.lot_dimensions,
+        "year_built": record.year_built,
+        "assessed_value": record.assessed_value,
+        "lat": record.lat,
+        "lng": record.lng,
+        "zoning_layer_url": record.zoning_layer_url,
     }
+
+    result: dict[str, Any] = {"status": "success", "result": payload}
 
     ev_id = _ev_id()
     citation = county_record_citation(
@@ -123,7 +131,7 @@ async def _handle_lookup_property_info(args: dict[str, Any], context: ToolContex
         analysis_run_id=context.analysis_run_id,
         tool_run_id=context.tool_run_id,
         claim_key="site.property_record",
-        payload=result["result"],
+        payload=payload,
         source_type=SourceType.COUNTY_RECORD,
         tool_name="lookup_property_info",
         confidence=EvidenceConfidence.MEDIUM,
@@ -258,8 +266,25 @@ async def _handle_discover_open_data_layers(args: dict[str, Any], context: ToolC
 
     county = str(args.get("county", "")).strip()
     state = str(args.get("state", "FL")).strip() or "FL"
-    lat = float(args.get("lat"))
-    lng = float(args.get("lng"))
+    lat_raw = args.get("lat")
+    lng_raw = args.get("lng")
+    if lat_raw is None or lng_raw is None:
+        return {
+            "status": "error",
+            "message": "discover_open_data_layers requires numeric lat and lng",
+            "results": [],
+            "evidence": [],
+        }
+    try:
+        lat = float(lat_raw)
+        lng = float(lng_raw)
+    except (TypeError, ValueError):
+        return {
+            "status": "error",
+            "message": "discover_open_data_layers requires numeric lat and lng",
+            "results": [],
+            "evidence": [],
+        }
 
     candidates = await discover_layers(county=county, state=state, lat=lat, lng=lng)
 

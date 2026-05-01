@@ -7,15 +7,17 @@ the full MCP transport layer is stabilized.
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timezone
 from typing import Any
+
+import logging
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from plotlot.harness.default_runtime import get_default_runtime
 from plotlot.harness.mcp_adapter import MCPAdapter
+from plotlot.harness.approvals import approval_request_id, approval_request_json, is_valid_approved_approval
 from plotlot.harness.tool_registry import tool_risk_class
 from plotlot.land_use.models import ToolContext
 from plotlot.storage.db import get_session
@@ -35,31 +37,8 @@ class MCPCallRequest(BaseModel):
     approval_id: str | None = None
 
 
-async def _validated_approved_ids(*, approval_ids: set[str], workspace_id: str) -> set[str]:
-    """Return subset actually approved in DB; fail-closed on DB errors."""
-
-    if not approval_ids:
-        return set()
-
-    session = await get_session()
-    try:
-        now = datetime.now(timezone.utc)
-        approved: set[str] = set()
-        for approval_id in approval_ids:
-            row = await session.get(ApprovalRequest, approval_id)
-            if (
-                row
-                and row.workspace_id == workspace_id
-                and row.status == "approved"
-                and (row.expires_at is None or row.expires_at > now)
-            ):
-                approved.add(approval_id)
-        return approved
-    except Exception:
-        logger.warning("MCP approval validation failed; failing closed", exc_info=True)
-        return set()
-    finally:
-        await session.close()
+def _effective_approval_id(*, tool_name: str, args: dict[str, Any], context: ToolContext, provided: str | None) -> str:
+    return provided or approval_request_id(tool_name=tool_name, run_id=context.run_id, args=args)
 
 
 @router.get("/tools/list")
@@ -73,13 +52,30 @@ async def tools_call(body: MCPCallRequest) -> dict[str, Any]:
     adapter = MCPAdapter(get_default_runtime())
 
     claimed = set(body.context.approved_approval_ids or set())
+    approval_id = _effective_approval_id(
+        tool_name=body.name,
+        args=body.arguments,
+        context=body.context,
+        provided=body.approval_id,
+    )
     risk_class = tool_risk_class(body.name)
-    validated = claimed
+    validated: set[str] = set()
     if risk_class in {"write_external", "execution", "write_internal", "expensive_read"}:
-        validated = await _validated_approved_ids(
-            approval_ids=claimed,
-            workspace_id=body.context.workspace_id,
-        )
+        if approval_id in claimed:
+            validation_session = await get_session()
+            try:
+                ok = await is_valid_approved_approval(
+                    approval_id=approval_id,
+                    workspace_id=body.context.workspace_id,
+                    tool_name=body.name,
+                    args=body.arguments,
+                    run_id=body.context.run_id,
+                    session=validation_session,
+                )
+                if ok:
+                    validated = {approval_id}
+            finally:
+                await validation_session.close()
         body = body.model_copy(
             update={
                 "context": body.context.model_copy(update={"approved_approval_ids": validated})
@@ -90,13 +86,18 @@ async def tools_call(body: MCPCallRequest) -> dict[str, Any]:
         name=body.name,
         arguments=body.arguments,
         context=body.context,
-        approval_id=body.approval_id,
+        approval_id=approval_id,
     )
 
     if result.status == "pending_approval" and result.decision.approval_id:
         session = await get_session()
         try:
             existing = await session.get(ApprovalRequest, result.decision.approval_id)
+            desired_request = approval_request_json(
+                tool_name=body.name,
+                args=body.arguments,
+                run_id=body.context.run_id,
+            )
             if existing is None:
                 session.add(
                     ApprovalRequest(
@@ -109,16 +110,26 @@ async def tools_call(body: MCPCallRequest) -> dict[str, Any]:
                         risk_class=risk_class,
                         action_name=body.name,
                         reason=result.decision.reason,
-                        request_json={
-                            "tool": body.name,
-                            "args": body.arguments,
-                            "run_id": body.context.run_id,
-                        },
+                        request_json=desired_request,
                         response_json={},
                         requested_by=body.context.actor_user_id,
                     )
                 )
                 await session.commit()
+            else:
+                now = datetime.now(timezone.utc)
+                expired = existing.expires_at is not None and existing.expires_at <= now
+                if existing.status != "pending" or expired or existing.request_json != desired_request:
+                    setattr(existing, "status", "pending")
+                    setattr(existing, "reason", result.decision.reason)
+                    setattr(existing, "request_json", desired_request)
+                    setattr(existing, "response_json", {})
+                    setattr(existing, "requested_by", body.context.actor_user_id)
+                    setattr(existing, "decided_by", None)
+                    setattr(existing, "decided_at", None)
+                    if expired:
+                        setattr(existing, "expires_at", None)
+                    await session.commit()
         except Exception:
             logger.warning("Failed to persist approval request from MCP call", exc_info=True)
             try:

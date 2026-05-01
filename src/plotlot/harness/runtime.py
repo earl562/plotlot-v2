@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import uuid
 from typing import Any
 
-from plotlot.harness.events import HarnessEvent
+from plotlot.harness.events import EventKind, HarnessEvent
 from plotlot.harness.policy import HarnessPolicyEngine
 from plotlot.harness.tool_registry import tool_exists
 from plotlot.land_use.models import PolicyDecision, ToolContext
@@ -46,7 +46,7 @@ class HarnessRuntime:
     def _emit(
         self,
         *,
-        kind: str,
+        kind: EventKind,
         payload: dict[str, Any],
         buffer: list[HarnessEvent] | None,
     ) -> None:
@@ -144,7 +144,7 @@ class HarnessRuntime:
             return result
 
         try:
-            result = await handler(tool_args, context)
+            handler_result = await handler(tool_args, context)
         except Exception as exc:
             out = ToolCallResult(
                 tool_name=tool_name,
@@ -166,7 +166,7 @@ class HarnessRuntime:
             tool_name=tool_name,
             decision=decision,
             status="ok",
-            result=result,
+            result=handler_result,
         )
         self._emit(
             kind="tool_result",
