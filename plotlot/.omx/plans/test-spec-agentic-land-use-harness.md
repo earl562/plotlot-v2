@@ -196,7 +196,7 @@ Proposed file: `tests/contract/test_land_use_mcp_parity.py`
 Cases:
 
 - MCP `search_ordinances` matches REST response shape for fixture query.
-- MCP `plotlot.query_property_layer` matches REST response shape for fixture query.
+- MCP `query_property_layer` matches REST response shape for fixture query (future; not implemented in the default runtime yet).
 - MCP tool descriptions expose risk class, required args, and output shape.
 - MCP write tools are absent or approval-gated in default local config.
 
@@ -225,10 +225,14 @@ Cases:
   - `draft_email` (`WRITE_INTERNAL`)
   - `draft_google_doc` (`WRITE_INTERNAL`)
   - `gmail_send_draft` (`WRITE_EXTERNAL`)
-- `POST /api/v1/tools/call` with `gmail_send_draft` returns `pending_approval` and persists:
-  - an `approval_requests` row with `risk_class=write_external`, `action_name=gmail_send_draft`, and redacted `request_json`;
-  - a `tool_runs` row with `status=pending_approval`.
-- `POST /api/v1/mcp/tools/call` with `gmail_send_draft` returns the same approval decision shape and persists the same `approval_requests` row (REST↔MCP parity for approvals).
+- **Default runtime (no Gmail handler yet):**
+  - `gmail_send_draft` is **not listed** by `/api/v1/tools` or `/api/v1/mcp/tools/list`.
+  - Calls return `status=unavailable` and **do not** persist approvals (fail-closed: no approvals for unimplemented tools).
+- **When a Gmail handler is implemented/enabled:**
+  - `POST /api/v1/tools/call` with `gmail_send_draft` must return `pending_approval` and persist:
+    - an `approval_requests` row with `risk_class=write_external`, `action_name=gmail_send_draft`, and redacted `request_json`;
+    - a `tool_runs` row with `status=pending_approval`.
+  - `POST /api/v1/mcp/tools/call` with `gmail_send_draft` must return the same approval decision shape and persist the same `approval_requests` row (REST↔MCP parity for approvals).
 - Approval decision endpoints (`/api/v1/approvals/{approval_id}/decision`) flip status to `approved|rejected` and are validated by subsequent REST/MCP calls (fail-closed if DB disagrees).
 
 ## 7. Golden-set eval suite

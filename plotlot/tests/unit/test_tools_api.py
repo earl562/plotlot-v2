@@ -288,7 +288,7 @@ async def test_tools_call_draft_email_is_allowed_and_persists_document_artifact(
 
 
 @pytest.mark.asyncio
-async def test_tools_call_gmail_send_draft_requires_approval_and_persists_request(client):
+async def test_tools_call_gmail_send_draft_is_unavailable_until_implemented(client):
     from plotlot.storage.models import ApprovalRequest
 
     fake_session = FakeSession()
