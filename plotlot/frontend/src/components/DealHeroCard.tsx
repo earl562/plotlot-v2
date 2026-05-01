@@ -322,12 +322,27 @@ export default function DealHeroCard({ report, dealType }: DealHeroCardProps) {
     hybrid: "Hybrid Analysis",
   };
 
+  const confidenceColors: Record<string, string> = {
+    high: "text-emerald-600 dark:text-emerald-400",
+    medium: "text-amber-600 dark:text-amber-400",
+    low: "text-red-500 dark:text-red-400",
+  };
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
           {DEAL_LABELS[dealType]}
         </span>
+        {report.confidence && (
+          <span className={`text-[11px] font-medium ${confidenceColors[report.confidence] ?? confidenceColors.low}`}>
+            {report.confidence.charAt(0).toUpperCase() + report.confidence.slice(1)} confidence
+            {report.confidence_warning ? " · " : ""}
+          </span>
+        )}
+        {report.confidence_warning && (
+          <span className="text-[11px] text-[var(--text-muted)]">{report.confidence_warning}</span>
+        )}
       </div>
       {dealType === "land_deal" && <LandDealHero report={report} />}
       {dealType === "wholesale" && <WholesaleHero report={report} />}

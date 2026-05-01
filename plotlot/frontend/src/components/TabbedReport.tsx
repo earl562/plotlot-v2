@@ -19,8 +19,9 @@ import {
   DataRow, UsesList, parseNumericFt, estimateLotDimensions,
   ComparableSalesSection, ProFormaSection,
 } from "./ReportShared";
+import EvidencePanel from "./EvidencePanel";
 
-type ReportTab = "property" | "zoning" | "analysis" | "deal";
+type ReportTab = "property" | "zoning" | "analysis" | "deal" | "evidence";
 
 interface TabbedReportProps {
   report: ZoningReportData;
@@ -64,21 +65,29 @@ const TABS: { id: ReportTab; label: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    id: "evidence",
+    label: "Evidence",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    ),
+  },
 ];
 
 // Deal-type-specific tab visibility
 const DEAL_TABS: Record<DealType, ReportTab[]> = {
-  land_deal: ["property", "zoning", "analysis", "deal"],
-  wholesale: ["property", "zoning", "deal"],
-  creative_finance: ["property", "deal"],
-  hybrid: ["property", "zoning", "analysis", "deal"],
+  land_deal: ["property", "zoning", "analysis", "deal", "evidence"],
+  wholesale: ["property", "zoning", "deal", "evidence"],
+  creative_finance: ["property", "deal", "evidence"],
+  hybrid: ["property", "zoning", "analysis", "deal", "evidence"],
 };
 
 export default function TabbedReport({ report, dealType }: TabbedReportProps) {
   const visibleTabIds = DEAL_TABS[dealType] || DEAL_TABS.land_deal;
   const visibleTabs = TABS.filter((t) => visibleTabIds.includes(t.id));
   const [activeTab, setActiveTab] = useState<ReportTab>(visibleTabIds[0]);
-  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const { toast } = useToast();
 
@@ -261,24 +270,6 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
               <UsesList title="Prohibited" uses={report.prohibited_uses} color="red" />
             </div>
 
-            {/* Sources */}
-            {report.sources.length > 0 && (
-              <div className="space-y-2">
-                <button onClick={() => setSourcesOpen(!sourcesOpen)} className="flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
-                  <span>View {report.sources.length} source{report.sources.length !== 1 ? "s" : ""}</span>
-                  <svg className={`h-3 w-3 transition-transform ${sourcesOpen ? "rotate-90" : ""}`} viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                {sourcesOpen && (
-                  <div className="space-y-1 animate-fade-in">
-                    {report.sources.map((source, i) => (
-                      <div key={i} className="text-xs text-[var(--text-muted)]">{source}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </motion.div>
         )}
 
@@ -331,6 +322,11 @@ export default function TabbedReport({ report, dealType }: TabbedReportProps) {
               <PropertyIntelligence report={report} />
             </div>
           </motion.div>
+        )}
+
+        {/* Evidence Tab */}
+        {activeTab === "evidence" && (
+          <EvidencePanel key="evidence" report={report} />
         )}
 
         {/* Deal Tab */}
