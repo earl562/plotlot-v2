@@ -93,6 +93,10 @@ class SearchResult:
     chunk_text: str
     score: float
     municipality: str
+    chunk_id: int | None = None
+    chapter: str | None = None
+    municode_node_id: str | None = None
+    source_url: str | None = None
 
 
 # ---------------------------------------------------------------------------

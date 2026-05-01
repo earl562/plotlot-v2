@@ -642,86 +642,60 @@ class ConnectorToolPort:
 
 ## 8. REST route sketch
 
+Current implementation uses a **generic tool gateway** (stable boundary) rather than
+many one-off tool endpoints:
+
+- `GET /api/v1/tools` — list tool contracts with handlers
+- `POST /api/v1/tools/call` — execute a tool by name under policy + audit logging
+
 ```python
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Request
 
-router = APIRouter(prefix="/api/v1")
-
-
-@router.post("/projects/{project_id}/sites/{site_id}/analyses")
-async def create_analysis(project_id: str, site_id: str, req: CreateAnalysisRequest):
-    return await harness_runtime.start_run(project_id=project_id, site_id=site_id, task=req.task)
+router = APIRouter(prefix="/api/v1/tools")
 
 
-@router.post("/tools/search-ordinances")
-async def search_ordinances(req: OrdinanceSearchArgs, ctx: ToolContext = Depends(tool_context)):
-    return await ordinance_tool.search(req, ctx)
-
-
-@router.post("/tools/discover-open-data-layers")
-async def discover_open_data_layers(req: DiscoverLayersRequest, ctx: ToolContext = Depends(tool_context)):
-    return await open_data_tool.discover_layers(req.county, req.state, req.layer_type, ctx)
-
-
-@router.get("/analyses/{analysis_id}/evidence")
-async def list_evidence(analysis_id: str):
-    return await evidence_service.list_for_analysis(analysis_id)
-
-
-@router.get("/connectors/providers")
-async def list_connector_providers():
-    return [{"id": "google_workspace"}, {"id": "gmail"}, {"id": "google_calendar"}, {"id": "crm"}]
-
-
-@router.get("/connectors/accounts")
-async def list_connector_accounts(workspace_id: str):
-    return await connector_service.list_accounts(workspace_id)
-
-
-@router.post("/tools/draft-email")
-async def draft_email(req: DraftEmailArgs, ctx: ToolContext = Depends(tool_context)):
-    return await connector_tool.draft_email(req, ctx)
-
-
-@router.post("/tools/gmail-send-draft")
-async def gmail_send_draft(req: GmailSendDraftArgs, ctx: ToolContext = Depends(tool_context)):
-    # Will return approval_required unless ctx includes an approved approval_id.
-    return await connector_tool.gmail_send_draft(req, ctx)
-
-
-@router.post("/approvals/{approval_id}/decision")
-async def decide_approval(approval_id: str, body: ApprovalDecisionRequest):
-    return await approvals_service.decide(approval_id, body)
+@router.post("/call")
+async def call_tool(req: ToolCallRequest, http_request: Request):
+    # req.tool_name selects the ToolContract + handler (e.g. `search_ordinances`).
+    # The gateway persists ToolRuns + ApprovalRequests and routes execution through policy.
+    return await tool_gateway.call(req, http_request)
 ```
 
 ## 9. MCP adapter sketch
 
-MCP should expose the same ports. Example conceptual mapping:
+MCP should expose the same ports. The current implementation is an MCP-over-HTTP
+adapter:
+
+- `GET /api/v1/mcp/tools/list`
+- `POST /api/v1/mcp/tools/call`
+
+Tool names do not require a `plotlot.` prefix — the MCP server identity provides
+namespacing.
 
 ```python
 # transport-specific pseudo-code; exact MCP SDK can be chosen during implementation
 
-@mcp.tool(name="plotlot.search_ordinances")
+@mcp.tool(name="search_ordinances")
 async def mcp_search_ordinances(jurisdiction: dict, query: str, limit: int = 8):
     ctx = mcp_tool_context(read_only=True)
     args = OrdinanceSearchArgs(jurisdiction=OrdinanceJurisdiction(**jurisdiction), query=query, limit=limit)
     return [result.model_dump(mode="json") for result in await ordinance_tool.search(args, ctx)]
 
 
-@mcp.tool(name="plotlot.discover_open_data_layers")
+@mcp.tool(name="discover_open_data_layers")
 async def mcp_discover_open_data_layers(county: str, state: str, layer_type: str = "parcel"):
     ctx = mcp_tool_context(read_only=True)
     return [layer.model_dump(mode="json") for layer in await open_data_tool.discover_layers(county, state, layer_type, ctx)]
 
 
-@mcp.tool(name="plotlot.draft_email")
+@mcp.tool(name="draft_email")
 async def mcp_draft_email(to: list[str], subject: str, body: str):
     ctx = mcp_tool_context(read_only=False)
     args = DraftEmailArgs(to=to, subject=subject, body=body)
     return (await connector_tool.draft_email(args, ctx)).model_dump(mode="json")
 
 
-@mcp.tool(name="plotlot.gmail_send_draft")
+@mcp.tool(name="gmail_send_draft")
 async def mcp_gmail_send_draft(draft_id: str):
     ctx = mcp_tool_context(read_only=False)
     args = GmailSendDraftArgs(draft_id=draft_id)
@@ -752,8 +726,8 @@ required_tools:
   - geocode_address
   - lookup_property_info
   - search_ordinances
+  - fetch_ordinance_section
   - discover_open_data_layers
-  - query_property_layer
   - web_search
 required_evidence:
   - parcel_identity

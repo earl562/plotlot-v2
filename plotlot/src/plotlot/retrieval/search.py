@@ -84,6 +84,7 @@ async def _hybrid_rrf(
     query = text("""
         WITH vector_results AS (
             SELECT id, section, section_title, zone_codes, chunk_text, municipality,
+                   chapter, municode_node_id, source_url,
                    ROW_NUMBER() OVER (ORDER BY embedding <=> CAST(:embedding AS vector)) AS vrank
             FROM ordinance_chunks
             WHERE municipality ILIKE :municipality
@@ -93,6 +94,7 @@ async def _hybrid_rrf(
         ),
         keyword_results AS (
             SELECT id, section, section_title, zone_codes, chunk_text, municipality,
+                   chapter, municode_node_id, source_url,
                    ROW_NUMBER() OVER (ORDER BY ts_rank(search_vector, plainto_tsquery(:query)) DESC) AS krank
             FROM ordinance_chunks
             WHERE municipality ILIKE :municipality
@@ -109,12 +111,16 @@ async def _hybrid_rrf(
                 COALESCE(v.zone_codes, k.zone_codes) AS zone_codes,
                 COALESCE(v.chunk_text, k.chunk_text) AS chunk_text,
                 COALESCE(v.municipality, k.municipality) AS municipality,
+                COALESCE(v.chapter, k.chapter) AS chapter,
+                COALESCE(v.municode_node_id, k.municode_node_id) AS municode_node_id,
+                COALESCE(v.source_url, k.source_url) AS source_url,
                 COALESCE(1.0 / (:rrf_k + v.vrank), 0) +
                 COALESCE(1.0 / (:rrf_k + k.krank), 0) AS rrf_score
             FROM vector_results v
             FULL OUTER JOIN keyword_results k ON v.id = k.id
         )
-        SELECT id, section, section_title, zone_codes, chunk_text, municipality, rrf_score
+        SELECT id, section, section_title, zone_codes, chunk_text, municipality,
+               chapter, municode_node_id, source_url, rrf_score
         FROM fused
         ORDER BY rrf_score DESC
         LIMIT :limit
@@ -145,6 +151,10 @@ async def _hybrid_rrf(
             chunk_text=row.chunk_text,
             score=float(row.rrf_score),
             municipality=row.municipality,
+            chunk_id=int(row.id) if row.id is not None else None,
+            chapter=row.chapter,
+            municode_node_id=row.municode_node_id,
+            source_url=row.source_url,
         )
         for row in rows
     ]
@@ -159,6 +169,7 @@ async def _keyword_only(
     """Keyword-only fallback when embedding is unavailable."""
     query = text("""
         SELECT id, section, section_title, zone_codes, chunk_text, municipality,
+               chapter, municode_node_id, source_url,
                ts_rank(search_vector, plainto_tsquery(:query)) AS rank
         FROM ordinance_chunks
         WHERE municipality ILIKE :municipality
@@ -187,6 +198,10 @@ async def _keyword_only(
             chunk_text=row.chunk_text,
             score=float(row.rank),
             municipality=row.municipality,
+            chunk_id=int(row.id) if row.id is not None else None,
+            chapter=row.chapter,
+            municode_node_id=row.municode_node_id,
+            source_url=row.source_url,
         )
         for row in rows
     ]

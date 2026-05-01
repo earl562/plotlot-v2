@@ -102,6 +102,53 @@ async def test_tools_call_geocode_matches_mcp_adapter(client):
 
 
 @pytest.mark.asyncio
+async def test_tools_call_search_ordinances_returns_normalized_results(client):
+    from plotlot.core.types import SearchResult
+
+    fake_session = FakeSession()
+
+    async def _fake_hybrid_search(session, municipality, zone_code, limit=10, embedding=None):  # noqa: ANN001
+        return [
+            SearchResult(
+                section="Sec. 47-18",
+                section_title="Setback requirements",
+                zone_codes=["RS-8"],
+                chunk_text="Minimum front setback 25 feet. Rear setback 15 feet.",
+                score=0.99,
+                municipality=municipality,
+                chunk_id=123,
+                chapter="Chapter 47",
+                municode_node_id="NODE_1",
+                source_url="https://example.com/ordinance",
+            )
+        ]
+
+    with (
+        patch("plotlot.api.tools.get_session", new=AsyncMock(return_value=fake_session)),
+        patch("plotlot.storage.db.get_session", new=AsyncMock(return_value=fake_session)),
+        patch("plotlot.retrieval.search.hybrid_search", new=AsyncMock(side_effect=_fake_hybrid_search)),
+    ):
+        resp = await client.post(
+            "/api/v1/tools/call",
+            json={
+                "tool_name": "search_ordinances",
+                "arguments": {"municipality": "Example", "query": "RS-8 setbacks", "limit": 1},
+                "workspace_id": "ws_test",
+                "run_id": "run_test_search_ordinances",
+            },
+        )
+
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload["status"] == "ok"
+    assert payload["result"]["status"] == "success"
+    assert payload["result"]["results"]
+    first = payload["result"]["results"][0]
+    assert first["heading"] == "Setback requirements"
+    assert first["citation"]["url"] == "https://example.com/ordinance"
+
+
+@pytest.mark.asyncio
 async def test_tools_call_expensive_read_requires_approval(client):
     fake_session = FakeSession()
     with patch("plotlot.api.tools.get_session", new=AsyncMock(return_value=fake_session)):

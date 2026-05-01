@@ -185,8 +185,8 @@ Proposed file: `tests/contract/test_land_use_rest_tool_parity.py`
 
 Cases:
 
-- `POST /api/v1/tools/search-ordinances` and internal `search_ordinances()` return equivalent normalized payloads for fixture input.
-- `POST /api/v1/tools/discover-open-data-layers` and internal service return equivalent `LayerCandidate[]`.
+- `POST /api/v1/tools/call` with `tool_name=search_ordinances` matches the harness tool output for fixture input.
+- `POST /api/v1/tools/call` with `tool_name=discover_open_data_layers` matches the harness tool output for fixture input.
 - Existing chat tool calls wrap the same services and include evidence IDs.
 
 ### 6.2 MCP parity
@@ -195,7 +195,7 @@ Proposed file: `tests/contract/test_land_use_mcp_parity.py`
 
 Cases:
 
-- MCP `plotlot.search_ordinances` matches REST response shape for fixture query.
+- MCP `search_ordinances` matches REST response shape for fixture query.
 - MCP `plotlot.query_property_layer` matches REST response shape for fixture query.
 - MCP tool descriptions expose risk class, required args, and output shape.
 - MCP write tools are absent or approval-gated in default local config.

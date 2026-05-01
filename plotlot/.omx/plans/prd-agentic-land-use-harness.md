@@ -330,12 +330,12 @@ Requirements:
 ### Phase 3 — MCP adapter
 
 - Expose core read-only tools through an MCP server:
-  - `plotlot.search_ordinances`
-  - `plotlot.fetch_ordinance_section`
-  - `plotlot.discover_open_data_layers`
-  - `plotlot.query_property_layer`
-  - `plotlot.create_site_analysis`
-  - `plotlot.list_evidence`
+  - `search_ordinances`
+  - `fetch_ordinance_section`
+  - `discover_open_data_layers`
+  - `query_property_layer`
+  - `create_site_analysis`
+  - `list_evidence`
 - Gate write/execution tools behind explicit approval.
 - Add API/MCP parity tests.
 
