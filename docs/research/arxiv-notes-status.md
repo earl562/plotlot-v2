@@ -1,13 +1,14 @@
 # arXiv Notes Status
 
 Total: **109**
-Reviewed: **33**
-Stub: **76**
+Reviewed: **34**
+Stub: **75**
 
 ## Reviewed
 
 - [2408.01667v2](docs/research/arxiv-notes/2408.01667v2.md) — Automated Phishing Detection Using URLs and Webpages
 - [2505.02279v2](docs/research/arxiv-notes/2505.02279v2.md) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)
+- [2507.11633](docs/research/arxiv-notes/2507.11633.md) — General Modular Harness for LLM Agents in Multi-Turn Gaming Environments
 - [2509.21766](docs/research/arxiv-notes/2509.21766.md) — UltraHorizon: Benchmarking Agent Capabilities in Ultra Long-Horizon Scenarios
 - [2512.16301v3](docs/research/arxiv-notes/2512.16301v3.md) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills
 - [2601.10338v1](docs/research/arxiv-notes/2601.10338v1.md) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale
@@ -47,7 +48,6 @@ Stub: **76**
 - [2503.13577](docs/research/arxiv-notes/2503.13577.md) — When Should We Orchestrate Multiple Agents?
 - [2504.19413v1](docs/research/arxiv-notes/2504.19413v1.md) — Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory
 - [2506.08119v2](docs/research/arxiv-notes/2506.08119v2.md) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents
-- [2507.11633](docs/research/arxiv-notes/2507.11633.md) — General Modular Harness for LLM Agents in Multi-Turn Gaming Environments
 - [2507.18755v1](docs/research/arxiv-notes/2507.18755v1.md) — Agentic Program Repair from Test Failures at Scale: A Neuro-symbolic approach with static analysis and test execution feedback
 - [2507.23361v2](docs/research/arxiv-notes/2507.23361v2.md) — SWE-Exp: Experience-Driven Software Issue Resolution
 - [2508.00007v1](docs/research/arxiv-notes/2508.00007v1.md) — Agent Network Protocol Technical White Paper

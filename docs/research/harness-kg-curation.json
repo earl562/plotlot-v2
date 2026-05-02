@@ -346,6 +346,42 @@
       ]
     },
     {
+      "name": "Reflective Working Memory",
+      "type": "primitive",
+      "sources": [
+        "2507.11633"
+      ],
+      "bullets": [
+        "Keep a bounded buffer of recent states/actions plus a compact reflection on the latest transition instead of treating memory as full-history replay.",
+        "Working memory should help the agent detect repeated invalid moves, local regressions, and next-step opportunities inside multi-turn control loops.",
+        "For PlotLot, preserve the last retrieval/extraction/calculation transitions plus why confidence changed, what failed, and which evidence gaps remain before the next site-feasibility step."
+      ],
+      "links": [
+        "Context Broker",
+        "Replayable Trajectory",
+        "Workflow Verification",
+        "Evidence Ledger"
+      ]
+    },
+    {
+      "name": "Task-Conditioned Scaffolding",
+      "type": "primitive",
+      "sources": [
+        "2507.11633"
+      ],
+      "bullets": [
+        "Different task structures benefit from different harness modules; spatial/perceptual tasks want stronger state translation while long-horizon tasks want stronger memory support.",
+        "The harness should switch scaffold mix by failure mode instead of pushing one uniform prompt/context package through every stage.",
+        "For PlotLot, map/site-plan/table extraction should get perception-heavy scaffolds, while ordinance cross-reference, contradiction resolution, and iterative report revision should get memory-heavy scaffolds."
+      ],
+      "links": [
+        "Harness Runtime",
+        "Workflow Module Interface",
+        "Context Broker",
+        "Competence-Cost Agent Profile"
+      ]
+    },
+    {
       "name": "Context Refresh + Notes Recall",
       "type": "primitive",
       "sources": [
@@ -556,6 +592,15 @@
       ]
     },
     {
+      "title": "General Modular Harness (2507.11633) synthesis",
+      "bullets": [
+        "Connects [[Context Broker]] to [[Explicit-to-Implicit Translation]]: deterministic state translation is a first-class scaffold when raw perceptual input is noisy or spatially dense.",
+        "Connects [[Replayable Trajectory]] and [[Evidence Ledger]] to [[Reflective Working Memory]]: bounded recent-state memory plus local reflection helps the harness detect repeated invalid moves before they compound.",
+        "Connects [[Harness Runtime]] and [[Workflow Module Interface]] to [[Task-Conditioned Scaffolding]]: different subtasks should receive different module mixes instead of one uniform scaffold package.",
+        "For PlotLot, the immediate design move is a three-layer vertical harness: deterministic artifact/state translation for parcel and ordinance inputs, reflective working memory for multi-step evidence changes, and a controller that swaps scaffold intensity by stage."
+      ]
+    },
+    {
       "title": "UltraHorizon (2509.21766) synthesis",
       "bullets": [
         "Connects [[Context Broker]] and [[Evidence Ledger]] to [[Context Refresh + Notes Recall]]: long-horizon performance depends on artifact-backed state reconstruction, not ever-growing transcripts.",
@@ -647,6 +692,20 @@
         "This is the clearest reviewed paper so far on replacing end-to-end router training with an explicit, reusable routing knowledge base.",
         "For PlotLot, its biggest architectural consequence is to route by capability lanes backed by trace-derived evidence, not by one static default model per stage.",
         "Its most important warning is granularity: a richer skill taxonomy only helps if the orchestrator can reliably classify active skills and use the distinction to improve cost or accuracy."
+      ]
+    },
+    "2507.11633": {
+      "wikilinks": [
+        "Workflow Module Interface",
+        "Explicit-to-Implicit Translation",
+        "Reflective Working Memory",
+        "Task-Conditioned Scaffolding",
+        "Harness Runtime"
+      ],
+      "bullets": [
+        "This is the clearest reviewed source so far on splitting a general-purpose harness into perception, memory, and reasoning layers while holding the backbone model constant.",
+        "For PlotLot, its biggest architectural lesson is task-conditioned scaffolding: use deterministic state translation for map/table/document-heavy subtasks and reflective working memory for long multi-step ordinance reasoning.",
+        "Its main warning is evaluation hygiene: prompt variance is large enough to distort module comparisons, so PlotLot should compare scaffold mixes under fixed prompts and budgets rather than anecdotal one-off runs."
       ]
     },
     "2509.21766": {

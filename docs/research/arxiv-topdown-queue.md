@@ -2,8 +2,8 @@
 
 Generated from: `arxiv-abstracts.json`
 Total papers: **109**
-Reviewed: **33**
-Remaining: **76**
+Reviewed: **34**
+Remaining: **75**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -39,7 +39,6 @@ Priority tiers:
 - **P1** (17) [2602.12670v3](https://arxiv.org/abs/2602.12670v3) — SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks  — [note](docs/research/arxiv-notes/2602.12670v3.md) — _stub_
 - **P1** (16) [2601.21545v1](https://arxiv.org/abs/2601.21545v1) — ShardMemo: Masked MoE Routing for Sharded Agentic LLM Memory  — [note](docs/research/arxiv-notes/2601.21545v1.md) — _stub_
 - **P1** (16) [2603.20939v1](https://arxiv.org/abs/2603.20939v1) — User Preference Modeling for Conversational LLM Agents: Weak Rewards from Retrieval-Augmented Interaction  — [note](docs/research/arxiv-notes/2603.20939v1.md) — _stub_
-- **P1** (15) [2507.11633](https://arxiv.org/abs/2507.11633) — General Modular Harness for LLM Agents in Multi-Turn Gaming Environments  — [note](docs/research/arxiv-notes/2507.11633.md) — _stub_
 - **P1** (15) [2603.05344v3](https://arxiv.org/abs/2603.05344v3) — Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned  — [note](docs/research/arxiv-notes/2603.05344v3.md) — _stub_
 - **P1** (12) [2602.08004v1](https://arxiv.org/abs/2602.08004v1) — Agent Skills: A Data-Driven Analysis of Claude Skills for Extending Large Language Model Functionality  — [note](docs/research/arxiv-notes/2602.08004v1.md) — _stub_
 - **P1** (12) [2604.13318v1](https://arxiv.org/abs/2604.13318v1) — WebXSkill: Skill Learning for Autonomous Web Agents  — [note](docs/research/arxiv-notes/2604.13318v1.md) — _stub_
@@ -74,11 +73,13 @@ Priority tiers:
 - **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
 - **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
 - **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
+- **P2** (10) [2603.12658v1](https://arxiv.org/abs/2603.12658v1) — Continual Learning in Large Language Models: Methods, Challenges, and Opportunities  — [note](docs/research/arxiv-notes/2603.12658v1.md) — _stub_
 
 ## Already reviewed
 
 - **✅** (29) [2408.01667v2](https://arxiv.org/abs/2408.01667v2) — Automated Phishing Detection Using URLs and Webpages  — [note](docs/research/arxiv-notes/2408.01667v2.md) — _reviewed_
 - **✅** (26) [2505.02279v2](https://arxiv.org/abs/2505.02279v2) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)  — [note](docs/research/arxiv-notes/2505.02279v2.md) — _reviewed_
+- **✅** (15) [2507.11633](https://arxiv.org/abs/2507.11633) — General Modular Harness for LLM Agents in Multi-Turn Gaming Environments  — [note](docs/research/arxiv-notes/2507.11633.md) — _reviewed_
 - **✅** (16) [2509.21766](https://arxiv.org/abs/2509.21766) — UltraHorizon: Benchmarking Agent Capabilities in Ultra Long-Horizon Scenarios  — [note](docs/research/arxiv-notes/2509.21766.md) — _reviewed_
 - **✅** (31) [2512.16301v3](https://arxiv.org/abs/2512.16301v3) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills  — [note](docs/research/arxiv-notes/2512.16301v3.md) — _reviewed_
 - **✅** (30) [2601.10338v1](https://arxiv.org/abs/2601.10338v1) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale  — [note](docs/research/arxiv-notes/2601.10338v1.md) — _reviewed_
