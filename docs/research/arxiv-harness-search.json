@@ -1,0 +1,2843 @@
+{
+  "generatedAt": "2026-05-02T00:21:29.277Z",
+  "profileName": "harness-agents",
+  "queries": [
+    "harness engineering agents",
+    "agent harness",
+    "long-horizon agents",
+    "terminal agents",
+    "multi-agent systems",
+    "agent orchestration",
+    "agent runtime governance",
+    "agent memory skills"
+  ],
+  "since": "2024-01-01",
+  "categories": [
+    "cs.AI",
+    "cs.SE",
+    "cs.CL",
+    "cs.LG",
+    "cs.MA",
+    "cs.RO",
+    "cs.CR",
+    "cs.HC"
+  ],
+  "local": {
+    "byQuery": [
+      {
+        "query": "harness engineering agents",
+        "hits": [
+          {
+            "arxivId": "2604.11548v1",
+            "title": "SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.11548v1",
+            "score": 100,
+            "matchedTerms": [
+              "harness",
+              "engineering",
+              "agents"
+            ],
+            "snippet": "The rise of OpenClaw in early 2026 marks the moment when millions of users began deploying personal AI agents into their daily lives, delegating tasks ranging from travel planning to multi-step research. This scale of adoption signals that two parallel arcs of development have re"
+          },
+          {
+            "arxivId": "2604.21003v2",
+            "title": "The Last Harness You'll Ever Build",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.21003v2",
+            "score": 80,
+            "matchedTerms": [
+              "harness",
+              "engineering",
+              "agents"
+            ],
+            "snippet": "AI agents are increasingly deployed on complex, domain-specific workflows -- navigating enterprise web applications that require dozens of clicks and form fills, orchestrating multi-step research pipelines that span search, extraction, and synthesis, automating code review across"
+          },
+          {
+            "arxivId": "2603.28052v1",
+            "title": "Meta-Harness: End-to-End Optimization of Model Harnesses",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.28052v1",
+            "score": 76,
+            "matchedTerms": [
+              "harness",
+              "engineering"
+            ],
+            "snippet": "The performance of large language model (LLM) systems depends not only on model weights, but also on their harness: the code that determines what information to store, retrieve, and present to the model. Yet harnesses are still designed largely by hand, and existing text optimize"
+          },
+          {
+            "arxivId": "2604.08224v1",
+            "title": "Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.08224v1",
+            "score": 75,
+            "matchedTerms": [
+              "harness",
+              "engineering",
+              "agents"
+            ],
+            "snippet": "Large language model (LLM) agents are increasingly built less by changing model weights than by reorganizing the runtime around them. Capabilities that earlier systems expected the model to recover internally are now externalized into memory stores, reusable skills, interaction p"
+          },
+          {
+            "arxivId": "2603.03329v1",
+            "title": "AutoHarness: improving LLM agents by automatically synthesizing a code harness",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.03329v1",
+            "score": 68,
+            "matchedTerms": [
+              "harness",
+              "agents"
+            ],
+            "snippet": "Despite significant strides in language models in the last few years, when used as agents, such models often try to perform actions that are not just suboptimal for a given state, but are strictly prohibited by the external environment. For example, in the recent Kaggle GameArena"
+          },
+          {
+            "arxivId": "2603.08616v1",
+            "title": "Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.08616v1",
+            "score": 65,
+            "matchedTerms": [
+              "harness",
+              "agents"
+            ],
+            "snippet": "Coverage-guided fuzzing has proven effective for software testing, but targeting library code requires specialized fuzz harnesses that translate fuzzer-generated inputs into valid API invocations. Manual harness creation is time-consuming and requires deep understanding of API se"
+          },
+          {
+            "arxivId": "2603.02239v1",
+            "title": "Engineering Reasoning and Instruction (ERI) Benchmark: A Large Taxonomy-driven Dataset for Foundation Models and Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.02239v1",
+            "score": 64,
+            "matchedTerms": [
+              "harness",
+              "engineering",
+              "agents"
+            ],
+            "snippet": "The Engineering Reasoning and Instruction (ERI) benchmark is a taxonomy-driven instruction dataset designed to train and evaluate engineering-capable large language models (LLMs) and agents. This dataset spans nine engineering fields (namely: civil, mechanical, electrical, chemic"
+          },
+          {
+            "arxivId": "2603.25723v1",
+            "title": "Natural-Language Agent Harnesses",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.25723v1",
+            "score": 62,
+            "matchedTerms": [
+              "harness",
+              "engineering"
+            ],
+            "snippet": "Agent performance increasingly depends on \\emph{harness engineering}, yet harness design is usually buried in controller code and runtime-specific conventions, making it hard to transfer, compare, and study as a scientific object. We ask whether the high-level control logic of an"
+          },
+          {
+            "arxivId": "2604.13630v1",
+            "title": "SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13630v1",
+            "score": 62,
+            "matchedTerms": [
+              "harness",
+              "agents"
+            ],
+            "snippet": "The performance of large language model (LLM) agents depends critically on the execution harness, the system layer that orchestrates tool use, context management, and state persistence. Yet this same architectural centrality makes the harness a high-value attack surface: a single"
+          },
+          {
+            "arxivId": "2603.05344v3",
+            "title": "Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.05344v3",
+            "score": 58,
+            "matchedTerms": [
+              "harness",
+              "engineering",
+              "agents"
+            ],
+            "snippet": "The landscape of AI coding assistance is undergoing a fundamental shift from complex IDE plugins to versatile, terminal-native agents. Operating directly where developers manage source control, execute builds, and deploy environments, CLI-based agents offer unprecedented autonomy"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 57,
+            "matchedTerms": [
+              "harness",
+              "agents"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2604.03610v1",
+            "title": "DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.03610v1",
+            "score": 52,
+            "matchedTerms": [
+              "harness",
+              "agents"
+            ],
+            "snippet": "Patching severe security flaws in complex software remains a major challenge. While automated tools like fuzzers efficiently discover bugs, fixing deep-rooted low-level faults (e.g., use-after-free and memory corruption) still requires labor-intensive manual analysis by experts. "
+          }
+        ]
+      },
+      {
+        "query": "agent harness",
+        "hits": [
+          {
+            "arxivId": "2603.25723v1",
+            "title": "Natural-Language Agent Harnesses",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.25723v1",
+            "score": 196,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Agent performance increasingly depends on \\emph{harness engineering}, yet harness design is usually buried in controller code and runtime-specific conventions, making it hard to transfer, compare, and study as a scientific object. We ask whether the high-level control logic of an"
+          },
+          {
+            "arxivId": "2603.08616v1",
+            "title": "Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.08616v1",
+            "score": 169,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Coverage-guided fuzzing has proven effective for software testing, but targeting library code requires specialized fuzz harnesses that translate fuzzer-generated inputs into valid API invocations. Manual harness creation is time-consuming and requires deep understanding of API se"
+          },
+          {
+            "arxivId": "2604.18071v1",
+            "title": "Architectural Design Decisions in AI Agent Harnesses",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.18071v1",
+            "score": 141,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "AI agent systems increasingly rely on reusable non-LLM engineering infrastructure that packages tool mediation, context handling, delegation, safety control, and orchestration. Yet the architectural design decisions in this surrounding infrastructure remain understudied. This pap"
+          },
+          {
+            "arxivId": "2505.02279v2",
+            "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2505.02279v2",
+            "score": 138,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 136,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2603.20380v1",
+            "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.20380v1",
+            "score": 131,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+          },
+          {
+            "arxivId": "2603.19347v3",
+            "title": "Exploring the Agentic Frontier of Verilog Code Generation",
+            "primaryCategory": "cs.AR",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.19347v3",
+            "score": 100,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Large language models (LLMs) have made rapid advancements in code generation for popular languages such as Python and C++. Many of these recent gains can be attributed to the use of ``agents'' that wrap domain-relevant tools alongside LLMs. Hardware design languages such as Veril"
+          },
+          {
+            "arxivId": "2512.16301v3",
+            "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2512.16301v3",
+            "score": 87,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+          },
+          {
+            "arxivId": "2604.03610v1",
+            "title": "DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.03610v1",
+            "score": 87,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Patching severe security flaws in complex software remains a major challenge. While automated tools like fuzzers efficiently discover bugs, fixing deep-rooted low-level faults (e.g., use-after-free and memory corruption) still requires labor-intensive manual analysis by experts. "
+          },
+          {
+            "arxivId": "2604.11548v1",
+            "title": "SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.11548v1",
+            "score": 86,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "The rise of OpenClaw in early 2026 marks the moment when millions of users began deploying personal AI agents into their daily lives, delegating tasks ranging from travel planning to multi-step research. This scale of adoption signals that two parallel arcs of development have re"
+          },
+          {
+            "arxivId": "2604.13630v1",
+            "title": "SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13630v1",
+            "score": 86,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "The performance of large language model (LLM) agents depends critically on the execution harness, the system layer that orchestrates tool use, context management, and state persistence. Yet this same architectural centrality makes the harness a high-value attack surface: a single"
+          },
+          {
+            "arxivId": "2603.28088v1",
+            "title": "GEMS: Agent-Native Multimodal Generation with Memory and Skills",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.28088v1",
+            "score": 85,
+            "matchedTerms": [
+              "agent",
+              "harness"
+            ],
+            "snippet": "Recent multimodal generation models have achieved remarkable progress on general-purpose generation tasks, yet continue to struggle with complex instructions and specialized downstream tasks. Inspired by the success of advanced agent frameworks such as Claude Code, we propose \\te"
+          }
+        ]
+      },
+      {
+        "query": "long-horizon agents",
+        "hits": [
+          {
+            "arxivId": "2601.03204v1",
+            "title": "InfiAgent: An Infinite-Horizon Framework for General-Purpose Autonomous Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.03204v1",
+            "score": 99,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "LLM agents can reason and use tools, but they often break down on long-horizon tasks due to unbounded context growth and accumulated errors. Common remedies such as context compression or retrieval-augmented prompting introduce trade-offs between information fidelity and reasonin"
+          },
+          {
+            "arxivId": "2604.13018v1",
+            "title": "Toward Autonomous Long-Horizon Engineering for ML Research",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.13018v1",
+            "score": 79,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "Autonomous AI research has advanced rapidly, but long-horizon ML research engineering remains difficult: agents must sustain coherent progress across task comprehension, environment setup, implementation, experimentation, and debugging over hours or days. We introduce AiScientist"
+          },
+          {
+            "arxivId": "2512.03627v1",
+            "title": "MemVerse: Multimodal Memory for Lifelong Learning Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2512.03627v1",
+            "score": 64,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "Despite rapid progress in large-scale language and vision models, AI agents still suffer from a fundamental limitation: they cannot remember. Without reliable memory, agents catastrophically forget past experiences, struggle with long-horizon reasoning, and fail to operate cohere"
+          },
+          {
+            "arxivId": "2602.22680v2",
+            "title": "Toward Personalized LLM-Powered Agents: Foundations, Evaluation, and Future Directions",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2602.22680v2",
+            "score": 55,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "Large language models have enabled agentic systems that reason, plan, and interact with tools and environments to accomplish complex tasks. As these agents operate over extended interaction horizons, their effectiveness increasingly depends on adapting behavior to individual user"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 52,
+            "matchedTerms": [
+              "long",
+              "agents"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2604.19572v2",
+            "title": "A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.19572v2",
+            "score": 50,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "As terminal agents scale to long-horizon, multi-turn workflows, a key bottleneck is not merely limited context length, but the accumulation of noisy terminal observations in the interaction history. Retaining raw observations preserves useful environment feedback, but also leads "
+          },
+          {
+            "arxivId": "2602.19672v1",
+            "title": "SkillOrchestra: Learning to Route Agents via Skill Transfer",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.19672v1",
+            "score": 47.6,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "Compound AI systems promise capabilities beyond those of individual models, yet their success depends critically on effective orchestration. Existing routing approaches face two limitations: (1) input-level routers make coarse query-level decisions that ignore evolving task requi"
+          },
+          {
+            "arxivId": "2602.16069v2",
+            "title": "The Limits of Long-Context Reasoning in Automated Bug Fixing",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.16069v2",
+            "score": 47,
+            "matchedTerms": [
+              "long"
+            ],
+            "snippet": "Rapidly increasing context lengths have led to the assumption that large language models (LLMs) can directly reason over entire codebases. Concurrently, recent advances in LLMs have enabled strong performance on software engineering benchmarks, particularly when paired with agent"
+          },
+          {
+            "arxivId": "2504.19413v1",
+            "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2504.19413v1",
+            "score": 44,
+            "matchedTerms": [
+              "long",
+              "agents"
+            ],
+            "snippet": "Large Language Models (LLMs) have demonstrated remarkable prowess in generating contextually coherent responses, yet their fixed context windows pose fundamental challenges for maintaining consistency over prolonged multi-session dialogues. We introduce Mem0, a scalable memory-ce"
+          },
+          {
+            "arxivId": "2512.04535v2",
+            "title": "GTM: Simulating the World of Tools for AI Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2512.04535v2",
+            "score": 40,
+            "matchedTerms": [
+              "long",
+              "agents"
+            ],
+            "snippet": "The integration of external tools is pivotal for empowering Large Language Model (LLM) agents with real-world capabilities. However, training these agents through direct, continuous interaction with diverse tools is often prohibitively expensive, slow, and introduces additional d"
+          },
+          {
+            "arxivId": "2604.11784v1",
+            "title": "ClawGUI: A Unified Framework for Training, Evaluating, and Deploying GUI Agents",
+            "primaryCategory": "cs.LG",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.11784v1",
+            "score": 40,
+            "matchedTerms": [
+              "long",
+              "agents"
+            ],
+            "snippet": "GUI agents drive applications through their visual interfaces instead of programmatic APIs, interacting with arbitrary software via taps, swipes, and keystrokes, reaching a long tail of applications that CLI-based agents cannot. Yet progress in this area is bottlenecked less by m"
+          },
+          {
+            "arxivId": "2602.20867v1",
+            "title": "SoK: Agentic Skills -- Beyond Tool Use in LLM Agents",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.20867v1",
+            "score": 37,
+            "matchedTerms": [
+              "long",
+              "horizon",
+              "agents"
+            ],
+            "snippet": "Agentic systems increasingly rely on reusable procedural capabilities, \\textit{a.k.a., agentic skills}, to execute long-horizon workflows reliably. These capabilities are callable modules that package procedural knowledge with explicit applicability conditions, execution policies"
+          }
+        ]
+      },
+      {
+        "query": "terminal agents",
+        "hits": [
+          {
+            "arxivId": "2604.19572v2",
+            "title": "A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.19572v2",
+            "score": 209,
+            "matchedTerms": [
+              "terminal",
+              "agents"
+            ],
+            "snippet": "As terminal agents scale to long-horizon, multi-turn workflows, a key bottleneck is not merely limited context length, but the accumulation of noisy terminal observations in the interaction history. Retaining raw observations preserves useful environment feedback, but also leads "
+          },
+          {
+            "arxivId": "2603.05344v3",
+            "title": "Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.05344v3",
+            "score": 49,
+            "matchedTerms": [
+              "terminal",
+              "agents"
+            ],
+            "snippet": "The landscape of AI coding assistance is undergoing a fundamental shift from complex IDE plugins to versatile, terminal-native agents. Operating directly where developers manage source control, execute builds, and deploy environments, CLI-based agents offer unprecedented autonomy"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 47,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2602.22680v2",
+            "title": "Toward Personalized LLM-Powered Agents: Foundations, Evaluation, and Future Directions",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2602.22680v2",
+            "score": 40,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "Large language models have enabled agentic systems that reason, plan, and interact with tools and environments to accomplish complex tasks. As these agents operate over extended interaction horizons, their effectiveness increasingly depends on adapting behavior to individual user"
+          },
+          {
+            "arxivId": "2602.19672v1",
+            "title": "SkillOrchestra: Learning to Route Agents via Skill Transfer",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.19672v1",
+            "score": 38,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "Compound AI systems promise capabilities beyond those of individual models, yet their success depends critically on effective orchestration. Existing routing approaches face two limitations: (1) input-level routers make coarse query-level decisions that ignore evolving task requi"
+          },
+          {
+            "arxivId": "2603.10664v1",
+            "title": "Terminal Is All You Need: Design Properties for Human-AI Agent Collaboration",
+            "primaryCategory": "cs.HC",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.10664v1",
+            "score": 35,
+            "matchedTerms": [
+              "terminal",
+              "agents"
+            ],
+            "snippet": "While research on AI agents focuses on enabling them to operate graphical user interfaces, the most effective and widely adopted agent tools in practice are terminal-based. We argue that this convergence is not coincidental. It reflects three design properties central to effectiv"
+          },
+          {
+            "arxivId": "2604.11784v1",
+            "title": "ClawGUI: A Unified Framework for Training, Evaluating, and Deploying GUI Agents",
+            "primaryCategory": "cs.LG",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.11784v1",
+            "score": 35,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "GUI agents drive applications through their visual interfaces instead of programmatic APIs, interacting with arbitrary software via taps, swipes, and keystrokes, reaching a long tail of applications that CLI-based agents cannot. Yet progress in this area is bottlenecked less by m"
+          },
+          {
+            "arxivId": "2603.07670v1",
+            "title": "Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.07670v1",
+            "score": 32,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "Large language model (LLM) agents increasingly operate in settings where a single context window is far too small to capture what has happened, what was learned, and what should not be repeated. Memory -- the ability to persist, organize, and selectively recall information across"
+          },
+          {
+            "arxivId": "2604.11548v1",
+            "title": "SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.11548v1",
+            "score": 32,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "The rise of OpenClaw in early 2026 marks the moment when millions of users began deploying personal AI agents into their daily lives, delegating tasks ranging from travel planning to multi-step research. This scale of adoption signals that two parallel arcs of development have re"
+          },
+          {
+            "arxivId": "2506.08119v2",
+            "title": "SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2506.08119v2",
+            "score": 30,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "LLM-based agents struggle to execute complex, multi-step Standard Operating Procedures (SOPs) that are fundamental to industrial automation. Existing benchmarks fail to capture the procedural complexity and tool orchestration demands of real-world workflows. We introduce SOP-Benc"
+          },
+          {
+            "arxivId": "2512.03627v1",
+            "title": "MemVerse: Multimodal Memory for Lifelong Learning Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2512.03627v1",
+            "score": 30,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "Despite rapid progress in large-scale language and vision models, AI agents still suffer from a fundamental limitation: they cannot remember. Without reliable memory, agents catastrophically forget past experiences, struggle with long-horizon reasoning, and fail to operate cohere"
+          },
+          {
+            "arxivId": "2512.04535v2",
+            "title": "GTM: Simulating the World of Tools for AI Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2512.04535v2",
+            "score": 30,
+            "matchedTerms": [
+              "agents"
+            ],
+            "snippet": "The integration of external tools is pivotal for empowering Large Language Model (LLM) agents with real-world capabilities. However, training these agents through direct, continuous interaction with diverse tools is often prohibitively expensive, slow, and introduces additional d"
+          }
+        ]
+      },
+      {
+        "query": "multi-agent systems",
+        "hits": [
+          {
+            "arxivId": "2603.20380v1",
+            "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.20380v1",
+            "score": 175,
+            "matchedTerms": [
+              "multi",
+              "agent",
+              "systems"
+            ],
+            "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+          },
+          {
+            "arxivId": "2505.02279v2",
+            "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2505.02279v2",
+            "score": 163,
+            "matchedTerms": [
+              "multi",
+              "agent",
+              "systems"
+            ],
+            "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+          },
+          {
+            "arxivId": "2604.02334v1",
+            "title": "Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.02334v1",
+            "score": 123,
+            "matchedTerms": [
+              "multi",
+              "agent",
+              "systems"
+            ],
+            "snippet": "As large language models (LLM)-driven agents transition from isolated task solvers to persistent digital entities, the emergence of the Agentic Web, an ecosystem where heterogeneous agents autonomously interact and co-evolve, marks a pivotal shift toward Artificial General Intell"
+          },
+          {
+            "arxivId": "2603.27813v1",
+            "title": "MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.27813v1",
+            "score": 103,
+            "matchedTerms": [
+              "multi",
+              "agent"
+            ],
+            "snippet": "Research agents have recently achieved significant progress in information seeking and synthesis across heterogeneous textual and visual sources. In this paper, we introduce MuSEAgent, a multimodal reasoning agent that enhances decision-making by extending the capabilities of res"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 101,
+            "matchedTerms": [
+              "agent",
+              "systems"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2512.16301v3",
+            "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2512.16301v3",
+            "score": 97,
+            "matchedTerms": [
+              "agent",
+              "systems"
+            ],
+            "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+          },
+          {
+            "arxivId": "2603.22148v1",
+            "title": "OpenEarth-Agent: From Tool Calling to Tool Creation for Open-Environment Earth Observation",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.22148v1",
+            "score": 87,
+            "matchedTerms": [
+              "multi",
+              "agent"
+            ],
+            "snippet": "Earth Observation (EO) is essential for perceiving dynamic land surface changes, yet deploying autonomous EO in open environments is hindered by the immense diversity of multi-source data and heterogeneous tasks. While remote sensing agents have emerged to streamline EO workflows"
+          },
+          {
+            "arxivId": "2603.21019v1",
+            "title": "SkillProbe: Security Auditing for Emerging Agent Skill Marketplaces via Multi-Agent Collaboration",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.21019v1",
+            "score": 85,
+            "matchedTerms": [
+              "multi",
+              "agent",
+              "systems"
+            ],
+            "snippet": "With the rapid evolution of Large Language Model (LLM) agent ecosystems, centralized skill marketplaces have emerged as pivotal infrastructure for augmenting agent capabilities. However, these marketplaces face unprecedented security challenges, primarily stemming from semantic-b"
+          },
+          {
+            "arxivId": "2603.28088v1",
+            "title": "GEMS: Agent-Native Multimodal Generation with Memory and Skills",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.28088v1",
+            "score": 84,
+            "matchedTerms": [
+              "multi",
+              "agent"
+            ],
+            "snippet": "Recent multimodal generation models have achieved remarkable progress on general-purpose generation tasks, yet continue to struggle with complex instructions and specialized downstream tasks. Inspired by the success of advanced agent frameworks such as Claude Code, we propose \\te"
+          },
+          {
+            "arxivId": "2602.19672v1",
+            "title": "SkillOrchestra: Learning to Route Agents via Skill Transfer",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.19672v1",
+            "score": 77,
+            "matchedTerms": [
+              "multi",
+              "agent",
+              "systems"
+            ],
+            "snippet": "Compound AI systems promise capabilities beyond those of individual models, yet their success depends critically on effective orchestration. Existing routing approaches face two limitations: (1) input-level routers make coarse query-level decisions that ignore evolving task requi"
+          },
+          {
+            "arxivId": "2601.21123v2",
+            "title": "CUA-Skill: Develop Skills for Computer Using Agent",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.21123v2",
+            "score": 75,
+            "matchedTerms": [
+              "agent",
+              "systems"
+            ],
+            "snippet": "Computer-Using Agents (CUAs) aim to autonomously operate computer systems to complete real-world tasks. However, existing agentic systems remain difficult to scale and lag behind human performance. A key limitation is the absence of reusable and structured skill abstractions that"
+          },
+          {
+            "arxivId": "2602.12430v3",
+            "title": "Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.12430v3",
+            "score": 72,
+            "matchedTerms": [
+              "agent",
+              "systems"
+            ],
+            "snippet": "The transition from monolithic language models to modular, skill-equipped agents marks a defining shift in how large language models (LLMs) are deployed in practice. Rather than encoding all procedural knowledge within model weights, agent skills -- composable packages of instruc"
+          }
+        ]
+      },
+      {
+        "query": "agent orchestration",
+        "hits": [
+          {
+            "arxivId": "2505.02279v2",
+            "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2505.02279v2",
+            "score": 138,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 101,
+            "matchedTerms": [
+              "agent",
+              "orchestration"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2603.20380v1",
+            "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.20380v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+          },
+          {
+            "arxivId": "2512.16301v3",
+            "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2512.16301v3",
+            "score": 87,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+          },
+          {
+            "arxivId": "2602.19672v1",
+            "title": "SkillOrchestra: Learning to Route Agents via Skill Transfer",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.19672v1",
+            "score": 86,
+            "matchedTerms": [
+              "agent",
+              "orchestration"
+            ],
+            "snippet": "Compound AI systems promise capabilities beyond those of individual models, yet their success depends critically on effective orchestration. Existing routing approaches face two limitations: (1) input-level routers make coarse query-level decisions that ignore evolving task requi"
+          },
+          {
+            "arxivId": "2604.20779v1",
+            "title": "SWE-chat: Coding Agent Interactions From Real Users in the Wild",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.20779v1",
+            "score": 70,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "AI coding agents are being adopted at scale, yet we lack empirical evidence on how people actually use them and how much of their output is useful in practice. We present SWE-chat, the first large-scale dataset of real coding agent sessions collected from open-source developers i"
+          },
+          {
+            "arxivId": "2603.27813v1",
+            "title": "MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.27813v1",
+            "score": 69,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Research agents have recently achieved significant progress in information seeking and synthesis across heterogeneous textual and visual sources. In this paper, we introduce MuSEAgent, a multimodal reasoning agent that enhances decision-making by extending the capabilities of res"
+          },
+          {
+            "arxivId": "2603.22148v1",
+            "title": "OpenEarth-Agent: From Tool Calling to Tool Creation for Open-Environment Earth Observation",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.22148v1",
+            "score": 67,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Earth Observation (EO) is essential for perceiving dynamic land surface changes, yet deploying autonomous EO in open environments is hindered by the immense diversity of multi-source data and heterogeneous tasks. While remote sensing agents have emerged to streamline EO workflows"
+          },
+          {
+            "arxivId": "2601.21123v2",
+            "title": "CUA-Skill: Develop Skills for Computer Using Agent",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.21123v2",
+            "score": 65,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Computer-Using Agents (CUAs) aim to autonomously operate computer systems to complete real-world tasks. However, existing agentic systems remain difficult to scale and lag behind human performance. A key limitation is the absence of reusable and structured skill abstractions that"
+          },
+          {
+            "arxivId": "2601.03204v1",
+            "title": "InfiAgent: An Infinite-Horizon Framework for General-Purpose Autonomous Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.03204v1",
+            "score": 64,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "LLM agents can reason and use tools, but they often break down on long-horizon tasks due to unbounded context growth and accumulated errors. Common remedies such as context compression or retrieval-augmented prompting introduce trade-offs between information fidelity and reasonin"
+          },
+          {
+            "arxivId": "2604.02334v1",
+            "title": "Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.02334v1",
+            "score": 64,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "As large language models (LLM)-driven agents transition from isolated task solvers to persistent digital entities, the emergence of the Agentic Web, an ecosystem where heterogeneous agents autonomously interact and co-evolve, marks a pivotal shift toward Artificial General Intell"
+          },
+          {
+            "arxivId": "2602.12430v3",
+            "title": "Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.12430v3",
+            "score": 62,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "The transition from monolithic language models to modular, skill-equipped agents marks a defining shift in how large language models (LLMs) are deployed in practice. Rather than encoding all procedural knowledge within model weights, agent skills -- composable packages of instruc"
+          }
+        ]
+      },
+      {
+        "query": "agent runtime governance",
+        "hits": [
+          {
+            "arxivId": "2505.02279v2",
+            "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2505.02279v2",
+            "score": 143,
+            "matchedTerms": [
+              "agent",
+              "runtime"
+            ],
+            "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+          },
+          {
+            "arxivId": "2604.07833v2",
+            "title": "Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution",
+            "primaryCategory": "cs.RO",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.07833v2",
+            "score": 130,
+            "matchedTerms": [
+              "agent",
+              "runtime",
+              "governance"
+            ],
+            "snippet": "Embodied agents are evolving from passive reasoning systems into active executors that interact with tools, robots, and physical environments. Once granted execution authority, the central challenge becomes how to keep actions governable at runtime. Existing approaches embed safe"
+          },
+          {
+            "arxivId": "2603.20380v1",
+            "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.20380v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2512.16301v3",
+            "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2512.16301v3",
+            "score": 87,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+          },
+          {
+            "arxivId": "2604.20779v1",
+            "title": "SWE-chat: Coding Agent Interactions From Real Users in the Wild",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2604.20779v1",
+            "score": 70,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "AI coding agents are being adopted at scale, yet we lack empirical evidence on how people actually use them and how much of their output is useful in practice. We present SWE-chat, the first large-scale dataset of real coding agent sessions collected from open-source developers i"
+          },
+          {
+            "arxivId": "2603.27813v1",
+            "title": "MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2603.27813v1",
+            "score": 69,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Research agents have recently achieved significant progress in information seeking and synthesis across heterogeneous textual and visual sources. In this paper, we introduce MuSEAgent, a multimodal reasoning agent that enhances decision-making by extending the capabilities of res"
+          },
+          {
+            "arxivId": "2602.12430v3",
+            "title": "Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.12430v3",
+            "score": 67,
+            "matchedTerms": [
+              "agent",
+              "governance"
+            ],
+            "snippet": "The transition from monolithic language models to modular, skill-equipped agents marks a defining shift in how large language models (LLMs) are deployed in practice. Rather than encoding all procedural knowledge within model weights, agent skills -- composable packages of instruc"
+          },
+          {
+            "arxivId": "2603.22148v1",
+            "title": "OpenEarth-Agent: From Tool Calling to Tool Creation for Open-Environment Earth Observation",
+            "primaryCategory": "cs.CV",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.22148v1",
+            "score": 67,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Earth Observation (EO) is essential for perceiving dynamic land surface changes, yet deploying autonomous EO in open environments is hindered by the immense diversity of multi-source data and heterogeneous tasks. While remote sensing agents have emerged to streamline EO workflows"
+          },
+          {
+            "arxivId": "2602.20867v1",
+            "title": "SoK: Agentic Skills -- Beyond Tool Use in LLM Agents",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.20867v1",
+            "score": 66,
+            "matchedTerms": [
+              "agent",
+              "governance"
+            ],
+            "snippet": "Agentic systems increasingly rely on reusable procedural capabilities, \\textit{a.k.a., agentic skills}, to execute long-horizon workflows reliably. These capabilities are callable modules that package procedural knowledge with explicit applicability conditions, execution policies"
+          },
+          {
+            "arxivId": "2601.21123v2",
+            "title": "CUA-Skill: Develop Skills for Computer Using Agent",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.21123v2",
+            "score": 65,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Computer-Using Agents (CUAs) aim to autonomously operate computer systems to complete real-world tasks. However, existing agentic systems remain difficult to scale and lag behind human performance. A key limitation is the absence of reusable and structured skill abstractions that"
+          },
+          {
+            "arxivId": "2601.03204v1",
+            "title": "InfiAgent: An Infinite-Horizon Framework for General-Purpose Autonomous Agents",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.03204v1",
+            "score": 64,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "LLM agents can reason and use tools, but they often break down on long-horizon tasks due to unbounded context growth and accumulated errors. Common remedies such as context compression or retrieval-augmented prompting introduce trade-offs between information fidelity and reasonin"
+          }
+        ]
+      },
+      {
+        "query": "agent memory skills",
+        "hits": [
+          {
+            "arxivId": "2512.16301v3",
+            "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2512.16301v3",
+            "score": 145,
+            "matchedTerms": [
+              "agent",
+              "memory",
+              "skills"
+            ],
+            "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+          },
+          {
+            "arxivId": "2505.02279v2",
+            "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2505.02279v2",
+            "score": 138,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+          },
+          {
+            "arxivId": "2602.20867v1",
+            "title": "SoK: Agentic Skills -- Beyond Tool Use in LLM Agents",
+            "primaryCategory": "cs.CR",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.20867v1",
+            "score": 120,
+            "matchedTerms": [
+              "agent",
+              "skills"
+            ],
+            "snippet": "Agentic systems increasingly rely on reusable procedural capabilities, \\textit{a.k.a., agentic skills}, to execute long-horizon workflows reliably. These capabilities are callable modules that package procedural knowledge with explicit applicability conditions, execution policies"
+          },
+          {
+            "arxivId": "2602.02474v1",
+            "title": "MemSkill: Learning and Evolving Memory Skills for Self-Evolving Agents",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.02474v1",
+            "score": 115,
+            "matchedTerms": [
+              "agent",
+              "memory",
+              "skills"
+            ],
+            "snippet": "Most Large Language Model (LLM) agent memory systems rely on a small set of static, hand-designed operations for extracting memory. These fixed procedures hard-code human priors about what to store and how to revise memory, making them rigid under diverse interaction patterns and"
+          },
+          {
+            "arxivId": "2602.12670v3",
+            "title": "SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2602.12670v3",
+            "score": 108,
+            "matchedTerms": [
+              "agent",
+              "skills"
+            ],
+            "snippet": "Agent Skills are structured packages of procedural knowledge that augment LLM agents at inference time. Despite rapid adoption, there is no standard way to measure whether they actually help. We present SkillsBench, a benchmark of 86 tasks across 11 domains paired with curated Sk"
+          },
+          {
+            "arxivId": "2602.12430v3",
+            "title": "Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2602.12430v3",
+            "score": 101,
+            "matchedTerms": [
+              "agent",
+              "skills"
+            ],
+            "snippet": "The transition from monolithic language models to modular, skill-equipped agents marks a defining shift in how large language models (LLMs) are deployed in practice. Rather than encoding all procedural knowledge within model weights, agent skills -- composable packages of instruc"
+          },
+          {
+            "arxivId": "2604.08224v1",
+            "title": "Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.08224v1",
+            "score": 100,
+            "matchedTerms": [
+              "agent",
+              "memory",
+              "skills"
+            ],
+            "snippet": "Large language model (LLM) agents are increasingly built less by changing model weights than by reorganizing the runtime around them. Capabilities that earlier systems expected the model to recover internally are now externalized into memory stores, reusable skills, interaction p"
+          },
+          {
+            "arxivId": "2601.21123v2",
+            "title": "CUA-Skill: Develop Skills for Computer Using Agent",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2601.21123v2",
+            "score": 99,
+            "matchedTerms": [
+              "agent",
+              "memory",
+              "skills"
+            ],
+            "snippet": "Computer-Using Agents (CUAs) aim to autonomously operate computer systems to complete real-world tasks. However, existing agentic systems remain difficult to scale and lag behind human performance. A key limitation is the absence of reusable and structured skill abstractions that"
+          },
+          {
+            "arxivId": "2603.07670v1",
+            "title": "Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers",
+            "primaryCategory": "cs.AI",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.07670v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent",
+              "memory"
+            ],
+            "snippet": "Large language model (LLM) agents increasingly operate in settings where a single context window is far too small to capture what has happened, what was learned, and what should not be repeated. Memory -- the ability to persist, organize, and selectively recall information across"
+          },
+          {
+            "arxivId": "2603.20380v1",
+            "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+            "primaryCategory": "cs.MA",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2603.20380v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "primaryCategory": "cs.CL",
+            "noteStatus": "reviewed",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "score": 96,
+            "matchedTerms": [
+              "agent"
+            ],
+            "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+          },
+          {
+            "arxivId": "2602.08004v1",
+            "title": "Agent Skills: A Data-Driven Analysis of Claude Skills for Extending Large Language Model Functionality",
+            "primaryCategory": "cs.SE",
+            "noteStatus": "stub",
+            "absUrl": "https://arxiv.org/abs/2602.08004v1",
+            "score": 93,
+            "matchedTerms": [
+              "agent",
+              "skills"
+            ],
+            "snippet": "Agent skills extend large language model (LLM) agents with reusable, program-like modules that define triggering conditions, procedural logic, and tool interactions. As these skills proliferate in public marketplaces, it is unclear what types are available, how users adopt them, "
+          }
+        ]
+      }
+    ],
+    "topAggregate": [
+      {
+        "arxivId": "2505.02279v2",
+        "title": "A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)",
+        "primaryCategory": "cs.AI",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2505.02279v2",
+        "score": 720,
+        "matchedQueries": [
+          "agent harness",
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "agent",
+          "multi",
+          "systems",
+          "runtime"
+        ],
+        "snippet": "Large language model powered autonomous agents demand robust, standardized protocols to integrate tools, share contextual data, and coordinate tasks across heterogeneous systems. Ad-hoc integrations are difficult to scale, secure, and generalize across domains. This survey examin"
+      },
+      {
+        "arxivId": "2604.13346v1",
+        "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+        "primaryCategory": "cs.CL",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2604.13346v1",
+        "score": 686,
+        "matchedQueries": [
+          "harness engineering agents",
+          "agent harness",
+          "long-horizon agents",
+          "terminal agents",
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "harness",
+          "agents",
+          "agent",
+          "long",
+          "systems",
+          "orchestration"
+        ],
+        "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+      },
+      {
+        "arxivId": "2603.20380v1",
+        "title": "ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams",
+        "primaryCategory": "cs.MA",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2603.20380v1",
+        "score": 594,
+        "matchedQueries": [
+          "agent harness",
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness",
+          "multi",
+          "systems"
+        ],
+        "snippet": "Industry practitioners and academic researchers regularly use multi-agent systems to accelerate their work, yet the frameworks through which these systems operate do not provide a simple, unified mechanism for scalably managing the critical aspects of the agent harness, impacting"
+      },
+      {
+        "arxivId": "2512.16301v3",
+        "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
+        "primaryCategory": "cs.AI",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2512.16301v3",
+        "score": 503,
+        "matchedQueries": [
+          "agent harness",
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "agent",
+          "systems",
+          "memory",
+          "skills"
+        ],
+        "snippet": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direct"
+      },
+      {
+        "arxivId": "2601.21123v2",
+        "title": "CUA-Skill: Develop Skills for Computer Using Agent",
+        "primaryCategory": "cs.AI",
+        "noteStatus": "stub",
+        "absUrl": "https://arxiv.org/abs/2601.21123v2",
+        "score": 304,
+        "matchedQueries": [
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "agent",
+          "systems",
+          "memory",
+          "skills"
+        ],
+        "snippet": "Computer-Using Agents (CUAs) aim to autonomously operate computer systems to complete real-world tasks. However, existing agentic systems remain difficult to scale and lag behind human performance. A key limitation is the absence of reusable and structured skill abstractions that"
+      },
+      {
+        "arxivId": "2602.12430v3",
+        "title": "Agent Skills for Large Language Models: Architecture, Acquisition, Security, and the Path Forward",
+        "primaryCategory": "cs.MA",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2602.12430v3",
+        "score": 302,
+        "matchedQueries": [
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance",
+          "agent memory skills"
+        ],
+        "matchedTerms": [
+          "agent",
+          "systems",
+          "governance",
+          "skills"
+        ],
+        "snippet": "The transition from monolithic language models to modular, skill-equipped agents marks a defining shift in how large language models (LLMs) are deployed in practice. Rather than encoding all procedural knowledge within model weights, agent skills -- composable packages of instruc"
+      },
+      {
+        "arxivId": "2604.19572v2",
+        "title": "A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression",
+        "primaryCategory": "cs.CL",
+        "noteStatus": "stub",
+        "absUrl": "https://arxiv.org/abs/2604.19572v2",
+        "score": 259,
+        "matchedQueries": [
+          "long-horizon agents",
+          "terminal agents"
+        ],
+        "matchedTerms": [
+          "long",
+          "horizon",
+          "agents",
+          "terminal"
+        ],
+        "snippet": "As terminal agents scale to long-horizon, multi-turn workflows, a key bottleneck is not merely limited context length, but the accumulation of noisy terminal observations in the interaction history. Retaining raw observations preserves useful environment feedback, but also leads "
+      },
+      {
+        "arxivId": "2603.25723v1",
+        "title": "Natural-Language Agent Harnesses",
+        "primaryCategory": "cs.CL",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2603.25723v1",
+        "score": 258,
+        "matchedQueries": [
+          "harness engineering agents",
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "harness",
+          "engineering",
+          "agent"
+        ],
+        "snippet": "Agent performance increasingly depends on \\emph{harness engineering}, yet harness design is usually buried in controller code and runtime-specific conventions, making it hard to transfer, compare, and study as a scientific object. We ask whether the high-level control logic of an"
+      },
+      {
+        "arxivId": "2602.19672v1",
+        "title": "SkillOrchestra: Learning to Route Agents via Skill Transfer",
+        "primaryCategory": "cs.AI",
+        "noteStatus": "reviewed",
+        "absUrl": "https://arxiv.org/abs/2602.19672v1",
+        "score": 248.6,
+        "matchedQueries": [
+          "long-horizon agents",
+          "terminal agents",
+          "multi-agent systems",
+          "agent orchestration"
+        ],
+        "matchedTerms": [
+          "long",
+          "horizon",
+          "agents",
+          "multi",
+          "agent",
+          "systems",
+          "orchestration"
+        ],
+        "snippet": "Compound AI systems promise capabilities beyond those of individual models, yet their success depends critically on effective orchestration. Existing routing approaches face two limitations: (1) input-level routers make coarse query-level decisions that ignore evolving task requi"
+      },
+      {
+        "arxivId": "2603.27813v1",
+        "title": "MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences",
+        "primaryCategory": "cs.CV",
+        "noteStatus": "stub",
+        "absUrl": "https://arxiv.org/abs/2603.27813v1",
+        "score": 241,
+        "matchedQueries": [
+          "multi-agent systems",
+          "agent orchestration",
+          "agent runtime governance"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent"
+        ],
+        "snippet": "Research agents have recently achieved significant progress in information seeking and synthesis across heterogeneous textual and visual sources. In this paper, we introduce MuSEAgent, a multimodal reasoning agent that enhances decision-making by extending the capabilities of res"
+      },
+      {
+        "arxivId": "2603.08616v1",
+        "title": "Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing",
+        "primaryCategory": "cs.SE",
+        "noteStatus": "stub",
+        "absUrl": "https://arxiv.org/abs/2603.08616v1",
+        "score": 234,
+        "matchedQueries": [
+          "harness engineering agents",
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "harness",
+          "agents",
+          "agent"
+        ],
+        "snippet": "Coverage-guided fuzzing has proven effective for software testing, but targeting library code requires specialized fuzz harnesses that translate fuzzer-generated inputs into valid API invocations. Manual harness creation is time-consuming and requires deep understanding of API se"
+      },
+      {
+        "arxivId": "2601.03204v1",
+        "title": "InfiAgent: An Infinite-Horizon Framework for General-Purpose Autonomous Agents",
+        "primaryCategory": "cs.AI",
+        "noteStatus": "stub",
+        "absUrl": "https://arxiv.org/abs/2601.03204v1",
+        "score": 227,
+        "matchedQueries": [
+          "long-horizon agents",
+          "agent orchestration",
+          "agent runtime governance"
+        ],
+        "matchedTerms": [
+          "long",
+          "horizon",
+          "agents",
+          "agent"
+        ],
+        "snippet": "LLM agents can reason and use tools, but they often break down on long-horizon tasks due to unbounded context growth and accumulated errors. Common remedies such as context compression or retrieval-augmented prompting introduce trade-offs between information fidelity and reasonin"
+      }
+    ]
+  },
+  "remote": {
+    "byQuery": [
+      {
+        "query": "harness engineering agents",
+        "hits": []
+      },
+      {
+        "query": "agent harness",
+        "hits": [
+          {
+            "arxivId": "2604.25850v3",
+            "title": "Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses",
+            "absUrl": "https://arxiv.org/abs/2604.25850v3",
+            "updatedAt": "2026-04-30T17:34:17Z",
+            "primaryCategory": "cs.CL",
+            "score": 162,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2603.25723v1",
+            "title": "Natural-Language Agent Harnesses",
+            "absUrl": "https://arxiv.org/abs/2603.25723v1",
+            "updatedAt": "2026-03-26T17:58:15Z",
+            "primaryCategory": "cs.CL",
+            "score": 162,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.07236v4",
+            "title": "How Much Heavy Lifting Can an Agent Harness Do?: Measuring the LLM's Residual Role in a Planning Agent",
+            "absUrl": "https://arxiv.org/abs/2604.07236v4",
+            "updatedAt": "2026-04-28T14:27:47Z",
+            "primaryCategory": "cs.AI",
+            "score": 158,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.20801v1",
+            "title": "Synthesizing Multi-Agent Harnesses for Vulnerability Discovery",
+            "absUrl": "https://arxiv.org/abs/2604.20801v1",
+            "updatedAt": "2026-04-22T17:27:40Z",
+            "primaryCategory": "cs.CR",
+            "score": 142,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.18071v1",
+            "title": "Architectural Design Decisions in AI Agent Harnesses",
+            "absUrl": "https://arxiv.org/abs/2604.18071v1",
+            "updatedAt": "2026-04-20T10:39:34Z",
+            "primaryCategory": "cs.AI",
+            "score": 118,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.13346v1",
+            "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+            "absUrl": "https://arxiv.org/abs/2604.13346v1",
+            "updatedAt": "2026-04-14T23:16:25Z",
+            "primaryCategory": "cs.CL",
+            "score": 108,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.20938v1",
+            "title": "HARBOR: Automated Harness Optimization",
+            "absUrl": "https://arxiv.org/abs/2604.20938v1",
+            "updatedAt": "2026-04-22T13:45:12Z",
+            "primaryCategory": "cs.LG",
+            "score": 72,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.21003v2",
+            "title": "The Last Harness You'll Ever Build",
+            "absUrl": "https://arxiv.org/abs/2604.21003v2",
+            "updatedAt": "2026-04-28T02:33:56Z",
+            "primaryCategory": "cs.AI",
+            "score": 68,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.03610v1",
+            "title": "DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair",
+            "absUrl": "https://arxiv.org/abs/2604.03610v1",
+            "updatedAt": "2026-04-04T06:49:30Z",
+            "primaryCategory": "cs.SE",
+            "score": 68,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.10352v1",
+            "title": "ClawVM: Harness-Managed Virtual Memory for Stateful Tool-Using LLM Agents",
+            "absUrl": "https://arxiv.org/abs/2604.10352v1",
+            "updatedAt": "2026-04-11T21:38:15Z",
+            "primaryCategory": "cs.AI",
+            "score": 64,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.18543v3",
+            "title": "ClawEnvKit: Automatic Environment Generation for Claw-Like Agents",
+            "absUrl": "https://arxiv.org/abs/2604.18543v3",
+            "updatedAt": "2026-04-29T14:01:51Z",
+            "primaryCategory": "cs.AI",
+            "score": 60,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.05172v2",
+            "title": "ClawsBench: Evaluating Capability and Safety of LLM Productivity Agents in Simulated Workspaces",
+            "absUrl": "https://arxiv.org/abs/2604.05172v2",
+            "updatedAt": "2026-04-08T09:27:21Z",
+            "primaryCategory": "cs.AI",
+            "score": 60,
+            "existingInVault": false
+          }
+        ]
+      },
+      {
+        "query": "long-horizon agents",
+        "hits": [
+          {
+            "arxivId": "2603.27490v1",
+            "title": "AgentSwing: Adaptive Parallel Context Management Routing for Long-Horizon Web Agents",
+            "absUrl": "https://arxiv.org/abs/2603.27490v1",
+            "updatedAt": "2026-03-29T02:59:27Z",
+            "primaryCategory": "cs.CL",
+            "score": 136,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2603.23610v3",
+            "title": "Environment Maps: Structured Environmental Representations for Long-Horizon Agents",
+            "absUrl": "https://arxiv.org/abs/2603.23610v3",
+            "updatedAt": "2026-03-27T03:53:46Z",
+            "primaryCategory": "cs.AI",
+            "score": 134,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.11978v1",
+            "title": "The Long-Horizon Task Mirage? Diagnosing Where and Why Agentic Systems Break",
+            "absUrl": "https://arxiv.org/abs/2604.11978v1",
+            "updatedAt": "2026-04-13T19:11:42Z",
+            "primaryCategory": "cs.AI",
+            "score": 128,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2603.22744v1",
+            "title": "Beyond Binary Correctness: Scaling Evaluation of Long-Horizon Agents on Subjective Enterprise Tasks",
+            "absUrl": "https://arxiv.org/abs/2603.22744v1",
+            "updatedAt": "2026-03-24T03:16:32Z",
+            "primaryCategory": "cs.AI",
+            "score": 118,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.24964v1",
+            "title": "Odysseys: Benchmarking Web Agents on Realistic Long Horizon Tasks",
+            "absUrl": "https://arxiv.org/abs/2604.24964v1",
+            "updatedAt": "2026-04-27T20:05:41Z",
+            "primaryCategory": "cs.LG",
+            "score": 116,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.22085v1",
+            "title": "Memanto: Typed Semantic Memory with Information-Theoretic Retrieval for Long-Horizon Agents",
+            "absUrl": "https://arxiv.org/abs/2604.22085v1",
+            "updatedAt": "2026-04-23T21:34:36Z",
+            "primaryCategory": "cs.AI",
+            "score": 114,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.00892v1",
+            "title": "When Users Change Their Mind: Evaluating Interruptible Agents in Long-Horizon Web Navigation",
+            "absUrl": "https://arxiv.org/abs/2604.00892v1",
+            "updatedAt": "2026-04-01T13:40:28Z",
+            "primaryCategory": "cs.CL",
+            "score": 68,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.19457v1",
+            "title": "Four-Axis Decision Alignment for Long-Horizon Enterprise AI Agents",
+            "absUrl": "https://arxiv.org/abs/2604.19457v1",
+            "updatedAt": "2026-04-21T13:37:19Z",
+            "primaryCategory": "cs.AI",
+            "score": 64,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.23815v1",
+            "title": "DRACULA: Hunting for the Actions Users Want Deep Research Agents to Execute",
+            "absUrl": "https://arxiv.org/abs/2604.23815v1",
+            "updatedAt": "2026-04-26T17:32:39Z",
+            "primaryCategory": "cs.CL",
+            "score": 56,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.16529v1",
+            "title": "Scaling Test-Time Compute for Agentic Coding",
+            "absUrl": "https://arxiv.org/abs/2604.16529v1",
+            "updatedAt": "2026-04-16T17:39:33Z",
+            "primaryCategory": "cs.SE",
+            "score": 56,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.12890v2",
+            "title": "Towards Long-horizon Agentic Multimodal Search",
+            "absUrl": "https://arxiv.org/abs/2604.12890v2",
+            "updatedAt": "2026-04-25T02:32:57Z",
+            "primaryCategory": "cs.CV",
+            "score": 56,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.11462v1",
+            "title": "Escaping the Context Bottleneck: Active Context Curation for LLM Agents via Reinforcement Learning",
+            "absUrl": "https://arxiv.org/abs/2604.11462v1",
+            "updatedAt": "2026-04-13T13:39:17Z",
+            "primaryCategory": "cs.AI",
+            "score": 56,
+            "existingInVault": false
+          }
+        ]
+      },
+      {
+        "query": "terminal agents",
+        "hits": [
+          {
+            "arxivId": "2604.19572v2",
+            "title": "A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression",
+            "absUrl": "https://arxiv.org/abs/2604.19572v2",
+            "updatedAt": "2026-04-28T18:09:49Z",
+            "primaryCategory": "cs.CL",
+            "score": 174,
+            "existingInVault": true
+          },
+          {
+            "arxivId": "2604.00073v2",
+            "title": "Terminal Agents Suffice for Enterprise Automation",
+            "absUrl": "https://arxiv.org/abs/2604.00073v2",
+            "updatedAt": "2026-04-03T15:48:53Z",
+            "primaryCategory": "cs.SE",
+            "score": 142,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2601.16443v3",
+            "title": "Endless Terminals: Scaling RL Environments for Terminal Agents",
+            "absUrl": "https://arxiv.org/abs/2601.16443v3",
+            "updatedAt": "2026-02-14T09:14:28Z",
+            "primaryCategory": "cs.LG",
+            "score": 138,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2602.07274v1",
+            "title": "TermiGen: High-Fidelity Environment and Robust Trajectory Synthesis for Terminal Agents",
+            "absUrl": "https://arxiv.org/abs/2602.07274v1",
+            "updatedAt": "2026-02-06T23:56:50Z",
+            "primaryCategory": "cs.AI",
+            "score": 106,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2602.21193v1",
+            "title": "On Data Engineering for Scaling LLM Terminal Capabilities",
+            "absUrl": "https://arxiv.org/abs/2602.21193v1",
+            "updatedAt": "2026-02-24T18:51:04Z",
+            "primaryCategory": "cs.CL",
+            "score": 92,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.25727v1",
+            "title": "Toward Scalable Terminal Task Synthesis via Skill Graphs",
+            "absUrl": "https://arxiv.org/abs/2604.25727v1",
+            "updatedAt": "2026-04-28T14:53:59Z",
+            "primaryCategory": "cs.AI",
+            "score": 64,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2602.01244v2",
+            "title": "Large-Scale Terminal Agentic Trajectory Generation from Dockerized Environments",
+            "absUrl": "https://arxiv.org/abs/2602.01244v2",
+            "updatedAt": "2026-02-03T14:03:32Z",
+            "primaryCategory": "cs.CL",
+            "score": 44,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.28093v1",
+            "title": "What Makes a Good Terminal-Agent Benchmark Task: A Guideline for Adversarial, Difficult, and Legible Evaluation Design",
+            "absUrl": "https://arxiv.org/abs/2604.28093v1",
+            "updatedAt": "2026-04-30T16:37:37Z",
+            "primaryCategory": "cs.AI",
+            "score": 24,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.17596v1",
+            "title": "Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories",
+            "absUrl": "https://arxiv.org/abs/2604.17596v1",
+            "updatedAt": "2026-04-19T20:04:02Z",
+            "primaryCategory": "cs.CR",
+            "score": 24,
+            "existingInVault": false
+          }
+        ]
+      },
+      {
+        "query": "multi-agent systems",
+        "hits": [
+          {
+            "arxivId": "2604.27358v1",
+            "title": "Safe Bilevel Delegation (SBD): A Formal Framework for Runtime Delegation Safety in Multi-Agent Systems",
+            "absUrl": "https://arxiv.org/abs/2604.27358v1",
+            "updatedAt": "2026-04-30T03:15:05Z",
+            "primaryCategory": "cs.AI",
+            "score": 174,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.25917v1",
+            "title": "Recursive Multi-Agent Systems",
+            "absUrl": "https://arxiv.org/abs/2604.25917v1",
+            "updatedAt": "2026-04-28T17:59:34Z",
+            "primaryCategory": "cs.AI",
+            "score": 174,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.24477v1",
+            "title": "GAMMAF: A Common Framework for Graph-Based Anomaly Monitoring Benchmarking in LLM Multi-Agent Systems",
+            "absUrl": "https://arxiv.org/abs/2604.24477v1",
+            "updatedAt": "2026-04-27T13:45:14Z",
+            "primaryCategory": "cs.CR",
+            "score": 174,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.26053v1",
+            "title": "I Would If I Could: Reasoning about Dynamics of Actions in Multi-Agent Systems",
+            "absUrl": "https://arxiv.org/abs/2604.26053v1",
+            "updatedAt": "2026-04-28T18:43:23Z",
+            "primaryCategory": "cs.LO",
+            "score": 162,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.25602v2",
+            "title": "OxyGent: Making Multi-Agent Systems Modular, Observable, and Evolvable via Oxy Abstraction",
+            "absUrl": "https://arxiv.org/abs/2604.25602v2",
+            "updatedAt": "2026-04-29T14:40:10Z",
+            "primaryCategory": "cs.AI",
+            "score": 146,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.27882v1",
+            "title": "Building Persona-Based Agents On Demand: Tailoring Multi-Agent Workflows to User Needs",
+            "absUrl": "https://arxiv.org/abs/2604.27882v1",
+            "updatedAt": "2026-04-30T14:01:06Z",
+            "primaryCategory": "cs.AI",
+            "score": 124,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.27586v1",
+            "title": "Trace-Level Analysis of Information Contamination in Multi-Agent Systems",
+            "absUrl": "https://arxiv.org/abs/2604.27586v1",
+            "updatedAt": "2026-04-30T08:39:42Z",
+            "primaryCategory": "cs.AI",
+            "score": 114,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.26374v1",
+            "title": "Split over $n$ resource sharing problem: Are fewer capable agents better than many simpler ones?",
+            "absUrl": "https://arxiv.org/abs/2604.26374v1",
+            "updatedAt": "2026-04-29T07:35:46Z",
+            "primaryCategory": "cs.RO",
+            "score": 92,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.26997v1",
+            "title": "Agent Name Service (ANS): A Proof-of-Concept Trust Layer for Secure AI Agent Discovery, Identity, and Governance in Kubernetes",
+            "absUrl": "https://arxiv.org/abs/2604.26997v1",
+            "updatedAt": "2026-04-29T01:24:27Z",
+            "primaryCategory": "cs.CR",
+            "score": 92,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.24572v1",
+            "title": "FastOMOP: A Foundational Architecture for Reliable Agentic Real-World Evidence Generation on OMOP CDM data",
+            "absUrl": "https://arxiv.org/abs/2604.24572v1",
+            "updatedAt": "2026-04-27T15:02:02Z",
+            "primaryCategory": "cs.AI",
+            "score": 88,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.27351v1",
+            "title": "Heterogeneous Scientific Foundation Model Collaboration",
+            "absUrl": "https://arxiv.org/abs/2604.27351v1",
+            "updatedAt": "2026-04-30T03:02:27Z",
+            "primaryCategory": "cs.AI",
+            "score": 84,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.26561v1",
+            "title": "Preserving Disagreement: Architectural Heterogeneity and Coherence Validation in Multi-Agent Policy Simulation",
+            "absUrl": "https://arxiv.org/abs/2604.26561v1",
+            "updatedAt": "2026-04-29T11:47:28Z",
+            "primaryCategory": "cs.MA",
+            "score": 84,
+            "existingInVault": false
+          }
+        ]
+      },
+      {
+        "query": "agent orchestration",
+        "hits": [
+          {
+            "arxivId": "2604.19856v1",
+            "title": "ChipCraftBrain: Validation-First RTL Generation via Multi-Agent Orchestration",
+            "absUrl": "https://arxiv.org/abs/2604.19856v1",
+            "updatedAt": "2026-04-21T17:20:24Z",
+            "primaryCategory": "cs.AR",
+            "score": 150,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.06392v1",
+            "title": "Qualixar OS: A Universal Operating System for AI Agent Orchestration",
+            "absUrl": "https://arxiv.org/abs/2604.06392v1",
+            "updatedAt": "2026-04-07T19:22:20Z",
+            "primaryCategory": "cs.AI",
+            "score": 138,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2603.27299v1",
+            "title": "From Inference Routing to Agent Orchestration: Declarative Policy Compilation with Cross-Layer Verification",
+            "absUrl": "https://arxiv.org/abs/2603.27299v1",
+            "updatedAt": "2026-03-28T15:04:31Z",
+            "primaryCategory": "cs.LG",
+            "score": 138,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.27891v1",
+            "title": "In-Context Prompting Obsoletes Agent Orchestration for Procedural Tasks",
+            "absUrl": "https://arxiv.org/abs/2604.27891v1",
+            "updatedAt": "2026-04-30T14:07:37Z",
+            "primaryCategory": "cs.AI",
+            "score": 134,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2603.26182v1",
+            "title": "ClinicalAgents: Multi-Agent Orchestration for Clinical Decision Making with Dual-Memory",
+            "absUrl": "https://arxiv.org/abs/2603.26182v1",
+            "updatedAt": "2026-03-27T08:52:19Z",
+            "primaryCategory": "cs.CL",
+            "score": 134,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.07681v1",
+            "title": "Multi-Agent Orchestration for High-Throughput Materials Screening on a Leadership-Class System",
+            "absUrl": "https://arxiv.org/abs/2604.07681v1",
+            "updatedAt": "2026-04-09T01:01:11Z",
+            "primaryCategory": "cs.AI",
+            "score": 126,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.17240v1",
+            "title": "Safe and Policy-Compliant Multi-Agent Orchestration for Enterprise AI",
+            "absUrl": "https://arxiv.org/abs/2604.17240v1",
+            "updatedAt": "2026-04-19T04:02:17Z",
+            "primaryCategory": "cs.AI",
+            "score": 114,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.00901v2",
+            "title": "Experience as a Compass: Multi-agent RAG with Evolving Orchestration and Agent Prompts",
+            "absUrl": "https://arxiv.org/abs/2604.00901v2",
+            "updatedAt": "2026-04-02T21:22:41Z",
+            "primaryCategory": "cs.AI",
+            "score": 108,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.12129v1",
+            "title": "Aethon: A Reference-Based Replication Primitive for Constant-Time Instantiation of Stateful AI Agents",
+            "absUrl": "https://arxiv.org/abs/2604.12129v1",
+            "updatedAt": "2026-04-13T23:23:15Z",
+            "primaryCategory": "cs.AI",
+            "score": 68,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.06170v1",
+            "title": "Paper Circle: An Open-source Multi-agent Research Discovery and Analysis Framework",
+            "absUrl": "https://arxiv.org/abs/2604.06170v1",
+            "updatedAt": "2026-04-07T17:59:58Z",
+            "primaryCategory": "cs.CL",
+            "score": 64,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.16753v1",
+            "title": "Know When to Trust the Skill: Delayed Appraisal and Epistemic Vigilance for Single-Agent LLMs",
+            "absUrl": "https://arxiv.org/abs/2604.16753v1",
+            "updatedAt": "2026-04-17T23:55:19Z",
+            "primaryCategory": "cs.AI",
+            "score": 60,
+            "existingInVault": false
+          },
+          {
+            "arxivId": "2604.11518v1",
+            "title": "From Translation to Superset: Benchmark-Driven Evolution of a Production AI Agent from Rust to Python",
+            "absUrl": "https://arxiv.org/abs/2604.11518v1",
+            "updatedAt": "2026-04-13T14:21:44Z",
+            "primaryCategory": "cs.SE",
+            "score": 60,
+            "existingInVault": false
+          }
+        ]
+      },
+      {
+        "query": "agent runtime governance",
+        "hits": [
+          {
+            "arxivId": "2604.07833v2",
+            "title": "Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution",
+            "absUrl": "https://arxiv.org/abs/2604.07833v2",
+            "updatedAt": "2026-04-10T01:58:54Z",
+            "primaryCategory": "cs.RO",
+            "score": 104,
+            "existingInVault": true
+          }
+        ]
+      },
+      {
+        "query": "agent memory skills",
+        "hits": []
+      }
+    ],
+    "topNew": [
+      {
+        "arxivId": "2604.27358v1",
+        "title": "Safe Bilevel Delegation (SBD): A Formal Framework for Runtime Delegation Safety in Multi-Agent Systems",
+        "abstract": "As large language model (LLM) agents are deployed in high-stakes environments, the question of how safely to delegate subtasks to specialized sub-agents becomes critical. Existing work addresses multi-agent architecture selection at design time or provides broad empirical guidelines, but neither provides a runtime mechanism that dynamically adjusts the safety-efficiency trade-off as task context changes during execution. We propose Safe Bilevel Delegation (SBD), a formal framework for runtime delegation safety in hierarchical multi-agent systems. SBD formulates task delegation as a bilevel optimization problem: an outer meta-weight network phi learns context-dependent safety-efficiency weights lambda(s) in [0,1]; an inner loop optimizes the delegation policy pi subject to a probabilistic safety constraint P(safe) >= 1-delta. The continuous delegation degree alpha in [0, 1] controls how much decision authority is transferred to each sub-agent, interpolating smoothly between full human override (alpha=0) and fully autonomous execution (alpha=1). We establish three theoretical results: (1) Safety Monotonicity--higher outer safety weight produces a weakly safer inner policy; (2) Inner Policy Convergence--projected gradient descent on the inner problem converges linearly under standard smoothness assumptions; (3) an Accountability Propagation bound that distributes responsibility across multi-hop delegation chains with a provable per-agent ceiling. We instantiate SBD in three high-stakes domains--medical AI (MIMIC-III), financial risk control (S and P 500), and educational agent supervision (ASSISTments)--specifying datasets, safety constraint sets, baselines, and evaluation protocols. This manuscript presents the formal framework and theoretical results in full; empirical validation following the protocols described herein is planned and will be reported in a forthcoming revision.",
+        "authors": [
+          "Yuan Sun"
+        ],
+        "publishedAt": "2026-04-30T03:15:05Z",
+        "updatedAt": "2026-04-30T03:15:05Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.27358v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.27358v1",
+        "existingInVault": false,
+        "score": 174,
+        "matchedQueries": [
+          "multi-agent systems"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent",
+          "systems"
+        ],
+        "snippet": "As large language model (LLM) agents are deployed in high-stakes environments, the question of how safely to delegate subtasks to specialized sub-agents becomes critical. Existing work addresses multi-agent architecture selection at design time or provides broad empirical guideli"
+      },
+      {
+        "arxivId": "2604.25917v1",
+        "title": "Recursive Multi-Agent Systems",
+        "abstract": "Recursive or looped language models have recently emerged as a new scaling axis by iteratively refining the same model computation over latent states to deepen reasoning. We extend such scaling principle from a single model to multi-agent systems, and ask: Can agent collaboration itself be scaled through recursion? To this end, we introduce RecursiveMAS, a recursive multi-agent framework that casts the entire system as a unified latent-space recursive computation. RecursiveMAS connects heterogeneous agents as a collaboration loop through the lightweight RecursiveLink module, enabling in-distribution latent thoughts generation and cross-agent latent state transfer. To optimize our framework, we develop an inner-outer loop learning algorithm for iterative whole-system co-optimization through shared gradient-based credit assignment across recursion rounds. Theoretical analyses of runtime complexity and learning dynamics establish that RecursiveMAS is more efficient than standard text-based MAS and maintains stable gradients during recursive training. Empirically, we instantiate RecursiveMAS under 4 representative agent collaboration patterns and evaluate across 9 benchmarks spanning mathematics, science, medicine, search, and code generation. In comparison with advanced single/multi-agent and recursive computation baselines, RecursiveMAS consistently delivers an average accuracy improvement of 8.3%, together with 1.2$\\times$-2.4$\\times$ end-to-end inference speedup, and 34.6%-75.6% token usage reduction. Code and Data are provided in https://recursivemas.github.io.",
+        "authors": [
+          "Xiyuan Yang",
+          "Jiaru Zou",
+          "Rui Pan",
+          "Ruizhong Qiu",
+          "Pan Lu",
+          "Shizhe Diao",
+          "Jindong Jiang",
+          "Hanghang Tong",
+          "Tong Zhang",
+          "Markus J. Buehler",
+          "Jingrui He",
+          "James Zou"
+        ],
+        "publishedAt": "2026-04-28T17:59:34Z",
+        "updatedAt": "2026-04-28T17:59:34Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.CL",
+          "cs.LG"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.25917v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.25917v1",
+        "existingInVault": false,
+        "score": 174,
+        "matchedQueries": [
+          "multi-agent systems"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent",
+          "systems"
+        ],
+        "snippet": "Recursive or looped language models have recently emerged as a new scaling axis by iteratively refining the same model computation over latent states to deepen reasoning. We extend such scaling principle from a single model to multi-agent systems, and ask: Can agent collaboration"
+      },
+      {
+        "arxivId": "2604.24477v1",
+        "title": "GAMMAF: A Common Framework for Graph-Based Anomaly Monitoring Benchmarking in LLM Multi-Agent Systems",
+        "abstract": "The rapid integration of Large Language Models (LLMs) into Multi-Agent Systems (MAS) has significantly enhanced their collaborative problem-solving capabilities, but it has also expanded their attack surfaces, exposing them to vulnerabilities such as prompt infection and compromised inter-agent communication. While emerging graph-based anomaly detection methods show promise in protecting these networks, the field currently lacks a standardized, reproducible environment to train these models and evaluate their efficacy. To address this gap, we introduce Gammaf (Graph-based Anomaly Monitoring for LLM Multi-Agent systems Framework), an open-source benchmarking platform. Gammaf is not a novel defense mechanism itself, but rather a comprehensive evaluation architecture designed to generate synthetic multi-agent interaction datasets and benchmark the performance of existing and future defense models. The proposed framework operates through two interdependent pipelines: a Training Data Generation stage, which simulates debates across varied network topologies to capture interactions as robust attributed graphs, and a Defense System Benchmarking stage, which actively evaluates defense models by dynamically isolating flagged adversarial nodes during live inference rounds. Through rigorous evaluation using established defense baselines (XG-Guard and BlindGuard) across multiple knowledge tasks (such as MMLU-Pro and GSM8K), we demonstrate Gammaf's high utility, topological scalability, and execution efficiency. Furthermore, our experimental results reveal that equipping an LLM-MAS with effective attack remediation not only recovers system integrity but also substantially reduces overall operational costs by facilitating early consensus and cutting off the extensive token generation typical of adversarial agents.",
+        "authors": [
+          "Pablo Mateo-Torrejón",
+          "Alfonso Sánchez-Macián"
+        ],
+        "publishedAt": "2026-04-27T13:45:14Z",
+        "updatedAt": "2026-04-27T13:45:14Z",
+        "primaryCategory": "cs.CR",
+        "categories": [
+          "cs.CR",
+          "cs.AI",
+          "cs.MA"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.24477v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.24477v1",
+        "existingInVault": false,
+        "score": 174,
+        "matchedQueries": [
+          "multi-agent systems"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent",
+          "systems"
+        ],
+        "snippet": "The rapid integration of Large Language Models (LLMs) into Multi-Agent Systems (MAS) has significantly enhanced their collaborative problem-solving capabilities, but it has also expanded their attack surfaces, exposing them to vulnerabilities such as prompt infection and compromi"
+      },
+      {
+        "arxivId": "2604.25850v3",
+        "title": "Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses",
+        "abstract": "Harnesses are now central to coding-agent performance, mediating how models interact with tools and execution environments. Yet harness engineering remains a manual craft, because automating it faces a heterogeneous action space across editable components, voluminous trajectories that bury actionable signal, and edits whose effect is hard to attribute. We introduce Agentic Harness Engineering (AHE), a closed loop that addresses these challenges through three matched observability pillars: (1) component observability gives every editable harness component a file-level representation so the action space is explicit and revertible; (2) experience observability distills millions of raw trajectory tokens into a layered, drill-down evidence corpus that an evolving agent can actually consume; and (3) decision observability pairs every edit with a self-declared prediction, later verified against the next round's task-level outcomes. Together, these pillars turn every edit into a falsifiable contract, so harness evolution proceeds autonomously without collapsing into trial-and-error. Empirically, ten AHE iterations lift pass@1 on Terminal-Bench 2 from 69.7% to 77.0%, surpassing the human-designed harness Codex-CLI (71.9%) and the self-evolving baselines ACE and TF-GRPO. The frozen harness transfers without re-evolution: on SWE-bench-verified it tops aggregate success at 12% fewer tokens than the seed, and on Terminal-Bench 2 it yields +5.1 to +10.1pp cross-family gains across three alternate model families, indicating the evolved components encode general engineering experience rather than benchmark-specific tuning. Ablations localize the gain to tools, middleware, and long-term memory rather than the system prompt, suggesting factual harness structure transfers while prose-level strategy does not.",
+        "authors": [
+          "Jiahang Lin",
+          "Shichun Liu",
+          "Chengjun Pan",
+          "Lizhi Lin",
+          "Shihan Dou",
+          "Xuanjing Huang",
+          "Hang Yan",
+          "Zhenhua Han",
+          "Tao Gui"
+        ],
+        "publishedAt": "2026-04-28T16:55:02Z",
+        "updatedAt": "2026-04-30T17:34:17Z",
+        "primaryCategory": "cs.CL",
+        "categories": [
+          "cs.CL",
+          "cs.SE"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.25850v3",
+        "pdfUrl": "https://arxiv.org/pdf/2604.25850v3",
+        "existingInVault": false,
+        "score": 162,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "Harnesses are now central to coding-agent performance, mediating how models interact with tools and execution environments. Yet harness engineering remains a manual craft, because automating it faces a heterogeneous action space across editable components, voluminous trajectories"
+      },
+      {
+        "arxivId": "2604.26053v1",
+        "title": "I Would If I Could: Reasoning about Dynamics of Actions in Multi-Agent Systems",
+        "abstract": "Autonomous agents acting in realistic Multi-Agent Systems (MAS) should be able to adapt during their execution. Standard strategic logics, such as Alternating-time Temporal Logic (ATL), model agents' state- or history-dependent behaviour. However, the dynamic treatment of agents' available actions and their knowledge of required actions is still rarely addressed. In this paper, we introduce ATL with Dynamic Actions (ATL-D), which models the process of granting and revoking actions, and its extension ATEL-D, which captures how such updates affect agents' knowledge. Beyond the conceptual contribution, we provide several technical results: we analyse the expressivity of our logic in relation to ATL, study its relation to normative systems, and provide complexity results for relevant computational problems.",
+        "authors": [
+          "Rustam Galimullin",
+          "Hermine Grosinger",
+          "Munyque Mittelmann"
+        ],
+        "publishedAt": "2026-04-28T18:43:23Z",
+        "updatedAt": "2026-04-28T18:43:23Z",
+        "primaryCategory": "cs.LO",
+        "categories": [
+          "cs.LO",
+          "cs.MA"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.26053v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.26053v1",
+        "existingInVault": false,
+        "score": 162,
+        "matchedQueries": [
+          "multi-agent systems"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent",
+          "systems"
+        ],
+        "snippet": "Autonomous agents acting in realistic Multi-Agent Systems (MAS) should be able to adapt during their execution. Standard strategic logics, such as Alternating-time Temporal Logic (ATL), model agents' state- or history-dependent behaviour. However, the dynamic treatment of agents'"
+      },
+      {
+        "arxivId": "2604.07236v4",
+        "title": "How Much Heavy Lifting Can an Agent Harness Do?: Measuring the LLM's Residual Role in a Planning Agent",
+        "abstract": "Agent harnesses -- the stateful programs that wrap a language model and decide what it sees at each step -- are now known to change end-to-end performance on a fixed model by as much as six times. That raises a question asked less often than it should be: how much of an agent's competence does the harness itself already carry, and how much genuinely still needs the LLM? We externalize a planning harness for noisy Collaborative Battleship into four progressively richer layers -- posterior belief tracking, declarative planning, symbolic reflec tion, and an LLM-backed revision gate -- under a common runtime, taking \\emph{win rate} as the primary metric and \\emph{F1} as secondary, and pre-specifying \\emph{heavy lifting} as the single largest positive marginal to the primary metric. Across 54 games, declarative pla nning carries the heavy lifting ($+24.1$pp win rate over a belief-only harness, zero LLM calls); symbolic reflection is mechanistically real but calibration-sensitive, with signed board-level effects up to $\\pm0.140$ F1 that cancel on aggregate; and LLM-backed revision ac tivates on only $4.3\\%$ of turns with a bounded, non-monotonic effect. The contribution is methodological: once harness layers are made externally measurable, the LLM's role can be quantified as residual rather than assumed central.",
+        "authors": [
+          "Sungwoo Jung",
+          "Seonil Son"
+        ],
+        "publishedAt": "2026-04-08T16:02:04Z",
+        "updatedAt": "2026-04-28T14:27:47Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.CL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.07236v4",
+        "pdfUrl": "https://arxiv.org/pdf/2604.07236v4",
+        "existingInVault": false,
+        "score": 158,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "Agent harnesses -- the stateful programs that wrap a language model and decide what it sees at each step -- are now known to change end-to-end performance on a fixed model by as much as six times. That raises a question asked less often than it should be: how much of an agent's c"
+      },
+      {
+        "arxivId": "2604.19856v1",
+        "title": "ChipCraftBrain: Validation-First RTL Generation via Multi-Agent Orchestration",
+        "abstract": "Large Language Models (LLMs) show promise for generating Register-Transfer Level (RTL) code from natural language specifications, but single-shot generation achieves only 60-65% functional correctness on standard benchmarks. Multi-agent approaches such as MAGE reach 95.9% on VerilogEval yet remain untested on harder industrial benchmarks such as NVIDIA's CVDP, lack synthesis awareness, and incur high API costs. We present ChipCraftBrain, a framework combining symbolic-neural reasoning with adaptive multi-agent orchestration for automated RTL generation. Four innovations drive the system: (1) adaptive orchestration over six specialized agents via a PPO policy over a 168-dim state (an alternative world-model MPC planner is also evaluated); (2) a hybrid symbolic-neural architecture that solves K-map and truth-table problems algorithmically while specialized agents handle waveform timing and general RTL; (3) knowledge-augmented generation from a 321-pattern base plus 971 open-source reference implementations with focus-aware retrieval; and (4) hierarchical specification decomposition into dependency-ordered sub-modules with interface synchronization. On VerilogEval-Human, ChipCraftBrain achieves 97.2% mean pass@1 (range 96.15-98.72% across 7 runs, best 154/156), on par with ChipAgents (97.4%, self-reported) and ahead of MAGE (95.9%). On a 302-problem non-agentic subset of CVDP spanning five task categories, we reach 94.7% mean pass@1 (286/302, averaged over 3 runs), a 36-60 percentage-point lift per category over the published single-shot baseline; we additionally lead three of four categories shared with NVIDIA's ACE-RTL despite using roughly 30x fewer per-problem attempts. A RISC-V SoC case study demonstrates hierarchical decomposition generating 8/8 lint-passing modules (689 LOC) validated on FPGA, where monolithic generation fails entirely.",
+        "authors": [
+          "Cagri Eryilmaz"
+        ],
+        "publishedAt": "2026-04-21T17:20:24Z",
+        "updatedAt": "2026-04-21T17:20:24Z",
+        "primaryCategory": "cs.AR",
+        "categories": [
+          "cs.AR",
+          "cs.AI",
+          "cs.LG"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.19856v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.19856v1",
+        "existingInVault": false,
+        "score": 150,
+        "matchedQueries": [
+          "agent orchestration"
+        ],
+        "matchedTerms": [
+          "agent",
+          "orchestration"
+        ],
+        "snippet": "Large Language Models (LLMs) show promise for generating Register-Transfer Level (RTL) code from natural language specifications, but single-shot generation achieves only 60-65% functional correctness on standard benchmarks. Multi-agent approaches such as MAGE reach 95.9% on Veri"
+      },
+      {
+        "arxivId": "2604.25602v2",
+        "title": "OxyGent: Making Multi-Agent Systems Modular, Observable, and Evolvable via Oxy Abstraction",
+        "abstract": "Deploying production-ready multi-agent systems (MAS) in complex industrial environments remains challenging due to limitations in scalability, observability, and autonomous evolution. We present OxyGent, an open-source framework driven by two core novelties: a unified Oxy abstraction and the OxyBank evolution engine. The unified abstraction encapsulates agents, tools, LLMs, and reasoning flows as pluggable atomic components, enabling Lego-like scalable system composition and non-intrusive monitoring. To enhance observability, OxyGent introduces permission-driven dynamic planning that replaces rigid workflows with execution graphs generated at runtime, providing adaptive visualizations. Furthermore, to support continuous evolution, OxyBank serves as an AI asset management platform that drives automated data backflow, annotation, and joint evolution. Empirical evaluations and real-world case studies show that OxyGent provides a robust and scalable foundation for MAS. OxyGent is fully open-sourced under the Apache License 2.0 at https://github.com/jd-opensource/OxyGent.",
+        "authors": [
+          "Junxing Hu",
+          "Tianlong Li",
+          "Lei Yu",
+          "Ai Han"
+        ],
+        "publishedAt": "2026-04-28T13:08:14Z",
+        "updatedAt": "2026-04-29T14:40:10Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.25602v2",
+        "pdfUrl": "https://arxiv.org/pdf/2604.25602v2",
+        "existingInVault": false,
+        "score": 146,
+        "matchedQueries": [
+          "multi-agent systems"
+        ],
+        "matchedTerms": [
+          "multi",
+          "agent",
+          "systems"
+        ],
+        "snippet": "Deploying production-ready multi-agent systems (MAS) in complex industrial environments remains challenging due to limitations in scalability, observability, and autonomous evolution. We present OxyGent, an open-source framework driven by two core novelties: a unified Oxy abstrac"
+      },
+      {
+        "arxivId": "2604.20801v1",
+        "title": "Synthesizing Multi-Agent Harnesses for Vulnerability Discovery",
+        "abstract": "LLM agents have begun to find real security vulnerabilities that human auditors and automated fuzzers missed for decades, in source-available targets where the analyst can build and instrument the code. In practice the work is split among several agents, wired together by a harness: the program that fixes which roles exist, how they pass information, which tools each may call, and how retries are coordinated. When the language model is held fixed, changing only the harness can still change success rates by several-fold on public agent benchmarks, yet most harnesses are written by hand; recent harness optimizers each search only a narrow slice of the design space and rely on coarse pass/fail feedback that gives no diagnostic signal about why a trial failed. AgentFlow addresses both limitations with a typed graph DSL whose search space jointly covers agent roles, prompts, tools, communication topology, and coordination protocol, paired with a feedback-driven outer loop that reads runtime signals from the target program itself to diagnose which part of the harness caused the failure and rewrite it accordingly. We evaluate AgentFlow on TerminalBench-2 with Claude Opus 4.6 and on Google Chrome with Kimi K2.5. AgentFlow reaches 84.3% on TerminalBench-2, the highest score in the public leaderboard snapshot we evaluate against, and discovers ten previously unknown zero-day vulnerabilities in Google Chrome, including two Critical sandbox-escape vulnerabilities (CVE-2026-5280 and CVE-2026-6297).",
+        "authors": [
+          "Hanzhi Liu",
+          "Chaofan Shou",
+          "Xiaonan Liu",
+          "Hongbo Wen",
+          "Yanju Chen",
+          "Ryan Jingyang Fang",
+          "Yu Feng"
+        ],
+        "publishedAt": "2026-04-22T17:27:40Z",
+        "updatedAt": "2026-04-22T17:27:40Z",
+        "primaryCategory": "cs.CR",
+        "categories": [
+          "cs.CR"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.20801v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.20801v1",
+        "existingInVault": false,
+        "score": 142,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "LLM agents have begun to find real security vulnerabilities that human auditors and automated fuzzers missed for decades, in source-available targets where the analyst can build and instrument the code. In practice the work is split among several agents, wired together by a harne"
+      },
+      {
+        "arxivId": "2604.00073v2",
+        "title": "Terminal Agents Suffice for Enterprise Automation",
+        "abstract": "There has been growing interest in building agents that can interact with digital platforms to execute meaningful enterprise tasks autonomously. Among the approaches explored are tool-augmented agents built on abstractions such as Model Context Protocol (MCP) and web agents that operate through graphical interfaces. Yet, it remains unclear whether such complex agentic systems are necessary given their cost and operational overhead. We argue that a coding agent equipped only with a terminal and a filesystem can solve many enterprise tasks more effectively by interacting directly with platform APIs. We evaluate this hypothesis across diverse real-world systems and show that these low-level terminal agents match or outperform more complex agent architectures. Our findings suggest that simple programmatic interfaces, combined with strong foundation models, are sufficient for practical enterprise automation.",
+        "authors": [
+          "Patrice Bechard",
+          "Orlando Marquez Ayala",
+          "Emily Chen",
+          "Jordan Skelton",
+          "Sagar Davasam",
+          "Srinivas Sunkara",
+          "Vikas Yadav",
+          "Sai Rajeswar"
+        ],
+        "publishedAt": "2026-03-31T14:14:47Z",
+        "updatedAt": "2026-04-03T15:48:53Z",
+        "primaryCategory": "cs.SE",
+        "categories": [
+          "cs.SE",
+          "cs.AI",
+          "cs.CL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.00073v2",
+        "pdfUrl": "https://arxiv.org/pdf/2604.00073v2",
+        "existingInVault": false,
+        "score": 142,
+        "matchedQueries": [
+          "terminal agents"
+        ],
+        "matchedTerms": [
+          "terminal",
+          "agents"
+        ],
+        "snippet": "There has been growing interest in building agents that can interact with digital platforms to execute meaningful enterprise tasks autonomously. Among the approaches explored are tool-augmented agents built on abstractions such as Model Context Protocol (MCP) and web agents that "
+      },
+      {
+        "arxivId": "2601.16443v3",
+        "title": "Endless Terminals: Scaling RL Environments for Terminal Agents",
+        "abstract": "Environments are the bottleneck for self-improving agents. Current terminal benchmarks were built for evaluation, not training; reinforcement learning requires a scalable pipeline, not just a dataset. We introduce Endless Terminals, a fully autonomous pipeline that procedurally generates terminal-use tasks without human annotation. The pipeline has four stages: generating diverse task descriptions, building and validating containerized environments, producing completion tests, and filtering for solvability. From this pipeline we obtain 3255 tasks spanning file operations, log management, data processing, scripting, and database operations. We train agents using vanilla PPO with binary episode level rewards and a minimal interaction loop: no retrieval, multi-agent coordination, or specialized tools. Despite this simplicity, models trained on Endless Terminals show substantial gains: on our held-out dev set, Llama-3.2-3B improves from 4.0% to 18.2%, Qwen2.5-7B from 10.7% to 53.3%, and Qwen3-8B-openthinker-sft from 42.6% to 59.0%. These improvements transfer to human-curated benchmarks: models trained on Endless Terminals show substantial gains on held out human curated benchmarks: on TerminalBench 2.0, Llama-3.2-3B improves from 0.0% to 2.2%, Qwen2.5-7B from 2.2% to 3.4%, and Qwen3-8B-openthinker-sft from 1.1% to 6.7%, in each case outperforming alternative approaches including models with more complex agentic scaffolds. These results demonstrate that simple RL succeeds when environments scale.",
+        "authors": [
+          "Kanishk Gandhi",
+          "Shivam Garg",
+          "Noah D. Goodman",
+          "Dimitris Papailiopoulos"
+        ],
+        "publishedAt": "2026-01-23T04:39:55Z",
+        "updatedAt": "2026-02-14T09:14:28Z",
+        "primaryCategory": "cs.LG",
+        "categories": [
+          "cs.LG",
+          "cs.CL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2601.16443v3",
+        "pdfUrl": "https://arxiv.org/pdf/2601.16443v3",
+        "existingInVault": false,
+        "score": 138,
+        "matchedQueries": [
+          "terminal agents"
+        ],
+        "matchedTerms": [
+          "terminal",
+          "agents"
+        ],
+        "snippet": "Environments are the bottleneck for self-improving agents. Current terminal benchmarks were built for evaluation, not training; reinforcement learning requires a scalable pipeline, not just a dataset. We introduce Endless Terminals, a fully autonomous pipeline that procedurally g"
+      },
+      {
+        "arxivId": "2604.06392v1",
+        "title": "Qualixar OS: A Universal Operating System for AI Agent Orchestration",
+        "abstract": "We present Qualixar OS, the first application-layer operating system for universal AI agent orchestration. Unlike kernel-level approaches (AIOS) or single-framework tools (AutoGen, CrewAI), Qualixar OS provides a complete runtime for heterogeneous multi-agent systems spanning 10 LLM providers, 8+ agent frameworks, and 7 transports. We contribute: (1) execution semantics for 12 multi-agent topologies including grid, forest, mesh, and maker patterns; (2) Forge, an LLM-driven team design engine with historical strategy memory; (3) three-layer model routing combining Q-learning, five strategies, and Bayesian POMDP with dynamic multi-provider discovery; (4) a consensus-based judge pipeline with Goodhart detection, JSD drift monitoring, and alignment trilemma navigation; (5) four-layer content attribution with HMAC signing and steganographic watermarks; (6) universal compatibility via the Claw Bridge supporting MCP and A2A protocols with a 25-command Universal Command Protocol; (7) a 24-tab production dashboard with visual workflow builder and skill marketplace. Qualixar OS is validated by 2,821 test cases across 217 event types and 8 quality modules. On a custom 20-task evaluation suite, the system achieves 100% accuracy at a mean cost of $0.000039 per task. Source-available under the Elastic License 2.0.",
+        "authors": [
+          "Varun Pratap Bhardwaj"
+        ],
+        "publishedAt": "2026-04-07T19:22:20Z",
+        "updatedAt": "2026-04-07T19:22:20Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.MA",
+          "cs.SE"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.06392v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.06392v1",
+        "existingInVault": false,
+        "score": 138,
+        "matchedQueries": [
+          "agent orchestration"
+        ],
+        "matchedTerms": [
+          "agent",
+          "orchestration"
+        ],
+        "snippet": "We present Qualixar OS, the first application-layer operating system for universal AI agent orchestration. Unlike kernel-level approaches (AIOS) or single-framework tools (AutoGen, CrewAI), Qualixar OS provides a complete runtime for heterogeneous multi-agent systems spanning 10 "
+      }
+    ],
+    "topExisting": [
+      {
+        "arxivId": "2604.19572v2",
+        "title": "A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression",
+        "abstract": "As terminal agents scale to long-horizon, multi-turn workflows, a key bottleneck is not merely limited context length, but the accumulation of noisy terminal observations in the interaction history. Retaining raw observations preserves useful environment feedback, but also leads to context saturation and high token cost; conversely, naive compression may discard task-critical signals needed for subsequent actions. Because terminal environments are highly heterogeneous across repositories, commands, and execution states, heuristic-based or fixed-prompt compression methods are difficult to generalize. We propose TACO, a plug-and-play, training-free, self-evolving Terminal Agent Compression framework for existing terminal agents. TACO automatically discovers, refines, and reuses structured compression rules from interaction trajectories, enabling workflow-adaptive filtering of low-value terminal outputs while preserving task-relevant observations. Experiments on TerminalBench (TB 1.0 and TB 2.0) and four additional terminal-related benchmarks, including SWE-Bench Lite, CompileBench, DevEval, and CRUST-Bench, show that TACO consistently improves task performance and token efficiency across agent scaffolds and backbone models. On TerminalBench, TACO yields 1%-4% accuracy gains across strong agentic models and improves accuracy by around 2%-3% under the same token budget. On additional terminal-related benchmarks, it reduces total token consumption while maintaining or improving task success rates. These results suggest that self-evolving, workflow-adaptive observation compression is an effective path toward more reliable and efficient long-horizon terminal agents. The code is publicly available at https://github.com/multimodal-art-projection/TACO.",
+        "authors": [
+          "Jincheng Ren",
+          "Siwei Wu",
+          "Yizhi Li",
+          "Kang Zhu",
+          "Shu Xu",
+          "Boyu Feng",
+          "Ruibin Yuan",
+          "Wei Zhang",
+          "Riza Batista-Navarro",
+          "Jian Yang",
+          "Chenghua Lin"
+        ],
+        "publishedAt": "2026-04-21T15:25:54Z",
+        "updatedAt": "2026-04-28T18:09:49Z",
+        "primaryCategory": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.19572v2",
+        "pdfUrl": "https://arxiv.org/pdf/2604.19572v2",
+        "existingInVault": true,
+        "score": 174,
+        "matchedQueries": [
+          "terminal agents"
+        ],
+        "matchedTerms": [
+          "terminal",
+          "agents"
+        ],
+        "snippet": "As terminal agents scale to long-horizon, multi-turn workflows, a key bottleneck is not merely limited context length, but the accumulation of noisy terminal observations in the interaction history. Retaining raw observations preserves useful environment feedback, but also leads "
+      },
+      {
+        "arxivId": "2604.18071v1",
+        "title": "Architectural Design Decisions in AI Agent Harnesses",
+        "abstract": "AI agent systems increasingly rely on reusable non-LLM engineering infrastructure that packages tool mediation, context handling, delegation, safety control, and orchestration. Yet the architectural design decisions in this surrounding infrastructure remain understudied. This paper presents a protocol-guided, source-grounded empirical study of 70 publicly available agent-system projects, addressing three questions: which design-decision dimensions recur across projects, which co-occurrences structure those decisions, and which typical architectural patterns emerge. Methodologically, we contribute a transparent investigation procedure for analyzing heterogeneous agent-system corpora through source-code and technical-material reading. Empirically, we identify five recurring design dimensions (subagent architecture, context management, tool systems, safety mechanisms, and orchestration) and find that the corpus favors file-persistent, hybrid, and hierarchical context strategies; registry-oriented tool systems remain dominant while MCP- and plugin-oriented extensions are emerging; and intermediate isolation is common but high-assurance audit is rare. Cross-project co-occurrence analysis reveals that deeper coordination pairs with more explicit context services, stronger execution environments with more structured governance, and formalized tool-registration boundaries with broader ecosystem ambitions. We synthesize five recurring architectural patterns spanning lightweight tools, balanced CLI frameworks, multi-agent orchestrators, enterprise systems, and scenario-verticalized projects. The result provides an evidence-based account of architectural regularities in agent-system engineering, with grounded guidance for framework designers, selectors, and researchers.",
+        "authors": [
+          "Hu Wei"
+        ],
+        "publishedAt": "2026-04-20T10:39:34Z",
+        "updatedAt": "2026-04-20T10:39:34Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.18071v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.18071v1",
+        "existingInVault": true,
+        "score": 162,
+        "matchedQueries": [
+          "agent harness",
+          "agent orchestration"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness",
+          "orchestration"
+        ],
+        "snippet": "AI agent systems increasingly rely on reusable non-LLM engineering infrastructure that packages tool mediation, context handling, delegation, safety control, and orchestration. Yet the architectural design decisions in this surrounding infrastructure remain understudied. This pap"
+      },
+      {
+        "arxivId": "2603.25723v1",
+        "title": "Natural-Language Agent Harnesses",
+        "abstract": "Agent performance increasingly depends on \\emph{harness engineering}, yet harness design is usually buried in controller code and runtime-specific conventions, making it hard to transfer, compare, and study as a scientific object. We ask whether the high-level control logic of an agent harness can instead be externalized as a portable executable artifact. We introduce \\textbf{Natural-Language Agent Harnesses} (NLAHs), which express harness behavior in editable natural language, and \\textbf{Intelligent Harness Runtime} (IHR), a shared runtime that executes these harnesses through explicit contracts, durable artifacts, and lightweight adapters. Across coding and computer-use benchmarks, we conduct controlled evaluations of operational viability, module ablation, and code-to-text harness migration.",
+        "authors": [
+          "Linyue Pan",
+          "Lexiao Zou",
+          "Shuo Guo",
+          "Jingchen Ni",
+          "Hai-Tao Zheng"
+        ],
+        "publishedAt": "2026-03-26T17:58:15Z",
+        "updatedAt": "2026-03-26T17:58:15Z",
+        "primaryCategory": "cs.CL",
+        "categories": [
+          "cs.CL",
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2603.25723v1",
+        "pdfUrl": "https://arxiv.org/pdf/2603.25723v1",
+        "existingInVault": true,
+        "score": 162,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "Agent performance increasingly depends on \\emph{harness engineering}, yet harness design is usually buried in controller code and runtime-specific conventions, making it hard to transfer, compare, and study as a scientific object. We ask whether the high-level control logic of an"
+      },
+      {
+        "arxivId": "2604.13346v1",
+        "title": "AgentSPEX: An Agent SPecification and EXecution Language",
+        "abstract": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to control. Orchestration frameworks such as LangGraph, DSPy, and CrewAI impose greater structure through explicit workflow definitions, but tightly couple workflow logic with Python, making agents difficult to maintain and modify. In this paper, we introduce AgentSPEX, an Agent SPecification and EXecution Language for specifying LLM-agent workflows with explicit control flow and modular structure, along with a customizable agent harness. AgentSPEX supports typed steps, branching and loops, parallel execution, reusable submodules, and explicit state management, and these workflows execute within an agent harness that provides tool access, a sandboxed virtual environment, and support for checkpointing, verification, and logging. Furthermore, we provide a visual editor with synchronized graph and workflow views for authoring and inspection. We include ready-to-use agents for deep research and scientific research, and we evaluate AgentSPEX on 7 benchmarks. Finally, we show through a user study that AgentSPEX provides a more interpretable and accessible workflow-authoring paradigm than a popular existing agent framework.",
+        "authors": [
+          "Pengcheng Wang",
+          "Jerry Huang",
+          "Jiarui Yao",
+          "Rui Pan",
+          "Peizhi Niu",
+          "Yaowenqi Liu",
+          "Ruida Wang",
+          "Renhao Lu",
+          "Yuwei Guo",
+          "Tong Zhang"
+        ],
+        "publishedAt": "2026-04-14T23:16:25Z",
+        "updatedAt": "2026-04-14T23:16:25Z",
+        "primaryCategory": "cs.CL",
+        "categories": [
+          "cs.CL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.13346v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.13346v1",
+        "existingInVault": true,
+        "score": 108,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "Language-model agent systems commonly rely on reactive prompting, in which a single instruction guides the model through an open-ended sequence of reasoning and tool-use steps, leaving control flow and intermediate state implicit and making agent behavior potentially difficult to"
+      },
+      {
+        "arxivId": "2604.07833v2",
+        "title": "Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution",
+        "abstract": "Embodied agents are evolving from passive reasoning systems into active executors that interact with tools, robots, and physical environments. Once granted execution authority, the central challenge becomes how to keep actions governable at runtime. Existing approaches embed safety and recovery logic inside the agent loop, making execution control difficult to standardize, audit, and adapt. This paper argues that embodied intelligence requires not only stronger agents, but stronger runtime governance. We propose a framework for policy-constrained execution that separates agent cognition from execution oversight. Governance is externalized into a dedicated runtime layer performing policy checking, capability admission, execution monitoring, rollback handling, and human override. We formalize the control boundary among the embodied agent, Embodied Capability Modules (ECMs), and runtime governance layer, and validate through 1000 randomized simulation trials across three governance dimensions. Results show 96.2% interception of unauthorized actions, reduction of unsafe continuation from 100% to 22.2% under runtime drift, and 91.4% recovery success with full policy compliance, substantially outperforming all baselines (p<0.001). By reframing runtime governance as a first-class systems problem, this paper positions policy-constrained execution as a key design principle for embodied agent systems.",
+        "authors": [
+          "Xue Qin",
+          "Simin Luan",
+          "John See",
+          "Cong Yang",
+          "Zhijun Li"
+        ],
+        "publishedAt": "2026-04-09T05:35:08Z",
+        "updatedAt": "2026-04-10T01:58:54Z",
+        "primaryCategory": "cs.RO",
+        "categories": [
+          "cs.RO"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.07833v2",
+        "pdfUrl": "https://arxiv.org/pdf/2604.07833v2",
+        "existingInVault": true,
+        "score": 104,
+        "matchedQueries": [
+          "agent runtime governance"
+        ],
+        "matchedTerms": [
+          "agent",
+          "runtime",
+          "governance"
+        ],
+        "snippet": "Embodied agents are evolving from passive reasoning systems into active executors that interact with tools, robots, and physical environments. Once granted execution authority, the central challenge becomes how to keep actions governable at runtime. Existing approaches embed safe"
+      },
+      {
+        "arxivId": "2604.21003v2",
+        "title": "The Last Harness You'll Ever Build",
+        "abstract": "AI agents are increasingly deployed on complex, domain-specific workflows -- navigating enterprise web applications that require dozens of clicks and form fills, orchestrating multi-step research pipelines that span search, extraction, and synthesis, automating code review across unfamiliar repositories, and handling customer escalations that demand nuanced domain knowledge. \\textbf{Each new task domain requires painstaking, expert-driven harness engineering}: designing the prompts, tools, orchestration logic, and evaluation criteria that make a foundation model effective. We present a two-level framework that automates this process. At the first level, the \\textbf{Harness Evolution Loop} optimizes a worker agent's harness $\\mathcal{H}$ for a single task: a Worker Agent $W_{\\mathcal{H}}$ executes the task, an Evaluator Agent $V$ adversarially diagnoses failures and scores performance, and an Evolution Agent $E$ modifies the harness based on the full history of prior attempts. At the second level, the \\textbf{Meta-Evolution Loop} optimizes the evolution blueprint $Λ= (W_{\\mathcal{H}}, \\mathcal{H}^{(0)}, V, E)$ itself across diverse tasks, \\textbf{learning a blueprint $Λ^{(\\text{best})}$ that enables rapid harness convergence on any new task -- so that adapting an agent to a novel domain requires no human harness engineering at all.} We formalize the correspondence to meta-learning and present both algorithms. The framework \\textbf{shifts manual harness engineering into automated harness engineering}, and takes one step further -- \\textbf{automating the design of the automation itself}.",
+        "authors": [
+          "Haebin Seong",
+          "Li Yin",
+          "Haoran Zhang"
+        ],
+        "publishedAt": "2026-04-22T18:51:48Z",
+        "updatedAt": "2026-04-28T02:33:56Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.21003v2",
+        "pdfUrl": "https://arxiv.org/pdf/2604.21003v2",
+        "existingInVault": true,
+        "score": 68,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "AI agents are increasingly deployed on complex, domain-specific workflows -- navigating enterprise web applications that require dozens of clicks and form fills, orchestrating multi-step research pipelines that span search, extraction, and synthesis, automating code review across"
+      },
+      {
+        "arxivId": "2604.03610v1",
+        "title": "DebugHarness: Emulating Human Dynamic Debugging for Autonomous Program Repair",
+        "abstract": "Patching severe security flaws in complex software remains a major challenge. While automated tools like fuzzers efficiently discover bugs, fixing deep-rooted low-level faults (e.g., use-after-free and memory corruption) still requires labor-intensive manual analysis by experts. Emerging Large Language Model (LLM) agents attempt to automate this pipeline, but they typically treat bug fixing as a purely static code-generation task. Relying solely on static artifacts, these methods miss the dynamic execution context strictly necessary for diagnosing intricate memory safety violations. To overcome these limitations, we introduce DebugHarness, an autonomous LLM-powered debugging agent harness that resolves complex vulnerabilities by emulating the interactive debugging practices of human systems engineers. Instead of merely examining static code, DebugHarness actively queries the live runtime environment. Driven by a reproducible crash, it utilizes a pattern-guided investigation strategy to formulate hypotheses, interactively probes program memory states and execution paths, and synthesizes patches via a closed-loop validation cycle. We evaluate DebugHarness on SEC-bench, a rigorous dataset of real-world C/C++ security vulnerabilities. DebugHarness successfully patches approximately 90% of the evaluated bugs. This yields a relative improvement of over 30% compared to state-of-the-art baselines, demonstrating that dynamic debugging significantly enhances LLM diagnostic capabilities. Overall, DebugHarness establishes a novel paradigm for automated program repair, bridging the gap between static LLM reasoning and the dynamic intricacies of low-level systems programming.",
+        "authors": [
+          "Maolin Sun",
+          "Yibiao Yang",
+          "Xuanlin Liu",
+          "Yuming Zhou",
+          "Baowen Xu"
+        ],
+        "publishedAt": "2026-04-04T06:49:30Z",
+        "updatedAt": "2026-04-04T06:49:30Z",
+        "primaryCategory": "cs.SE",
+        "categories": [
+          "cs.SE"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.03610v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.03610v1",
+        "existingInVault": true,
+        "score": 68,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "Patching severe security flaws in complex software remains a major challenge. While automated tools like fuzzers efficiently discover bugs, fixing deep-rooted low-level faults (e.g., use-after-free and memory corruption) still requires labor-intensive manual analysis by experts. "
+      },
+      {
+        "arxivId": "2604.03088v3",
+        "title": "SkVM: Revisiting Language VM for Skills across Heterogenous LLMs and Harnesses",
+        "abstract": "LLM agents increasingly adopt skills as a reusable unit of composition. While skills are shared across diverse agent platforms, current systems treat them as raw context, causing the same skill to behave inconsistently for different agents. This fragility undermines skill portability and execution efficiency. To address this challenge, we analyze 118,000 skills and draw inspiration from traditional compiler design. We treat skills as code and LLMs as heterogeneous processors. To make portability actionable, we decompose a skill's requirements into a set of primitive capabilities, and measure how well each model-harness pair supports them. Based on these capability profiles, we propose SkVM, a compilation and runtime system designed for portable and efficient skill execution. At compile time, SkVM performs capability-based compilation, environment binding, and concurrency extraction. At runtime, SkVM applies JIT code solidification and adaptive recompilation for performance optimization. We evaluate SkVM across eight LLMs of varying scales and three agent harnesses, covering SkillsBench and representative skill tasks. Results demonstrate that SkVM significantly improves task completion rates across different models and environments while reducing token consumption by up to 40%. In terms of performance, SkVM achieves up to 3.2x speedup with enhanced parallelism, and 19-50x latency reduction through code solidification.",
+        "authors": [
+          "Le Chen",
+          "Erhu Feng",
+          "Yubin Xia",
+          "Haibo Chen"
+        ],
+        "publishedAt": "2026-04-03T15:11:45Z",
+        "updatedAt": "2026-04-11T16:11:49Z",
+        "primaryCategory": "cs.SE",
+        "categories": [
+          "cs.SE",
+          "cs.LG"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.03088v3",
+        "pdfUrl": "https://arxiv.org/pdf/2604.03088v3",
+        "existingInVault": true,
+        "score": 60,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "LLM agents increasingly adopt skills as a reusable unit of composition. While skills are shared across diverse agent platforms, current systems treat them as raw context, causing the same skill to behave inconsistently for different agents. This fragility undermines skill portabi"
+      },
+      {
+        "arxivId": "2603.29199v1",
+        "title": "AEC-Bench: A Multimodal Benchmark for Agentic Systems in Architecture, Engineering, and Construction",
+        "abstract": "The AEC-Bench is a multimodal benchmark for evaluating agentic systems on real-world tasks in the Architecture, Engineering, and Construction (AEC) domain. The benchmark covers tasks requiring drawing understanding, cross-sheet reasoning, and construction project-level coordination. This report describes the benchmark motivation, dataset taxonomy, evaluation protocol, and baseline results across several domain-specific foundation model harnesses. We use AEC-Bench to identify consistent tools and harness design techniques that uniformly improve performance across foundation models in their own base harnesses, such as Claude Code and Codex. We openly release our benchmark dataset, agent harness, and evaluation code for full replicability at https://github.com/nomic-ai/aec-bench under an Apache 2 license.",
+        "authors": [
+          "Harsh Mankodiya",
+          "Chase Gallik",
+          "Theodoros Galanos",
+          "Andriy Mulyar"
+        ],
+        "publishedAt": "2026-03-31T03:10:28Z",
+        "updatedAt": "2026-03-31T03:10:28Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI"
+        ],
+        "absUrl": "https://arxiv.org/abs/2603.29199v1",
+        "pdfUrl": "https://arxiv.org/pdf/2603.29199v1",
+        "existingInVault": true,
+        "score": 60,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "The AEC-Bench is a multimodal benchmark for evaluating agentic systems on real-world tasks in the Architecture, Engineering, and Construction (AEC) domain. The benchmark covers tasks requiring drawing understanding, cross-sheet reasoning, and construction project-level coordinati"
+      },
+      {
+        "arxivId": "2604.00362v1",
+        "title": "In harmony with gpt-oss",
+        "abstract": "No one has independently reproduced OpenAI's published scores for gpt-oss-20b with tools, because the original paper discloses neither the tools nor the agent harness. We reverse-engineered the model's in-distribution tools: when prompted without tool definitions, gpt-oss still calls tools from its training distribution with high statistical confidence -- a strong prior, not a hallucination. We then built a native harmony agent harness (https://github.com/borislavmavrin/harmonyagent.git) that encodes messages in the model's native format, bypassing the lossy Chat Completions conversion. Together, these yield the first independent reproduction of OpenAI's published scores: 60.4% on SWE Verified HIGH (published 60.7%), 53.3% MEDIUM (53.2%), and 91.7% on AIME25 with tools (90.4%).",
+        "authors": [
+          "Borislav Mavrin"
+        ],
+        "publishedAt": "2026-04-01T01:16:13Z",
+        "updatedAt": "2026-04-01T01:16:13Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.LG"
+        ],
+        "absUrl": "https://arxiv.org/abs/2604.00362v1",
+        "pdfUrl": "https://arxiv.org/pdf/2604.00362v1",
+        "existingInVault": true,
+        "score": 44,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "No one has independently reproduced OpenAI's published scores for gpt-oss-20b with tools, because the original paper discloses neither the tools nor the agent harness. We reverse-engineered the model's in-distribution tools: when prompted without tool definitions, gpt-oss still c"
+      },
+      {
+        "arxivId": "2603.26996v1",
+        "title": "FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?",
+        "abstract": "We present FormalProofBench, a private benchmark designed to evaluate whether AI models can produce formally verified mathematical proofs at the graduate level. Each task pairs a natural-language problem with a Lean~4 formal statement, and a model must output a Lean proof accepted by the Lean 4 checker. FormalProofBench targets advanced undergraduate and graduate mathematics, with problems drawn from qualifying exams and standard textbooks across topics including analysis, algebra, probability, and logic. We evaluate a range of frontier models with an agentic harness, and find that the best-performing foundation model achieves 33.5% accuracy, with performance dropping rapidly after that. In addition to the accuracy numbers, we also provide empirical analysis of tool-use, failure modes, cost and latency, thereby providing a thorough evaluation of the formal-theorem proving abilities of frontier models.",
+        "authors": [
+          "Nikil Ravi",
+          "Kexing Ying",
+          "Vasilii Nesterov",
+          "Rayan Krishnan",
+          "Elif Uskuplu",
+          "Bingyu Xia",
+          "Janitha Aswedige",
+          "Langston Nashold"
+        ],
+        "publishedAt": "2026-03-27T21:14:53Z",
+        "updatedAt": "2026-03-27T21:14:53Z",
+        "primaryCategory": "cs.AI",
+        "categories": [
+          "cs.AI",
+          "cs.CL",
+          "cs.LG",
+          "cs.PL"
+        ],
+        "absUrl": "https://arxiv.org/abs/2603.26996v1",
+        "pdfUrl": "https://arxiv.org/pdf/2603.26996v1",
+        "existingInVault": true,
+        "score": 8,
+        "matchedQueries": [
+          "agent harness"
+        ],
+        "matchedTerms": [
+          "agent",
+          "harness"
+        ],
+        "snippet": "We present FormalProofBench, a private benchmark designed to evaluate whether AI models can produce formally verified mathematical proofs at the graduate level. Each task pairs a natural-language problem with a Lean~4 formal statement, and a model must output a Lean proof accepte"
+      }
+    ],
+    "allCount": 87
+  }
+}
