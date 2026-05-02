@@ -380,6 +380,78 @@
         "Context Broker",
         "Evidence Ledger"
       ]
+    },
+    {
+      "name": "File-as-Bus Workspace",
+      "type": "primitive",
+      "sources": [
+        "2604.13018v1"
+      ],
+      "bullets": [
+        "Use a shared workspace of durable artifacts as the coordination substrate instead of relying on lossy conversational handoffs.",
+        "Separate artifact regions by role so analyses, runnable code, plans, and logs persist independently and can be re-read by later agents.",
+        "For PlotLot, each site-feasibility case should preserve parcel facts, authority resolution, ordinance evidence, extraction outputs, calculator state, review notes, and final reports as first-class artifacts."
+      ],
+      "links": [
+        "Harness Runtime",
+        "Evidence Ledger",
+        "Replayable Trajectory",
+        "Governance Middleware"
+      ]
+    },
+    {
+      "name": "Progressive Disclosure Workspace Map",
+      "type": "primitive",
+      "sources": [
+        "2604.13018v1"
+      ],
+      "bullets": [
+        "Give the orchestrator a compact map/index of the workspace so control decisions stay small while detailed state remains available on demand.",
+        "This realizes thin control over thick state: summaries and maps guide stage control, specialists drill into deeper artifacts only when needed.",
+        "For PlotLot, the active controller should carry case summary, open questions, artifact locations, and evidence gaps instead of hauling full transcripts and raw ordinance text forward."
+      ],
+      "links": [
+        "Context Broker",
+        "File-as-Bus Workspace",
+        "Harness Runtime",
+        "Step-Bounded Context"
+      ]
+    },
+    {
+      "name": "Exploration-vs-Exploitation Error Ledger",
+      "type": "primitive",
+      "sources": [
+        "2604.13151v1"
+      ],
+      "bullets": [
+        "Score trajectories by distinguishing exploration failures from exploitation failures instead of collapsing everything into final task success.",
+        "In partially observed tasks, low exploration error can be far more predictive of success than low exploitation error, so discovery quality deserves its own metric lane.",
+        "For PlotLot, traces should tell us whether a bad analysis came from missing the governing source or from synthesizing the wrong conclusion after the evidence was already available."
+      ],
+      "links": [
+        "Workflow Verification",
+        "Failure Manifestation Catalog",
+        "Evidence Ledger",
+        "Context Broker"
+      ]
+    },
+    {
+      "name": "Frontier + Activatable-State Summary",
+      "type": "primitive",
+      "sources": [
+        "2604.13151v1"
+      ],
+      "bullets": [
+        "Externalize visited space, reachable frontier, discovered entities, prerequisites, and ready-to-act states into an explicit memory summary.",
+        "A lightweight state summary can materially improve behavior by letting the model exploit discovered structure without depending on fragile conversational recall.",
+        "For PlotLot, the summary should track verified official hosts, remaining source frontier, discovered ordinance sections, unresolved dimensional questions, and claims whose prerequisites are complete enough for calculation or reporting."
+      ],
+      "links": [
+        "Context Broker",
+        "Evidence Ledger",
+        "Exploration-vs-Exploitation Error Ledger",
+        "Workflow Verification"
+      ]
     }
   ],
   "overviewConnections": [
@@ -434,6 +506,24 @@
         "Connects [[Context Broker]] and [[Evidence Ledger]] to [[Context Refresh + Notes Recall]]: long-horizon performance depends on artifact-backed state reconstruction, not ever-growing transcripts.",
         "Connects [[Workflow Verification]] and [[Replayable Trajectory]] to [[Failure Manifestation Catalog]]: traces should be replayable and labelable by premature convergence, looping, memory loss, and uncontrolled experiments.",
         "For PlotLot, this paper argues that site-feasibility is a genuinely long-horizon agent problem and needs explicit context-reset, evidence-threshold, and failure-diagnosis machinery."
+      ]
+    },
+    {
+      "title": "AiScientist (2604.13018v1) synthesis",
+      "bullets": [
+        "Connects [[Harness Runtime]] to [[File-as-Bus Workspace]]: durable case artifacts should be the system of record for long-horizon work, not inherited chat context.",
+        "Connects [[Context Broker]] to [[Progressive Disclosure Workspace Map]]: control stays compact when the orchestrator navigates the case through summaries and a workspace index instead of raw artifact bulk.",
+        "Connects [[Evidence Ledger]] and [[Replayable Trajectory]] to later-round refinement: the real value of saved state appears after the first runnable pass, when the harness needs to diagnose and patch hard cases without restarting.",
+        "For PlotLot, this paper supports a parcel-centric artifact bus with specialist lanes for authority discovery, ordinance retrieval, extraction, calculation, and review."
+      ]
+    },
+    {
+      "title": "Exploration and Exploitation Errors Are Measurable (2604.13151v1) synthesis",
+      "bullets": [
+        "Connects [[Workflow Verification]] and [[Evidence Ledger]] to [[Exploration-vs-Exploitation Error Ledger]]: site-feasibility runs should be judged by what kind of trajectory mistake happened, not only whether the final answer was right.",
+        "Connects [[Context Broker]] to [[Frontier + Activatable-State Summary]]: explicit frontier and ready-state memory helps the harness know what still needs discovery versus what is already safe to exploit.",
+        "Connects [[Failure Manifestation Catalog]] to search-vs-synthesis diagnosis: a bad PlotLot run can fail because it never found the decisive source or because it mishandled evidence it already had.",
+        "For PlotLot, this paper argues for frontier-aware retrieval, prerequisite-gated claims, and separate metrics for source discovery quality versus downstream synthesis quality."
       ]
     }
   ],
@@ -521,6 +611,34 @@
         "VeRO is the clearest newly ingested paper so far on what an optimization-ready eval harness must preserve: versioning, budgets, permissions, reproducibility, and trace visibility.",
         "For PlotLot, its most immediate consequence is operational rather than model-centric: make every site-feasibility quality run attributable to an exact harness state and evidence slice.",
         "Its main warning is that optimizer behavior collapses toward prompt edits unless the harness exposes richer structural signals and compares changes under identical budgets."
+      ]
+    },
+    "2604.13018v1": {
+      "wikilinks": [
+        "File-as-Bus Workspace",
+        "Progressive Disclosure Workspace Map",
+        "Harness Runtime",
+        "Evidence Ledger",
+        "Replayable Trajectory"
+      ],
+      "bullets": [
+        "AiScientist is the clearest reviewed paper so far on durable state continuity as the backbone of long-horizon engineering work.",
+        "Its most transferable PlotLot pattern is a parcel-centric artifact bus: preserve evolving evidence, plans, code/calculator outputs, and review notes so hard cases can be resumed and refined instead of restarted.",
+        "Its biggest warning is operational: later-round refinement collapses without saved intermediate state, so transcript-only case handling will underperform exactly where difficult site-feasibility work gets interesting."
+      ]
+    },
+    "2604.13151v1": {
+      "wikilinks": [
+        "Exploration-vs-Exploitation Error Ledger",
+        "Frontier + Activatable-State Summary",
+        "Workflow Verification",
+        "Failure Manifestation Catalog",
+        "Context Broker"
+      ],
+      "bullets": [
+        "This paper is the clearest reviewed source so far on separating discovery failures from synthesis failures in partially observed agent tasks.",
+        "For PlotLot, its most practical consequence is to maintain an explicit frontier/ready-state summary so the harness knows which sources still need discovery and which claims are mature enough for downstream calculation or reporting.",
+        "Its biggest warning is that semantic intuition is unreliable: domain priors can help some models and hurt others, so PlotLot must gate conclusions on evidence completeness rather than plausibility."
       ]
     }
   }

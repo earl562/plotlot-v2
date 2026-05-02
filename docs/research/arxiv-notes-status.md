@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **109**
-Reviewed: **30**
-Stub: **79**
+Reviewed: **32**
+Stub: **77**
 
 ## Reviewed
 
@@ -32,6 +32,8 @@ Stub: **79**
 - [2604.08224v1](docs/research/arxiv-notes/2604.08224v1.md) — Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering
 - [2604.11378v1](docs/research/arxiv-notes/2604.11378v1.md) — From Agent Loops to Structured Graphs:A Scheduler-Theoretic Framework for LLM Agent Execution
 - [2604.11548v1](docs/research/arxiv-notes/2604.11548v1.md) — SemaClaw: A Step Towards General-Purpose Personal AI Agents through Harness Engineering
+- [2604.13018v1](docs/research/arxiv-notes/2604.13018v1.md) — Toward Autonomous Long-Horizon Engineering for ML Research
+- [2604.13151v1](docs/research/arxiv-notes/2604.13151v1.md) — Exploration and Exploitation Errors Are Measurable for Language Model Agents
 - [2604.13346v1](docs/research/arxiv-notes/2604.13346v1.md) — AgentSPEX: An Agent SPecification and EXecution Language
 - [2604.13630v1](docs/research/arxiv-notes/2604.13630v1.md) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment
 - [2604.14228v1](docs/research/arxiv-notes/2604.14228v1.md) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems
@@ -108,8 +110,6 @@ Stub: **79**
 - [2604.11811v1](docs/research/arxiv-notes/2604.11811v1.md) — M$^\\star$: Every Task Deserves Its Own Memory Harness
 - [2604.12064v1](docs/research/arxiv-notes/2604.12064v1.md) — LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests
 - [2604.12162v1](docs/research/arxiv-notes/2604.12162v1.md) — AlphaEval: Evaluating Agents in Production
-- [2604.13018v1](docs/research/arxiv-notes/2604.13018v1.md) — Toward Autonomous Long-Horizon Engineering for ML Research
-- [2604.13151v1](docs/research/arxiv-notes/2604.13151v1.md) — Exploration and Exploitation Errors Are Measurable for Language Model Agents
 - [2604.13282v1](docs/research/arxiv-notes/2604.13282v1.md) — Agentic MR sequence development: leveraging LLMs with MR skills for automatic physics-informed sequence development
 - [2604.13318v1](docs/research/arxiv-notes/2604.13318v1.md) — WebXSkill: Skill Learning for Autonomous Web Agents
 - [2604.13759v1](docs/research/arxiv-notes/2604.13759v1.md) — The cognitive companion: a lightweight parallel monitoring architecture for detecting and recovering from reasoning degradation in LLM agents

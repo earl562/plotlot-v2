@@ -28,6 +28,10 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Context refresh + notes recall
 - Failure manifestation catalog
 - Controlled exploration discipline
+- File-as-Bus workspace
+- Progressive disclosure workspace map
+- Explore/exploit error ledger
+- Frontier + activatable-state summary
 
 ---
 
@@ -115,3 +119,33 @@ PlotLot mapping:
 - Offline evals should support deterministic sample budgets now, then grow into tool/runtime/token budgets for future optimizer loops.
 - Parcel facts, ordinance citations, calculator outputs, and failure labels should be saved as structured observations so retrieval/extraction/report changes can be compared fairly.
 - PlotLot should distinguish prompt-only improvements from structural harness improvements and validate both against holdout jurisdictions.
+
+---
+
+## AiScientist (2604.13018v1)
+
+- **File-as-Bus workspace**: use durable files as the coordination substrate instead of relying on conversational handoffs to carry project state.
+- **Progressive disclosure workspace map**: let the orchestrator operate on a compact map/index of the workspace, while specialists read deeper artifacts on demand.
+- **Thin control over thick state**: keep stage control small and stable, but persist large evolving state in analyses, code, plans, logs, and experiment outputs.
+- **Permission-scoped artifact roles**: split paper understanding, runnable code, and execution logs into distinct writable regions to reduce interference and improve traceability.
+- **Evidence-driven research loop**: implement → run → diagnose → patch → revalidate, with each round writing durable evidence for later refinement.
+
+PlotLot mapping:
+- Give every site-feasibility case a durable workspace with folders/artifacts for intake, authority discovery, ordinance retrieval, extraction, calculator outputs, review notes, and report drafts.
+- Keep the PlotLot orchestrator focused on stage summaries, open questions, and evidence gaps; let specialists drill into raw zoning texts, GIS outputs, and calculation artifacts only when needed.
+- Optimize PlotLot for later-round refinement: most hard cases will be won by preserving intermediate state and iterating, not by restarting with a bigger transcript.
+
+---
+
+## Exploration and Exploitation Errors Are Measurable for Language Model Agents (2604.13151v1)
+
+- **Explore/exploit error ledger**: classify trajectory mistakes into exploration errors, exploitation errors, or both instead of scoring only end success.
+- **Exploration-first under partial observability**: low exploration error is a much stronger predictor of success than low exploitation error when decisive information must first be discovered.
+- **Frontier + activatable-state summary**: externalize visited space, reachable frontier, discovered entities, prerequisites, and ready-to-act states into explicit memory.
+- **Behavioral eval over outcome-only eval**: agents with similar success can still have qualitatively different strategies, so traces need their own scoring vocabulary.
+- **Semantic-prior stress test**: domain semantics can help or hurt depending on the model, so harnesses should gate conclusions on evidence rather than intuition-like priors.
+
+PlotLot mapping:
+- Maintain an explicit PlotLot frontier summary: verified official hosts, unresolved likely hosts, discovered ordinance sections, unresolved dimensional questions, and claims whose prerequisites are satisfied.
+- Score land-use traces separately for search quality and synthesis quality so we can tell whether a failure came from missed discovery or bad reasoning after discovery.
+- Treat report-ready feasibility claims as activatable states: they only advance once the official source, citation, unit normalization, and conflict checks are satisfied.
