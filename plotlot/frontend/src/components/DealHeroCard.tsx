@@ -337,11 +337,7 @@ export default function DealHeroCard({ report, dealType }: DealHeroCardProps) {
         {report.confidence && (
           <span className={`text-[11px] font-medium ${confidenceColors[report.confidence] ?? confidenceColors.low}`}>
             {report.confidence.charAt(0).toUpperCase() + report.confidence.slice(1)} confidence
-            {report.confidence_warning ? " · " : ""}
           </span>
-        )}
-        {report.confidence_warning && (
-          <span className="text-[11px] text-[var(--text-muted)]">{report.confidence_warning}</span>
         )}
       </div>
       {dealType === "land_deal" && <LandDealHero report={report} />}
