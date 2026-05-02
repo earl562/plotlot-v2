@@ -88,10 +88,23 @@ def parse_arxiv_id(value: str | None) -> str | None:
     m = re.search(r"arxiv\.org/(?:abs|pdf)/([^\s/]+(?:/[^\s/]+)?)", value)
     if m:
         return m.group(1).removesuffix(".pdf")
+    m = re.search(r"\barx_([A-Za-z0-9.]+)\b", value)
+    if m:
+        return m.group(1)
     m = re.search(r"\b(\d{4}\.\d{4,5}(?:v\d+)?)\b", value)
     if m:
         return m.group(1)
+    m = re.search(r"\b([A-Za-z-]+\/\d{7}(?:v\d+)?)\b", value)
+    if m:
+        return m.group(1)
     return None
+
+
+def canonical_arxiv_id(value: str | None) -> str | None:
+    arxiv_id = parse_arxiv_id(value)
+    if not arxiv_id:
+        return None
+    return re.sub(r"v\d+$", "", arxiv_id)
 
 
 def load_existing_ids(metadata_path: str, urls_path: str) -> set[str]:
@@ -100,13 +113,13 @@ def load_existing_ids(metadata_path: str, urls_path: str) -> set[str]:
     if meta_path.exists():
         data = json.loads(meta_path.read_text())
         for item in data.get("items", []):
-            arxiv_id = item.get("arxivId")
+            arxiv_id = canonical_arxiv_id(item.get("arxivId"))
             if arxiv_id:
-                ids.add(str(arxiv_id).strip())
+                ids.add(arxiv_id)
     url_path = Path(urls_path)
     if url_path.exists():
         for line in url_path.read_text().splitlines():
-            arxiv_id = parse_arxiv_id(line)
+            arxiv_id = canonical_arxiv_id(line)
             if arxiv_id:
                 ids.add(arxiv_id)
     return ids
@@ -150,8 +163,11 @@ def parse_paperclip_output(output: str, query: str, result_id: str | None, exist
                 hit.authors = line
 
         hit.arxiv_id = parse_arxiv_id(hit.url) or parse_arxiv_id(hit.paper_id) or parse_arxiv_id(hit.title)
-        if hit.arxiv_id and hit.arxiv_id in existing_ids:
+        canonical_id = canonical_arxiv_id(hit.arxiv_id)
+        if canonical_id and canonical_id in existing_ids:
             hit.existing_in_vault = True
+        if hit.arxiv_id and not hit.url and re.match(r"^(\d{4}\.\d{4,5}|[A-Za-z-]+\/\d{7})(?:v\d+)?$", hit.arxiv_id):
+            hit.url = f"https://arxiv.org/abs/{hit.arxiv_id}"
         hit.raw = {"lines": lines}
         hits.append(hit)
     return hits
