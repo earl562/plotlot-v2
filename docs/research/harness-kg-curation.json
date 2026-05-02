@@ -131,6 +131,50 @@
         "For PlotLot, ordinance retrieval and evidence resolution should run under explicit budgets for tool calls, tokens, and wall-clock time."
       ],
       "links": ["Harness Runtime", "Dynamic Reference Expansion", "Governance Middleware"]
+    },
+    {
+      "name": "Skill Handbook",
+      "type": "primitive",
+      "sources": ["2602.19672v1"],
+      "bullets": [
+        "Keep routing knowledge in an explicit artifact containing mode-selection insights, a skill registry, and per-agent profiles.",
+        "The handbook is the reusable layer between high-level workflow stages and concrete model/tool choices.",
+        "For PlotLot, the handbook should encode when to retrieve, extract, calculate, review, or report, plus the skills each lane requires."
+      ],
+      "links": ["Harness Runtime", "Workflow Module Interface", "Evidence Ledger", "Competence-Cost Agent Profile", "Granularity-Aware Handbook Selection"]
+    },
+    {
+      "name": "Competence-Cost Agent Profile",
+      "type": "primitive",
+      "sources": ["2602.19672v1"],
+      "bullets": [
+        "Route agents using skill-conditioned competence estimates and mode-specific cost, not global model reputation.",
+        "A profile should accumulate success/failure evidence, routing caveats, and average cost per operational mode.",
+        "For PlotLot, specialist lanes like ordinance retrieval, table extraction, and citation-backed synthesis should each earn their own profile statistics."
+      ],
+      "links": ["Skill Handbook", "Evidence Ledger", "Workflow Verification", "Harness Runtime"]
+    },
+    {
+      "name": "Contrastive Skill Discovery",
+      "type": "primitive",
+      "sources": ["2602.19672v1"],
+      "bullets": [
+        "Learn new skills by contrasting successful and failed trajectories at the same mode to isolate the missing capability.",
+        "The raw material is execution traces, not hand-authored taxonomies or expensive RL updates.",
+        "For PlotLot, compare cited vs uncited retrievals, correct vs incorrect zoning extractions, and accepted vs rejected reports to discover reusable specialist skills."
+      ],
+      "links": ["Replayable Trajectory", "Evidence Ledger", "Agent-Supervised Tool Adaptation", "Skill Handbook"]
+    },
+    {
+      "name": "Granularity-Aware Handbook Selection",
+      "type": "primitive",
+      "sources": ["2602.19672v1"],
+      "bullets": [
+        "More skills are not always better; keep only the level of detail the orchestrator can reliably recognize and use.",
+        "Select handbook subsets on a Pareto frontier of task success versus execution cost.",
+        "For PlotLot, start with coarse skill buckets and split them only when eval traces show that the extra distinction improves routing quality."
+      ],
+      "links": ["Skill Handbook", "Context Broker", "Competence-Cost Agent Profile", "Budgeted Tool Loop"]
     }
   ],
   "overviewConnections": [
@@ -160,6 +204,15 @@
         "Connects [[Governance Middleware]] and [[Evidence Ledger]] to [[Entity-to-Authority Verification]]: first verify the official source boundary, then accept downstream claims.",
         "For PlotLot, the direct analogue is jurisdiction/source discovery: predict the governing city/county plus ordinance host, verify official domains, then cache trusted references for future site-feasibility runs."
       ]
+    },
+    {
+      "title": "SkillOrchestra (2602.19672v1) synthesis",
+      "bullets": [
+        "Connects [[Harness Runtime]] to [[Skill Handbook]]: routing policy should live in a reusable artifact instead of hiding in prompt folklore or hardcoded model preferences.",
+        "Connects [[Evidence Ledger]] and [[Replayable Trajectory]] to [[Contrastive Skill Discovery]]: the same traces used for replay can be mined into capability gaps and reusable specialist skills.",
+        "Connects [[Workflow Verification]] to [[Competence-Cost Agent Profile]]: per-skill success, citation coverage, and deterministic agreement become the evidence base for routing decisions.",
+        "For PlotLot, this paper suggests a land-use handbook that routes among retrieval, extraction, calculation, and review specialists while explicitly monitoring cost and collapse into one expensive lane."
+      ]
     }
   ],
   "sourceConnections": {
@@ -185,6 +238,14 @@
         "The paper matters less for phishing per se than for its harness decomposition: static signal translation -> budgeted discovery -> authority verification.",
         "Its most transferable primitive for PlotLot is replacing exhaustive prior registries with on-run reference expansion backed by official-source verification.",
         "Its main warning is operational: dynamic discovery improved accuracy dramatically but paid ~20s/sample and depended on brittle external services, so PlotLot needs caching, fallback routes, and strict retrieval budgets."
+      ]
+    },
+    "2602.19672v1": {
+      "wikilinks": ["Skill Handbook", "Competence-Cost Agent Profile", "Contrastive Skill Discovery", "Granularity-Aware Handbook Selection", "Harness Runtime"],
+      "bullets": [
+        "This is the clearest reviewed paper so far on replacing end-to-end router training with an explicit, reusable routing knowledge base.",
+        "For PlotLot, its biggest architectural consequence is to route by capability lanes backed by trace-derived evidence, not by one static default model per stage.",
+        "Its most important warning is granularity: a richer skill taxonomy only helps if the orchestrator can reliably classify active skills and use the distinction to improve cost or accuracy."
       ]
     }
   }

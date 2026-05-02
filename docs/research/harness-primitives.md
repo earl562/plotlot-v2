@@ -18,6 +18,10 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Agent-supervised tool adaptation
 - Adaptation signal design
 - Graduated subagent
+- Skill handbook
+- Competence-cost agent profile
+- Contrastive skill discovery
+- Granularity-aware handbook selection
 
 ---
 
@@ -61,3 +65,18 @@ PlotLot mapping:
 PlotLot mapping:
 - Default to T2-style adaptation for ordinance retrieval, zoning extraction, evidence review, and memory curation.
 - Use dense signals where possible (citation resolution, parser correctness, calculator reproducibility) and holistic signals only for end-to-end report quality.
+
+---
+
+## SkillOrchestra (2602.19672v1)
+
+- **Skill handbook**: keep routing knowledge in an explicit artifact with mode-selection insights, a skill registry, and per-agent profiles.
+- **Competence-cost agent profile**: estimate per-skill success probability and mode-specific cost for each agent, then route on utility instead of raw model prestige.
+- **Contrastive skill discovery**: learn new skills by contrasting successful vs failed trajectories at the same mode to isolate the missing capability.
+- **Granularity-aware handbook selection**: more skills are not always better; select a coarser or finer handbook based on what the orchestrator can reliably distinguish.
+- **Routing-collapse mitigation**: monitor whether the orchestrator degenerates to one expensive model/tool path and rebalance with explicit skill-conditioned routing.
+
+PlotLot mapping:
+- Build a PlotLot handbook over modes like authority discovery, ordinance retrieval, extraction/normalization, deterministic calculation, and report/review.
+- Track agent profiles for specialist lanes such as parcel-authority resolution, ordinance section retrieval, table extraction, dimensional normalization, conflict arbitration, and citation-backed synthesis.
+- Learn and refine skills from replayed site-feasibility traces instead of RL-tuning the orchestrator; start coarse, then split skills only when eval variance proves the distinction matters.
