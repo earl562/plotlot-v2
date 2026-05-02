@@ -15,6 +15,9 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Workflow module interface
 - Replayable trajectory
 - Workflow verification
+- Versioned agent snapshot
+- Budget-gated evaluator
+- Structured observation interface
 - Agent-supervised tool adaptation
 - Adaptation signal design
 - Graduated subagent
@@ -97,3 +100,18 @@ PlotLot mapping:
 - Long site-feasibility runs should checkpoint evidence/notes aggressively, then refresh active context from those artifacts instead of hauling full transcripts forward.
 - PlotLot evals should explicitly score premature commit, low-yield retrieval looping, conflicting-source confusion, and uncontrolled ordinance experimentation.
 - Zoning ambiguity resolution should require single-variable-style testing: change one assumption at a time, record the result, and only then revise the site-feasibility hypothesis.
+
+---
+
+## VeRO (2602.22480)
+
+- **Versioned agent snapshot**: capture each optimization/eval state as a discrete version with diffable changes, rollback, and replay semantics.
+- **Budget-gated evaluator**: make evaluation itself a controlled resource; the harness should block or surface over-budget runs instead of silently allowing extra search.
+- **Structured observation interface**: expose per-sample inputs, outputs, traces, errors, and scores in a consistent schema so different optimizers/scaffolds see the same evidence.
+- **Instruction-sensitive optimization**: expect optimizer guidance to interact with target-agent maturity; more prescription can help simpler agents and constrain stronger ones.
+
+PlotLot mapping:
+- Every site-feasibility quality run should emit a manifest with git commit, prompt versions, dataset slice, thresholds, and observed metrics.
+- Offline evals should support deterministic sample budgets now, then grow into tool/runtime/token budgets for future optimizer loops.
+- Parcel facts, ordinance citations, calculator outputs, and failure labels should be saved as structured observations so retrieval/extraction/report changes can be compared fairly.
+- PlotLot should distinguish prompt-only improvements from structural harness improvements and validate both against holdout jurisdictions.

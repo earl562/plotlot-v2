@@ -2,8 +2,8 @@
 
 Generated from: `arxiv-abstracts.json`
 Total papers: **109**
-Reviewed: **29**
-Remaining: **80**
+Reviewed: **30**
+Remaining: **79**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -68,32 +68,12 @@ Priority tiers:
 - **P1** (0) [2604.13759v1](https://arxiv.org/abs/2604.13759v1) — The cognitive companion: a lightweight parallel monitoring architecture for detecting and recovering from reasoning degradation in LLM agents  — [note](docs/research/arxiv-notes/2604.13759v1.md) — _stub_
 - **P2** (34) [2604.12064v1](https://arxiv.org/abs/2604.12064v1) — LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests  — [note](docs/research/arxiv-notes/2604.12064v1.md) — _stub_
 - **P2** (29) [2603.19347v3](https://arxiv.org/abs/2603.19347v3) — Exploring the Agentic Frontier of Verilog Code Generation  — [note](docs/research/arxiv-notes/2603.19347v3.md) — _stub_
-- **P2** (24) [2602.22480](https://arxiv.org/abs/2602.22480) — VeRO: An Evaluation Harness for Agents to Optimize Agents  — [note](docs/research/arxiv-notes/2602.22480.md) — _stub_
 - **P2** (19) [2601.11868](https://arxiv.org/abs/2601.11868) — Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces  — [note](docs/research/arxiv-notes/2601.11868.md) — _stub_
 - **P2** (19) [2602.11304v1](https://arxiv.org/abs/2602.11304v1) — CryptoAnalystBench: Failures in Multi-Tool Long-Form LLM Analysis  — [note](docs/research/arxiv-notes/2602.11304v1.md) — _stub_
 - **P2** (19) [2603.20075v1](https://arxiv.org/abs/2603.20075v1) — Agentic Harness for Real-World Compilers  — [note](docs/research/arxiv-notes/2603.20075v1.md) — _stub_
 - **P2** (19) [2603.26996v1](https://arxiv.org/abs/2603.26996v1) — FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?  — [note](docs/research/arxiv-notes/2603.26996v1.md) — _stub_
 - **P2** (16) [2602.14878v2](https://arxiv.org/abs/2602.14878v2) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions  — [note](docs/research/arxiv-notes/2602.14878v2.md) — _stub_
 - **P2** (16) [2604.00073](https://arxiv.org/abs/2604.00073) — Terminal Agents Suffice for Enterprise Automation  — [note](docs/research/arxiv-notes/2604.00073.md) — _stub_
-- **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
-- **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
-- **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
-- **P2** (10) [2603.12658v1](https://arxiv.org/abs/2603.12658v1) — Continual Learning in Large Language Models: Methods, Challenges, and Opportunities  — [note](docs/research/arxiv-notes/2603.12658v1.md) — _stub_
-- **P2** (9) [2311.02018v1](https://arxiv.org/abs/2311.02018v1) — Active Reasoning in an Open-World Environment  — [note](docs/research/arxiv-notes/2311.02018v1.md) — _stub_
-- **P2** (5) [2509.23206v3](https://arxiv.org/abs/2509.23206v3) — PARL-MT: Learning to Call Functions in Multi-Turn Conversation with Progress Awareness  — [note](docs/research/arxiv-notes/2509.23206v3.md) — _stub_
-- **P2** (5) [2602.03786](https://arxiv.org/abs/2602.03786) — AOrchestra: Automating Sub-Agent Creation for Agentic Orchestration  — [note](docs/research/arxiv-notes/2602.03786.md) — _stub_
-- **P2** (5) [2602.19008v1](https://arxiv.org/abs/2602.19008v1) — Capable but Unreliable: Canonical Path Deviation as a Causal Mechanism of Agent Failure in Long-Horizon Tasks  — [note](docs/research/arxiv-notes/2602.19008v1.md) — _stub_
-- **P2** (5) [2603.26778v1](https://arxiv.org/abs/2603.26778v1) — TED: Training-Free Experience Distillation for Multimodal Reasoning  — [note](docs/research/arxiv-notes/2603.26778v1.md) — _stub_
-- **P2** (5) [2604.19572v2](https://arxiv.org/abs/2604.19572v2) — A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression  — [note](docs/research/arxiv-notes/2604.19572v2.md) — _stub_
-- **P3** (12) [2602.10498v1](https://arxiv.org/abs/2602.10498v1) — When Skills Lie: Hidden-Comment Injection in LLM Agents  — [note](docs/research/arxiv-notes/2602.10498v1.md) — _stub_
-- **P3** (8) [2508.00007v1](https://arxiv.org/abs/2508.00007v1) — Agent Network Protocol Technical White Paper  — [note](docs/research/arxiv-notes/2508.00007v1.md) — _stub_
-- **P4** (19) [2604.00362v1](https://arxiv.org/abs/2604.00362v1) — In harmony with gpt-oss  — [note](docs/research/arxiv-notes/2604.00362v1.md) — _stub_
-- **P4** (9) [2508.20465v1](https://arxiv.org/abs/2508.20465v1) — On the possibility of deep alignment  — [note](docs/research/arxiv-notes/2508.20465v1.md) — _stub_
-- **P4** (9) [2604.02334v1](https://arxiv.org/abs/2604.02334v1) — Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web  — [note](docs/research/arxiv-notes/2604.02334v1.md) — _stub_
-- **P4** (9) [2604.11535v1](https://arxiv.org/abs/2604.11535v1) — Problem Reductions at Scale: Agentic Integration of Computationally Hard Problems  — [note](docs/research/arxiv-notes/2604.11535v1.md) — _stub_
-- **P4** (0) [2503.13577](https://arxiv.org/abs/2503.13577) — When Should We Orchestrate Multiple Agents?  — [note](docs/research/arxiv-notes/2503.13577.md) — _stub_
-- **P4** (0) [2512.04535v2](https://arxiv.org/abs/2512.04535v2) — GTM: Simulating the World of Tools for AI Agents  — [note](docs/research/arxiv-notes/2512.04535v2.md) — _stub_
-- **P4** (0) [2603.10664v1](https://arxiv.org/abs/2603.10664v1) — Terminal Is All You Need: Design Properties for Human-AI Agent Collaboration  — [note](docs/research/arxiv-notes/2603.10664v1.md) — _stub_
 
 ## Already reviewed
 
@@ -109,6 +89,7 @@ Priority tiers:
 - **✅** (14) [2602.16069v2](https://arxiv.org/abs/2602.16069v2) — The Limits of Long-Context Reasoning in Automated Bug Fixing  — [note](docs/research/arxiv-notes/2602.16069v2.md) — _reviewed_
 - **✅** (25) [2602.19672v1](https://arxiv.org/abs/2602.19672v1) — SkillOrchestra: Learning to Route Agents via Skill Transfer  — [note](docs/research/arxiv-notes/2602.19672v1.md) — _reviewed_
 - **✅** (50) [2602.20867v1](https://arxiv.org/abs/2602.20867v1) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents  — [note](docs/research/arxiv-notes/2602.20867v1.md) — _reviewed_
+- **✅** (24) [2602.22480](https://arxiv.org/abs/2602.22480) — VeRO: An Evaluation Harness for Agents to Optimize Agents  — [note](docs/research/arxiv-notes/2602.22480.md) — _reviewed_
 - **✅** (50) [2603.07670v1](https://arxiv.org/abs/2603.07670v1) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers  — [note](docs/research/arxiv-notes/2603.07670v1.md) — _reviewed_
 - **✅** (56) [2603.18829v9](https://arxiv.org/abs/2603.18829v9) — Agent Control Protocol: Admission Control for Agent Actions  — [note](docs/research/arxiv-notes/2603.18829v9.md) — _reviewed_
 - **✅** (51) [2603.20380v1](https://arxiv.org/abs/2603.20380v1) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams  — [note](docs/research/arxiv-notes/2603.20380v1.md) — _reviewed_

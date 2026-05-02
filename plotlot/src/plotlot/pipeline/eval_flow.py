@@ -9,15 +9,19 @@ Usage:
 
 import json
 import logging
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-GOLDEN_DATA_PATH = (
-    Path(__file__).resolve().parent.parent.parent.parent / "tests" / "eval" / "golden_data.json"
-)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+GOLDEN_DATA_PATH = PROJECT_ROOT / "tests" / "eval" / "golden_data.json"
+EVAL_PROTOCOL_VERSION = "vero-inspired-v1"
+EVAL_TARGET_WORKFLOW = "plotlot-site-feasibility"
 
 # Minimum acceptable metric values — below these, the eval fails
 DEFAULT_THRESHOLDS = {
@@ -34,6 +38,82 @@ def load_golden_data(path: Path | None = None) -> list[dict]:
     data: list[dict] = json.loads(p.read_text())
     logger.info("Loaded %d golden samples from %s", len(data), p)
     return data
+
+
+def select_eval_samples(golden_data: list[dict], max_samples: int | None = None) -> list[dict]:
+    """Apply a deterministic sample budget to an eval dataset."""
+    if max_samples is None:
+        return golden_data
+    if max_samples < 1:
+        raise ValueError("max_samples must be >= 1")
+    return golden_data[:max_samples]
+
+
+def prompt_version_map() -> dict[str, str]:
+    """Return the active prompt registry as a name -> version mapping."""
+    from plotlot.observability.prompts import list_prompts
+
+    return {prompt["name"]: prompt["version"] for prompt in list_prompts()}
+
+
+def get_git_commit() -> str | None:
+    """Return the current git commit for reproducible eval manifests."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=PROJECT_ROOT,
+            check=False,
+        )
+    except OSError:
+        return None
+
+    commit = result.stdout.strip()
+    return commit or None
+
+
+def build_eval_run_manifest(
+    *,
+    tag: str,
+    dataset_path: Path,
+    sample_count: int,
+    thresholds: dict[str, float],
+    prompt_versions: dict[str, str],
+    metrics: dict[str, Any],
+    max_samples: int | None,
+    git_commit: str | None,
+    passed: bool,
+) -> dict[str, Any]:
+    """Build a VeRO-style manifest for a site-feasibility eval run."""
+    return {
+        "protocol": EVAL_PROTOCOL_VERSION,
+        "target_workflow": EVAL_TARGET_WORKFLOW,
+        "tag": tag,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "versioning": {
+            "git_commit": git_commit,
+            "dataset_path": str(dataset_path),
+            "prompt_versions": prompt_versions,
+        },
+        "budget": {
+            "max_samples": max_samples,
+            "evaluated_samples": sample_count,
+        },
+        "rewards": {
+            "status": "passed" if passed else "failed",
+            "thresholds": thresholds,
+            "metrics": metrics,
+        },
+        "observations": {
+            "metric_keys": sorted(metrics.keys()),
+            "artifacts": [
+                "eval/eval_run_manifest.json",
+                "eval/golden_data_slice.json",
+                "prompts/*",
+            ],
+        },
+    }
 
 
 def run_scorers(golden_data: list[dict]) -> dict:
@@ -95,12 +175,14 @@ def check_thresholds(
 def eval_quality_check(
     tag: str = "nightly",
     thresholds: dict[str, float] | None = None,
+    max_samples: int | None = None,
 ) -> bool:
     """Run evaluation and check quality thresholds.
 
     Args:
         tag: Label for this eval run (e.g., "nightly", "pr-123").
         thresholds: Optional custom thresholds. Uses DEFAULT_THRESHOLDS if None.
+        max_samples: Optional deterministic sample budget for offline evals.
 
     Returns:
         True if all thresholds pass, False otherwise.
@@ -108,30 +190,50 @@ def eval_quality_check(
     import mlflow
 
     from plotlot.config import settings
-    from plotlot.observability.prompts import list_prompts, log_prompt_to_run
+    from plotlot.observability.prompts import log_prompt_to_run
 
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     mlflow.set_experiment(settings.mlflow_experiment_name)
 
-    golden_data = load_golden_data()
+    effective_thresholds = thresholds or DEFAULT_THRESHOLDS
+    golden_data = select_eval_samples(load_golden_data(), max_samples=max_samples)
     metrics = run_scorers(golden_data)
-    passed = check_thresholds(metrics, thresholds)
+    passed = check_thresholds(metrics, effective_thresholds)
+    prompts = prompt_version_map()
+    manifest = build_eval_run_manifest(
+        tag=tag,
+        dataset_path=GOLDEN_DATA_PATH,
+        sample_count=len(golden_data),
+        thresholds=effective_thresholds,
+        prompt_versions=prompts,
+        metrics=metrics,
+        max_samples=max_samples,
+        git_commit=get_git_commit(),
+        passed=passed,
+    )
 
     # Log results to MLflow
     with mlflow.start_run(run_name=f"eval_{tag}"):
-        # Tag all registered prompt versions for reproducibility
         prompt_tags = {
             "eval_tag": tag,
             "eval_type": "offline",
+            "eval_protocol": EVAL_PROTOCOL_VERSION,
+            "eval_target_workflow": EVAL_TARGET_WORKFLOW,
+            "eval_sample_budget": str(max_samples or "all"),
+            "eval_sample_count": str(len(golden_data)),
             "quality_gate": "passed" if passed else "failed",
         }
-        for p in list_prompts():
-            prompt_tags[f"prompt_{p['name']}_version"] = p["version"]
+        if manifest["versioning"]["git_commit"]:
+            prompt_tags["git_commit"] = manifest["versioning"]["git_commit"]
+        for name, version in prompts.items():
+            prompt_tags[f"prompt_{name}_version"] = version
         mlflow.set_tags(prompt_tags)
 
-        # Log every registered prompt as an artifact
-        for p in list_prompts():
-            log_prompt_to_run(p["name"])
+        for name in prompts:
+            log_prompt_to_run(name)
+
+        mlflow.log_dict(manifest, "eval/eval_run_manifest.json")
+        mlflow.log_dict(golden_data, "eval/golden_data_slice.json")
 
         for key, val in metrics.items():
             if isinstance(val, (int, float)):

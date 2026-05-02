@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **109**
-Reviewed: **29**
-Stub: **80**
+Reviewed: **30**
+Stub: **79**
 
 ## Reviewed
 
@@ -18,6 +18,7 @@ Stub: **80**
 - [2602.16069v2](docs/research/arxiv-notes/2602.16069v2.md) — The Limits of Long-Context Reasoning in Automated Bug Fixing
 - [2602.19672v1](docs/research/arxiv-notes/2602.19672v1.md) — SkillOrchestra: Learning to Route Agents via Skill Transfer
 - [2602.20867v1](docs/research/arxiv-notes/2602.20867v1.md) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents
+- [2602.22480](docs/research/arxiv-notes/2602.22480.md) — VeRO: An Evaluation Harness for Agents to Optimize Agents
 - [2603.07670v1](docs/research/arxiv-notes/2603.07670v1.md) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers
 - [2603.18829v9](docs/research/arxiv-notes/2603.18829v9.md) — Agent Control Protocol: Admission Control for Agent Actions
 - [2603.20380v1](docs/research/arxiv-notes/2603.20380v1.md) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams
@@ -77,7 +78,6 @@ Stub: **80**
 - [2602.12670v3](docs/research/arxiv-notes/2602.12670v3.md) — SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks
 - [2602.14878v2](docs/research/arxiv-notes/2602.14878v2.md) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions
 - [2602.19008v1](docs/research/arxiv-notes/2602.19008v1.md) — Capable but Unreliable: Canonical Path Deviation as a Causal Mechanism of Agent Failure in Long-Horizon Tasks
-- [2602.22480](docs/research/arxiv-notes/2602.22480.md) — VeRO: An Evaluation Harness for Agents to Optimize Agents
 - [2602.22680v2](docs/research/arxiv-notes/2602.22680v2.md) — Toward Personalized LLM-Powered Agents: Foundations, Evaluation, and Future Directions
 - [2603.01493v1](docs/research/arxiv-notes/2603.01493v1.md) — PhotoBench: Beyond Visual Matching Towards Personalized Intent-Driven Photo Retrieval
 - [2603.02176v1](docs/research/arxiv-notes/2603.02176v1.md) — Organizing, Orchestrating, and Benchmarking Agent Skills at Ecosystem Scale

@@ -41,6 +41,10 @@ This backlog turns reviewed research into shippable harness modules.
 
 ## P2 — Evaluation
 
+- [x] VeRO-style offline eval manifest (`plotlot.pipeline.eval_flow`)
+  - versioned run context: git commit, prompt versions, dataset path
+  - reward contract: thresholds + observed metrics
+  - budget contract: deterministic sample budget for site-feasibility eval slices
 - [ ] Red-team harness scenarios (AJAR/SafeHarness)
   - context poisoning, indirect injection, tool tampering, memory injection
 - [ ] Vertical eval set + metric stack (memory survey)

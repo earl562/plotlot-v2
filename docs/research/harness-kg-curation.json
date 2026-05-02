@@ -96,6 +96,60 @@
       ]
     },
     {
+      "name": "Versioned Agent Snapshot",
+      "type": "primitive",
+      "sources": [
+        "2602.22480"
+      ],
+      "bullets": [
+        "Treat every optimizer or harness change as a discrete, diffable version so improvements can be replayed, compared, and rolled back.",
+        "Versioning should capture the full eval context, not just code: prompts, dataset slice, and configuration also matter.",
+        "For PlotLot, every site-feasibility eval should record git commit, prompt versions, dataset path, and the exact thresholds used to judge the run."
+      ],
+      "links": [
+        "Replayable Trajectory",
+        "Workflow Verification",
+        "Evidence Ledger",
+        "Harness Runtime"
+      ]
+    },
+    {
+      "name": "Budget-Gated Evaluator",
+      "type": "primitive",
+      "sources": [
+        "2602.22480"
+      ],
+      "bullets": [
+        "Evaluation is a governed resource; the harness should explicitly enforce limits instead of trusting the optimizer to self-budget.",
+        "Budgets make comparisons fair because no optimizer gets silent extra search or compute.",
+        "For PlotLot, offline site-feasibility evals should log sample budgets now and later expand to tool, runtime, and token budgets."
+      ],
+      "links": [
+        "Harness Runtime",
+        "Workflow Verification",
+        "Budgeted Tool Loop",
+        "Competence-Cost Agent Profile"
+      ]
+    },
+    {
+      "name": "Structured Observation Interface",
+      "type": "primitive",
+      "sources": [
+        "2602.22480"
+      ],
+      "bullets": [
+        "Expose per-sample inputs, outputs, intermediate traces, errors, and scores through a consistent interface across scaffolds.",
+        "Fair optimizer comparison depends on standardizing what evidence is visible, not just standardizing the final metric.",
+        "For PlotLot, parcel facts, ordinance citations, calculator outputs, and failure labels should be stored in one comparable observation schema."
+      ],
+      "links": [
+        "Evidence Ledger",
+        "Replayable Trajectory",
+        "Context Broker",
+        "Versioned Agent Snapshot"
+      ]
+    },
+    {
       "name": "Agent-Supervised Tool Adaptation",
       "type": "primitive",
       "sources": [
@@ -339,6 +393,15 @@
       ]
     },
     {
+      "title": "VeRO (2602.22480) synthesis",
+      "bullets": [
+        "Connects [[Harness Runtime]] to [[Versioned Agent Snapshot]]: every quality run should be attributable to a concrete, replayable harness state instead of a fuzzy latest configuration.",
+        "Connects [[Workflow Verification]] to [[Budget-Gated Evaluator]]: evaluation budgets are part of the contract, not an afterthought outside the harness.",
+        "Connects [[Evidence Ledger]] and [[Replayable Trajectory]] to [[Structured Observation Interface]]: the same saved case artifacts should feed both post-hoc analysis and future optimizer loops.",
+        "For PlotLot, this paper pushes the site-feasibility harness toward versioned eval manifests, deterministic sample budgets, and structured per-case observations."
+      ]
+    },
+    {
       "title": "Adaptation of Agentic AI (2512.16301v3) synthesis",
       "bullets": [
         "Connects [[Harness Runtime]] to [[Agent-Supervised Tool Adaptation]]: the stable orchestrator should supervise evolving specialist modules rather than absorb every improvement into one agent policy.",
@@ -444,6 +507,20 @@
         "UltraHorizon is the clearest newly ingested paper so far on how long-horizon agent failures compound as trajectories, tool calls, and partial observability increase.",
         "Its most transferable primitive for PlotLot is CRNR: reset active context and rebuild from durable notes/evidence instead of trusting one swollen transcript.",
         "Its biggest warning for PlotLot is evaluation realism: more steps alone do not solve hard site-feasibility cases unless the harness also enforces evidence thresholds and controlled hypothesis testing."
+      ]
+    },
+    "2602.22480": {
+      "wikilinks": [
+        "Versioned Agent Snapshot",
+        "Budget-Gated Evaluator",
+        "Structured Observation Interface",
+        "Workflow Verification",
+        "Replayable Trajectory"
+      ],
+      "bullets": [
+        "VeRO is the clearest newly ingested paper so far on what an optimization-ready eval harness must preserve: versioning, budgets, permissions, reproducibility, and trace visibility.",
+        "For PlotLot, its most immediate consequence is operational rather than model-centric: make every site-feasibility quality run attributable to an exact harness state and evidence slice.",
+        "Its main warning is that optimizer behavior collapses toward prompt edits unless the harness exposes richer structural signals and compares changes under identical budgets."
       ]
     }
   }
