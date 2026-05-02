@@ -15,6 +15,8 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Workflow module interface
 - Replayable trajectory
 - Workflow verification
+- Synthesized constraint harness
+- Compiled deterministic specialist
 - Versioned agent snapshot
 - Budget-gated evaluator
 - Structured observation interface
@@ -65,6 +67,20 @@ PlotLot mapping:
 PlotLot mapping:
 - Site-feasibility should run as a stage graph: intake → retrieve → extract → verify → calculate → report → review.
 - Every stage boundary should become a replay and verification boundary.
+
+---
+
+## AutoHarness (2603.03329v1)
+
+- **Synthesized constraint harness**: learn executable verifier/wrapper code around a base model from execution failures instead of hand-writing every guardrail.
+- **Execution-feedback harness refinement**: keep multiple code hypotheses, score them from environment results, and iteratively repair the best candidates with critic feedback.
+- **Compiled deterministic specialist**: when a bounded lane becomes stable enough, synthesize pure code and eliminate live LLM inference for that subproblem.
+- **Smaller model, better boundary**: improving the executable harness can outperform upgrading to a larger generalist model.
+
+PlotLot mapping:
+- Synthesize narrow deterministic specialists from repeated failure logs: citation resolvers, unit normalizers, ordinance table parsers, allowed-use checkers, and standards calculators.
+- Keep synthesis scope local to well-bounded tasks; do not try to compile the whole site-feasibility workflow into code.
+- Promote stable calculator/validator lanes into frozen modules behind the main land-use harness.
 
 ---
 

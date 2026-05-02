@@ -2,8 +2,8 @@
 
 Generated from: `arxiv-abstracts.json`
 Total papers: **109**
-Reviewed: **34**
-Remaining: **75**
+Reviewed: **35**
+Remaining: **74**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -14,7 +14,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (17) [2603.03329v1](https://arxiv.org/abs/2603.03329v1) — AutoHarness: improving LLM agents by automatically synthesizing a code harness  — [note](docs/research/arxiv-notes/2603.03329v1.md) — _stub_
 - **P0** (15) [2601.22773v3](https://arxiv.org/abs/2601.22773v3) — A Structured Approach to Safety Case Construction for AI Systems  — [note](docs/research/arxiv-notes/2601.22773v3.md) — _stub_
 - **P0** (14) [2604.08756v1](https://arxiv.org/abs/2604.08756v1) — Artifacts as Memory Beyond the Agent Boundary  — [note](docs/research/arxiv-notes/2604.08756v1.md) — _stub_
 - **P0** (8) [2603.27813v1](https://arxiv.org/abs/2603.27813v1) — MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences  — [note](docs/research/arxiv-notes/2603.27813v1.md) — _stub_
@@ -74,6 +73,7 @@ Priority tiers:
 - **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
 - **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
 - **P2** (10) [2603.12658v1](https://arxiv.org/abs/2603.12658v1) — Continual Learning in Large Language Models: Methods, Challenges, and Opportunities  — [note](docs/research/arxiv-notes/2603.12658v1.md) — _stub_
+- **P2** (9) [2311.02018v1](https://arxiv.org/abs/2311.02018v1) — Active Reasoning in an Open-World Environment  — [note](docs/research/arxiv-notes/2311.02018v1.md) — _stub_
 
 ## Already reviewed
 
@@ -91,6 +91,7 @@ Priority tiers:
 - **✅** (25) [2602.19672v1](https://arxiv.org/abs/2602.19672v1) — SkillOrchestra: Learning to Route Agents via Skill Transfer  — [note](docs/research/arxiv-notes/2602.19672v1.md) — _reviewed_
 - **✅** (50) [2602.20867v1](https://arxiv.org/abs/2602.20867v1) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents  — [note](docs/research/arxiv-notes/2602.20867v1.md) — _reviewed_
 - **✅** (24) [2602.22480](https://arxiv.org/abs/2602.22480) — VeRO: An Evaluation Harness for Agents to Optimize Agents  — [note](docs/research/arxiv-notes/2602.22480.md) — _reviewed_
+- **✅** (17) [2603.03329v1](https://arxiv.org/abs/2603.03329v1) — AutoHarness: improving LLM agents by automatically synthesizing a code harness  — [note](docs/research/arxiv-notes/2603.03329v1.md) — _reviewed_
 - **✅** (50) [2603.07670v1](https://arxiv.org/abs/2603.07670v1) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers  — [note](docs/research/arxiv-notes/2603.07670v1.md) — _reviewed_
 - **✅** (56) [2603.18829v9](https://arxiv.org/abs/2603.18829v9) — Agent Control Protocol: Admission Control for Agent Actions  — [note](docs/research/arxiv-notes/2603.18829v9.md) — _reviewed_
 - **✅** (51) [2603.20380v1](https://arxiv.org/abs/2603.20380v1) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams  — [note](docs/research/arxiv-notes/2603.20380v1.md) — _reviewed_

@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **109**
-Reviewed: **34**
-Stub: **75**
+Reviewed: **35**
+Stub: **74**
 
 ## Reviewed
 
@@ -20,6 +20,7 @@ Stub: **75**
 - [2602.19672v1](docs/research/arxiv-notes/2602.19672v1.md) — SkillOrchestra: Learning to Route Agents via Skill Transfer
 - [2602.20867v1](docs/research/arxiv-notes/2602.20867v1.md) — SoK: Agentic Skills -- Beyond Tool Use in LLM Agents
 - [2602.22480](docs/research/arxiv-notes/2602.22480.md) — VeRO: An Evaluation Harness for Agents to Optimize Agents
+- [2603.03329v1](docs/research/arxiv-notes/2603.03329v1.md) — AutoHarness: improving LLM agents by automatically synthesizing a code harness
 - [2603.07670v1](docs/research/arxiv-notes/2603.07670v1.md) — Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers
 - [2603.18829v9](docs/research/arxiv-notes/2603.18829v9.md) — Agent Control Protocol: Admission Control for Agent Actions
 - [2603.20380v1](docs/research/arxiv-notes/2603.20380v1.md) — ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams
@@ -86,7 +87,6 @@ Stub: **75**
 - [2603.02176v1](docs/research/arxiv-notes/2603.02176v1.md) — Organizing, Orchestrating, and Benchmarking Agent Skills at Ecosystem Scale
 - [2603.02239v1](docs/research/arxiv-notes/2603.02239v1.md) — Engineering Reasoning and Instruction (ERI) Benchmark: A Large Taxonomy-driven Dataset for Foundation Models and Agents
 - [2603.03212v1](docs/research/arxiv-notes/2603.03212v1.md) — NeuroSkill(tm): Proactive Real-Time Agentic System Capable of Modeling Human State of Mind
-- [2603.03329v1](docs/research/arxiv-notes/2603.03329v1.md) — AutoHarness: improving LLM agents by automatically synthesizing a code harness
 - [2603.05344v3](docs/research/arxiv-notes/2603.05344v3.md) — Building Effective AI Coding Agents for the Terminal: Scaffolding, Harness, Context Engineering, and Lessons Learned
 - [2603.07379v1](docs/research/arxiv-notes/2603.07379v1.md) — SoK: Agentic Retrieval-Augmented Generation (RAG): Taxonomy, Architectures, Evaluation, and Research Directions
 - [2603.08616v1](docs/research/arxiv-notes/2603.08616v1.md) — Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing

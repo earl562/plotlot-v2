@@ -543,6 +543,42 @@
         "Context Broker",
         "User Pushback Telemetry"
       ]
+    },
+    {
+      "name": "Synthesized Constraint Harness",
+      "type": "primitive",
+      "sources": [
+        "2603.03329v1"
+      ],
+      "bullets": [
+        "Learn deterministic wrapper code that blocks invalid model outputs before they propagate into the environment or final artifact.",
+        "Use execution failures as synthesis data instead of hand-authoring every constraint checker up front.",
+        "For PlotLot, synthesize narrow verifiers for citation resolution, unit normalization, allowed-use checks, and dimensional-rule schema validation."
+      ],
+      "links": [
+        "Workflow Verification",
+        "Agent-Supervised Tool Adaptation",
+        "Governance Middleware",
+        "Evidence Ledger"
+      ]
+    },
+    {
+      "name": "Compiled Deterministic Specialist",
+      "type": "primitive",
+      "sources": [
+        "2603.03329v1"
+      ],
+      "bullets": [
+        "When a bounded subtask is stable enough, compile it from model-time reasoning into reusable deterministic code with near-zero runtime inference cost.",
+        "Compilation works best on narrow lanes with crisp execution feedback, not on the whole open-ended workflow.",
+        "For PlotLot, graduate unit conversion, standards calculation, citation parsing, and ordinance table normalization into frozen deterministic modules."
+      ],
+      "links": [
+        "Graduated Subagent",
+        "Workflow Module Interface",
+        "Workflow Verification",
+        "Harness Runtime"
+      ]
     }
   ],
   "overviewConnections": [
@@ -633,6 +669,15 @@
         "Connects [[Workflow Verification]] and [[Failure Manifestation Catalog]] to [[User Pushback Telemetry]]: corrections, interruptions, and failure reports are valuable supervision about where the trajectory went off course.",
         "Connects [[Governance Middleware]] and [[Context Broker]] to [[Clarification Gate]]: high-risk ambiguity should trigger ask-before-acting boundaries instead of letting the user discover bad work late.",
         "For PlotLot, this paper argues for collaborative, analyst-steered site-feasibility runs optimized for accepted, cited conclusions rather than raw autonomous throughput."
+      ]
+    },
+    {
+      "title": "AutoHarness (2603.03329v1) synthesis",
+      "bullets": [
+        "Connects [[Workflow Verification]] and [[Evidence Ledger]] to [[Synthesized Constraint Harness]]: repeated execution failures become repair data for learned deterministic guards.",
+        "Connects [[Agent-Supervised Tool Adaptation]] and [[Graduated Subagent]] to [[Compiled Deterministic Specialist]]: once a narrow lane stabilizes, freeze it behind a reusable typed interface.",
+        "Connects [[Governance Middleware]] to constraint compilation: some high-value safety checks should execute as code before the model can advance a claim or action.",
+        "For PlotLot, use this paper to harden bounded land-use lanes like citation, unit, schema, and calculator validation\u2014not to replace the full site-feasibility orchestrator."
       ]
     }
   ],
@@ -776,6 +821,20 @@
         "SWE-chat is the clearest reviewed source so far on how real users supervise, interrupt, correct, and partially accept coding-agent work in the wild.",
         "For PlotLot, its most transferable primitive is acceptance telemetry: measure which generated claims and citations survive analyst review, then learn from the deletions, overwrites, and pushback events.",
         "Its biggest warning is that more autonomy can raise cost and safety risk while the agent still asks for clarification too rarely, so site-feasibility runs should stay collaborative and evidence-gated."
+      ]
+    },
+    "2603.03329v1": {
+      "wikilinks": [
+        "Synthesized Constraint Harness",
+        "Compiled Deterministic Specialist",
+        "Workflow Verification",
+        "Agent-Supervised Tool Adaptation",
+        "Graduated Subagent"
+      ],
+      "bullets": [
+        "AutoHarness is the clearest reviewed paper so far on turning repeated invalid-action failures into executable code constraints instead of stronger prompt admonitions.",
+        "For PlotLot, its best use is synthesizing narrow deterministic wrappers\u2014citation, unit, schema, and calculator verifiers\u2014around unstable LLM lanes rather than synthesizing the whole site-feasibility workflow.",
+        "Its main limitation is scope: one harness per environment with crisp legality feedback, so it says more about bounded specialist compilation than about full-product autonomy."
       ]
     }
   }
