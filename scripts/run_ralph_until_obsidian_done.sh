@@ -20,35 +20,15 @@ log() {
 }
 
 get_counts_json() {
-  node .pi/skills/autoresearch/scripts/list_unreviewed_notes.mjs 2>/dev/null | tail -n 20 | python3 - <<'PY'
-import json, sys
-text = sys.stdin.read().strip().splitlines()
-for line in reversed(text):
-    line = line.strip()
-    if not line:
-        continue
-    try:
-        obj = json.loads(line)
-        print(json.dumps(obj))
-        raise SystemExit(0)
-    except Exception:
-        pass
-raise SystemExit(1)
-PY
+  node .pi/skills/autoresearch/scripts/list_unreviewed_notes.mjs 2>/dev/null | python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)))'
 }
 
 get_stub_count() {
-  get_counts_json | python3 - <<'PY'
-import json, sys
-print(json.loads(sys.stdin.read())['stub'])
-PY
+  get_counts_json | python3 -c 'import json,sys; print(json.load(sys.stdin)["stub"])'
 }
 
 get_reviewed_count() {
-  get_counts_json | python3 - <<'PY'
-import json, sys
-print(json.loads(sys.stdin.read())['reviewed'])
-PY
+  get_counts_json | python3 -c 'import json,sys; print(json.load(sys.stdin)["reviewed"])'
 }
 
 save_progress_if_needed() {
