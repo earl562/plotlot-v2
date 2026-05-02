@@ -22,6 +22,9 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Competence-cost agent profile
 - Contrastive skill discovery
 - Granularity-aware handbook selection
+- Context refresh + notes recall
+- Failure manifestation catalog
+- Controlled exploration discipline
 
 ---
 
@@ -80,3 +83,17 @@ PlotLot mapping:
 - Build a PlotLot handbook over modes like authority discovery, ordinance retrieval, extraction/normalization, deterministic calculation, and report/review.
 - Track agent profiles for specialist lanes such as parcel-authority resolution, ordinance section retrieval, table extraction, dimensional normalization, conflict arbitration, and citation-backed synthesis.
 - Learn and refine skills from replayed site-feasibility traces instead of RL-tuning the orchestrator; start coarse, then split skills only when eval variance proves the distinction matters.
+
+---
+
+## UltraHorizon (2509.21766)
+
+- **Context refresh + notes recall (CRNR)**: once a run approaches context limits, drop stale dialogue, keep the governing prompt, and reconstruct working state from durable notes.
+- **Failure manifestation catalog**: diagnose long-horizon runs with explicit labels like repetitive looping, premature convergence, misaligned tool usage, memory issues, uncontrolled experiments, and environment mis-modeling.
+- **Controlled exploration discipline**: more steps do not help unless the harness enforces hypothesis-testing structure and evidence thresholds.
+- **Human-gap realism**: benchmark with partially observable, multi-tool tasks where humans still outperform agents; do not assume short-horizon wins transfer.
+
+PlotLot mapping:
+- Long site-feasibility runs should checkpoint evidence/notes aggressively, then refresh active context from those artifacts instead of hauling full transcripts forward.
+- PlotLot evals should explicitly score premature commit, low-yield retrieval looping, conflicting-source confusion, and uncontrolled ordinance experimentation.
+- Zoning ambiguity resolution should require single-variable-style testing: change one assumption at a time, record the result, and only then revise the site-feasibility hypothesis.

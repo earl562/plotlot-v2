@@ -1,13 +1,14 @@
 # arXiv Notes Status
 
-Total: **100**
-Reviewed: **28**
-Stub: **72**
+Total: **109**
+Reviewed: **29**
+Stub: **80**
 
 ## Reviewed
 
 - [2408.01667v2](docs/research/arxiv-notes/2408.01667v2.md) — Automated Phishing Detection Using URLs and Webpages
 - [2505.02279v2](docs/research/arxiv-notes/2505.02279v2.md) — A survey of agent interoperability protocols: Model Context Protocol (MCP), Agent Communication Protocol (ACP), Agent-to-Agent Protocol (A2A), and Agent Network Protocol (ANP)
+- [2509.21766](docs/research/arxiv-notes/2509.21766.md) — UltraHorizon: Benchmarking Agent Capabilities in Ultra Long-Horizon Scenarios
 - [2512.16301v3](docs/research/arxiv-notes/2512.16301v3.md) — Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills
 - [2601.10338v1](docs/research/arxiv-notes/2601.10338v1.md) — Agent Skills in the Wild: An Empirical Study of Security Vulnerabilities at Scale
 - [2601.10971v2](docs/research/arxiv-notes/2601.10971v2.md) — AJAR: Adaptive Jailbreak Architecture for Red-teaming
@@ -38,8 +39,11 @@ Stub: **72**
 ## Stubs (to review)
 
 - [2311.02018v1](docs/research/arxiv-notes/2311.02018v1.md) — Active Reasoning in an Open-World Environment
+- [2410.12475](docs/research/arxiv-notes/2410.12475.md) — Aegis:An Advanced LLM-Based Multi-Agent for Intelligent Functional Safety Engineering
+- [2503.13577](docs/research/arxiv-notes/2503.13577.md) — When Should We Orchestrate Multiple Agents?
 - [2504.19413v1](docs/research/arxiv-notes/2504.19413v1.md) — Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory
 - [2506.08119v2](docs/research/arxiv-notes/2506.08119v2.md) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents
+- [2507.11633](docs/research/arxiv-notes/2507.11633.md) — General Modular Harness for LLM Agents in Multi-Turn Gaming Environments
 - [2507.18755v1](docs/research/arxiv-notes/2507.18755v1.md) — Agentic Program Repair from Test Failures at Scale: A Neuro-symbolic approach with static analysis and test execution feedback
 - [2507.23361v2](docs/research/arxiv-notes/2507.23361v2.md) — SWE-Exp: Experience-Driven Software Issue Resolution
 - [2508.00007v1](docs/research/arxiv-notes/2508.00007v1.md) — Agent Network Protocol Technical White Paper
@@ -48,6 +52,7 @@ Stub: **72**
 - [2509.19349v1](docs/research/arxiv-notes/2509.19349v1.md) — ShinkaEvolve: Towards Open-Ended And Sample-Efficient Program Evolution
 - [2509.23206v3](docs/research/arxiv-notes/2509.23206v3.md) — PARL-MT: Learning to Call Functions in Multi-Turn Conversation with Progress Awareness
 - [2511.07568v1](docs/research/arxiv-notes/2511.07568v1.md) — Procedural Knowledge Improves Agentic LLM Workflows
+- [2512.03420](docs/research/arxiv-notes/2512.03420.md) — HarnessAgent: Scaling Automatic Fuzzing Harness Construction with Tool-Augmented LLM Pipelines
 - [2512.03627v1](docs/research/arxiv-notes/2512.03627v1.md) — MemVerse: Multimodal Memory for Lifelong Learning Agents
 - [2512.04535v2](docs/research/arxiv-notes/2512.04535v2.md) — GTM: Simulating the World of Tools for AI Agents
 - [2512.24601v1](docs/research/arxiv-notes/2512.24601v1.md) — Recursive Language Models
@@ -56,12 +61,14 @@ Stub: **72**
 - [2601.07372v1](docs/research/arxiv-notes/2601.07372v1.md) — Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models
 - [2601.08670v1](docs/research/arxiv-notes/2601.08670v1.md) — Parallel Context-of-Experts Decoding for Retrieval Augmented Generation
 - [2601.08773v1](docs/research/arxiv-notes/2601.08773v1.md) — Reliable Graph-RAG for Codebases: AST-Derived Graphs vs LLM-Extracted Knowledge Graphs
+- [2601.11868](docs/research/arxiv-notes/2601.11868.md) — Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces
 - [2601.20412v1](docs/research/arxiv-notes/2601.20412v1.md) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents
 - [2601.21123v2](docs/research/arxiv-notes/2601.21123v2.md) — CUA-Skill: Develop Skills for Computer Using Agent
 - [2601.21545v1](docs/research/arxiv-notes/2601.21545v1.md) — ShardMemo: Masked MoE Routing for Sharded Agentic LLM Memory
 - [2601.21684v1](docs/research/arxiv-notes/2601.21684v1.md) — Do Not Waste Your Rollouts: Recycling Search Experience for Efficient Test-Time Scaling
 - [2601.22773v3](docs/research/arxiv-notes/2601.22773v3.md) — A Structured Approach to Safety Case Construction for AI Systems
 - [2602.02007v3](docs/research/arxiv-notes/2602.02007v3.md) — Beyond RAG for Agent Memory: Retrieval by Decoupling and Aggregation
+- [2602.03786](docs/research/arxiv-notes/2602.03786.md) — AOrchestra: Automating Sub-Agent Creation for Agentic Orchestration
 - [2602.08004v1](docs/research/arxiv-notes/2602.08004v1.md) — Agent Skills: A Data-Driven Analysis of Claude Skills for Extending Large Language Model Functionality
 - [2602.08603v1](docs/research/arxiv-notes/2602.08603v1.md) — OSCAR: Optimization-Steered Agentic Planning for Composed Image Retrieval
 - [2602.10498v1](docs/research/arxiv-notes/2602.10498v1.md) — When Skills Lie: Hidden-Comment Injection in LLM Agents
@@ -70,6 +77,7 @@ Stub: **72**
 - [2602.12670v3](docs/research/arxiv-notes/2602.12670v3.md) — SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks
 - [2602.14878v2](docs/research/arxiv-notes/2602.14878v2.md) — Model Context Protocol (MCP) Tool Descriptions Are Smelly! Towards Improving AI Agent Efficiency with Augmented MCP Tool Descriptions
 - [2602.19008v1](docs/research/arxiv-notes/2602.19008v1.md) — Capable but Unreliable: Canonical Path Deviation as a Causal Mechanism of Agent Failure in Long-Horizon Tasks
+- [2602.22480](docs/research/arxiv-notes/2602.22480.md) — VeRO: An Evaluation Harness for Agents to Optimize Agents
 - [2602.22680v2](docs/research/arxiv-notes/2602.22680v2.md) — Toward Personalized LLM-Powered Agents: Foundations, Evaluation, and Future Directions
 - [2603.01493v1](docs/research/arxiv-notes/2603.01493v1.md) — PhotoBench: Beyond Visual Matching Towards Personalized Intent-Driven Photo Retrieval
 - [2603.02176v1](docs/research/arxiv-notes/2603.02176v1.md) — Organizing, Orchestrating, and Benchmarking Agent Skills at Ecosystem Scale
@@ -89,6 +97,7 @@ Stub: **72**
 - [2603.26996v1](docs/research/arxiv-notes/2603.26996v1.md) — FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?
 - [2603.27813v1](docs/research/arxiv-notes/2603.27813v1.md) — MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences
 - [2603.28088v1](docs/research/arxiv-notes/2603.28088v1.md) — GEMS: Agent-Native Multimodal Generation with Memory and Skills
+- [2604.00073](docs/research/arxiv-notes/2604.00073.md) — Terminal Agents Suffice for Enterprise Automation
 - [2604.00362v1](docs/research/arxiv-notes/2604.00362v1.md) — In harmony with gpt-oss
 - [2604.02334v1](docs/research/arxiv-notes/2604.02334v1.md) — Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web
 - [2604.03088v3](docs/research/arxiv-notes/2604.03088v3.md) — SkVM: Revisiting Language VM for Skills across Heterogenous LLMs and Harnesses

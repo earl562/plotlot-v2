@@ -1,6 +1,6 @@
 {
   "retrievedAt": "2026-04-30T19:09:34.442Z",
-  "count": 103,
+  "count": 109,
   "items": [
     {
       "arxivId": "2311.02018v1",
@@ -43,6 +43,36 @@
       "updatedAt": "2024-08-16T03:25:51Z",
       "absUrl": "https://arxiv.org/abs/2408.01667v2",
       "pdfUrl": "https://arxiv.org/pdf/2408.01667v2",
+      "comment": null,
+      "status": "ok"
+    },
+    {
+      "arxivId": "2410.12475",
+      "sourceUrl": "https://arxiv.org/abs/2410.12475",
+      "title": "Aegis:An Advanced LLM-Based Multi-Agent for Intelligent Functional Safety Engineering",
+      "abstract": "Functional safety is a critical aspect of automotive engineering, encompassing all phases of a vehicle's lifecycle, including design, development, production, operation, and decommissioning. This domain involves highly knowledge-intensive tasks. This paper introduces Aegis: An Advanced LLM-Based Multi-Agent for Intelligent Functional Safety Engineering. Aegis is specifically designed to support complex functional safety tasks within the automotive sector. It is tailored to perform Hazard Analysis and Risk Assessment(HARA), document Functional Safety Requirements(FSR), and plan test cases for Automatic Emergency Braking(AEB) systems. The most advanced version, Aegis-Max, leverages Retrieval-Augmented Generation(RAG) and reflective mechanisms to enhance its capability in managing complex, knowledge-intensive tasks. Additionally, targeted prompt refinement by professional functional safety practitioners can significantly optimize Aegis's performance in the functional safety domain. This paper demonstrates the potential of Aegis to improve the efficiency and effectiveness of functional safety processes in automotive engineering.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2410.12475",
+      "pdfUrl": "https://arxiv.org/pdf/2410.12475.pdf",
+      "comment": null,
+      "status": "ok"
+    },
+    {
+      "arxivId": "2503.13577",
+      "sourceUrl": "https://arxiv.org/abs/2503.13577",
+      "title": "When Should We Orchestrate Multiple Agents?",
+      "abstract": "Strategies for orchestrating the interactions between multiple agents, both human and artificial, can wildly overestimate performance and underestimate the cost of orchestration. We design a framework to orchestrate agents under realistic conditions, such as inference costs or availability constraints. We show theoretically that orchestration is only effective if there are performance or cost differentials between agents. We then empirically demonstrate how orchestration between multiple agents can be helpful for selecting agents in a simulated environment, picking a learning strategy in the infamous Rogers' Paradox from social science, and outsourcing tasks to other agents during a question-answer task in a user study.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2503.13577",
+      "pdfUrl": "https://arxiv.org/pdf/2503.13577.pdf",
       "comment": null,
       "status": "ok"
     },
@@ -132,6 +162,21 @@
       "absUrl": "https://arxiv.org/abs/2506.08119v2",
       "pdfUrl": "https://arxiv.org/pdf/2506.08119v2",
       "comment": "Under review",
+      "status": "ok"
+    },
+    {
+      "arxivId": "2507.11633",
+      "sourceUrl": "https://arxiv.org/abs/2507.11633",
+      "title": "General Modular Harness for LLM Agents in Multi-Turn Gaming Environments",
+      "abstract": "We introduce a modular harness design for LLM agents that composes of perception, memory, and reasoning components, enabling a single LLM or VLM backbone to tackle a wide spectrum of multi turn gaming environments without domain-specific engineering. Using classic and modern game suites as low-barrier, high-diversity testbeds, our framework provides a unified workflow for analyzing how each module affects performance across dynamic interactive settings. Extensive experiments demonstrate that the harness lifts gameplay performance consistently over un-harnessed baselines and reveals distinct contribution patterns, for example, memory dominates in long-horizon puzzles while perception is critical in vision noisy arcades. These findings highlight the effectiveness of our modular harness design in advancing general-purpose agent, given the familiarity and ubiquity of games in everyday human experience.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2507.11633",
+      "pdfUrl": "https://arxiv.org/pdf/2507.11633.pdf",
+      "comment": null,
       "status": "ok"
     },
     {
@@ -299,6 +344,21 @@
       "status": "ok"
     },
     {
+      "arxivId": "2509.21766",
+      "sourceUrl": "https://arxiv.org/abs/2509.21766",
+      "title": "UltraHorizon: Benchmarking Agent Capabilities in Ultra Long-Horizon Scenarios",
+      "abstract": "Autonomous agents have recently achieved remarkable progress across diverse domains, yet most evaluations focus on short-horizon, fully observable tasks. In contrast, many critical real-world tasks, such as large-scale software development, commercial investment, and scientific discovery, unfold in long-horizon and partially observable scenarios where success hinges on sustained reasoning, planning, memory management, and tool use. Existing benchmarks rarely capture these long-horizon challenges, leaving a gap in systematic evaluation. To bridge this gap, we introduce \\textbf{UltraHorizon} a novel benchmark that measures the foundational capabilities essential for complex real-world challenges. We use exploration as a unifying task across three distinct environments to validate these core competencies. Agents are designed in long-horizon discovery tasks where they must iteratively uncover hidden rules through sustained reasoning, planning, memory and tools management, and interaction with environments. Under the heaviest scale setting, trajectories average \\textbf{200k+} tokens and \\textbf{400+} tool calls, whereas in standard configurations they still exceed \\textbf{35k} tokens and involve more than \\textbf{60} tool calls on average. Our extensive experiments reveal that LLM-agents consistently underperform in these settings, whereas human participants achieve higher scores, underscoring a persistent gap in agents' long-horizon abilities. We also observe that simple scaling fails in our task. To better illustrate the failure of agents, we conduct an in-depth analysis of collected trajectories. We identify eight types of errors and attribute them to two primary causes: in-context locking and functional fundamental capability gaps. \\href{[this https URL](https://github.com/StarDewXXX/UltraHorizon)}{Our code will be available here.}",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2509.21766",
+      "pdfUrl": "https://arxiv.org/pdf/2509.21766.pdf",
+      "comment": null,
+      "status": "ok"
+    },
+    {
       "arxivId": "2509.23206v3",
       "sourceUrl": null,
       "title": "PARL-MT: Learning to Call Functions in Multi-Turn Conversation with Progress Awareness",
@@ -349,6 +409,21 @@
       "updatedAt": "2025-11-10T19:27:57Z",
       "absUrl": "https://arxiv.org/abs/2511.07568v1",
       "pdfUrl": "https://arxiv.org/pdf/2511.07568v1",
+      "comment": null,
+      "status": "ok"
+    },
+    {
+      "arxivId": "2512.03420",
+      "sourceUrl": "https://arxiv.org/abs/2512.03420",
+      "title": "HarnessAgent: Scaling Automatic Fuzzing Harness Construction with Tool-Augmented LLM Pipelines",
+      "abstract": "Large language model (LLM)-based techniques have achieved notable progress in generating harnesses for program fuzzing. However, applying them to arbitrary functions (especially internal functions) \\textit{at scale} remains challenging due to the requirement of sophisticated contextual information, such as specification, dependencies, and usage examples. State-of-the-art methods heavily rely on static or incomplete context provisioning, causing failure of generating functional harnesses. Furthermore, LLMs tend to exploit harness validation metrics, producing plausible yet logically useless code. % Therefore, harness generation across large and diverse projects continues to face challenges in reliable compilation, robust code retrieval, and comprehensive validation. To address these challenges, we present HarnessAgent, a tool-augmented agentic framework that achieves fully automated, scalable harness construction over hundreds of OSS-Fuzz targets. HarnessAgent introduces three key innovations: 1) a rule-based strategy to identify and minimize various compilation errors; 2) a hybrid tool pool for precise and robust symbol source code retrieval; and 3) an enhanced harness validation pipeline that detects fake definitions. We evaluate HarnessAgent on 243 target functions from OSS-Fuzz projects (65 C projects and 178 C++ projects). It improves the three-shot success rate by approximately 20\\% compared to state-of-the-art techniques, reaching 87\\% for C and 81\\% for C++. Our one-hour fuzzing results show that more than 75\\% of the harnesses generated by HarnessAgent increase the target function coverage, surpassing the baselines by over 10\\%. In addition, the hybrid tool-pool system of HarnessAgent achieves a response rate of over 90\\% for source code retrieval, outperforming Fuzz Introspector by more than 30\\%.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": "Fri, 12 Dec 2025 01:20:39 GMT",
+      "updatedAt": "Fri, 12 Dec 2025 01:20:39 GMT",
+      "absUrl": "https://arxiv.org/abs/2512.03420",
+      "pdfUrl": "https://arxiv.org/pdf/2512.03420.pdf",
       "comment": null,
       "status": "ok"
     },
@@ -406,59 +481,6 @@
       "updatedAt": "2025-12-05T06:40:32Z",
       "absUrl": "https://arxiv.org/abs/2512.04535v2",
       "pdfUrl": "https://arxiv.org/pdf/2512.04535v2",
-      "comment": null,
-      "status": "ok"
-    },
-    {
-      "arxivId": "2512.16301v3",
-      "sourceUrl": "https://arxiv.org/html/2512.16301v3",
-      "title": "Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills",
-      "abstract": "Large language model (LLM) agents are moving beyond prompting alone. ChatGPT marked the rise of general-purpose LLM assistants, DeepSeek showed that on-policy reinforcement learning with verifiable rewards can improve reasoning and tool use, and OpenClaw highlights a newer direction in which agents accumulate persistent memory and reusable skills. Yet the research landscape remains fragmented across post-training, retrieval, memory, and skill systems. This survey studies these developments under a single notion of \\emph{adaptation}: improving an agent, its tools, or their interaction after pretraining. We organize the field with a four-paradigm framework spanning agent adaptation and tool adaptation. On the agent side, A1 (tool-execution-signaled) and A2 (agent-output-signaled) improve the agent itself through supervised fine-tuning, preference optimization, and reinforcement learning with verifiable rewards. On the tool side, T1 (agent-agnostic) provides reusable pre-trained modules any agent can call, while T2 (agent-supervised) uses the agent's outputs to train memory systems, skill libraries, or lightweight subagents. Using this framework, we review post-training methods, adaptive memory architectures, and agent skills; compare their trade-offs in cost, flexibility, and generalization; and summarize evaluation practices across deep research, software development, computer use, and drug discovery. We conclude by outlining open problems in agent-tool co-adaptation, continual learning, safety, and efficient deployment.",
-      "authors": [
-        "Pengcheng Jiang",
-        "Jiacheng Lin",
-        "Zhiyi Shi",
-        "Zifeng Wang",
-        "Luxi He",
-        "Yichen Wu",
-        "Ming Zhong",
-        "Peiyang Song",
-        "Qizheng Zhang",
-        "Heng Wang",
-        "Xueqiang Xu",
-        "Hanwen Xu",
-        "Pengrui Han",
-        "Dylan Zhang",
-        "Jiashuo Sun",
-        "Chaoqi Yang",
-        "Kun Qian",
-        "Tian Wang",
-        "Changran Hu",
-        "Manling Li",
-        "Quanzheng Li",
-        "Hao Peng",
-        "Sheng Wang",
-        "Jingbo Shang",
-        "Chao Zhang",
-        "Jiaxuan You",
-        "Liyuan Liu",
-        "Pan Lu",
-        "Yu Zhang",
-        "Heng Ji",
-        "Yejin Choi",
-        "Dawn Song",
-        "Jimeng Sun",
-        "Jiawei Han"
-      ],
-      "primaryCategory": "cs.AI",
-      "categories": [
-        "cs.AI",
-        "cs.CL"
-      ],
-      "publishedAt": "2025-12-18T08:38:51Z",
-      "updatedAt": "2026-03-09T07:39:08Z",
-      "absUrl": "https://arxiv.org/abs/2512.16301v3",
-      "pdfUrl": "https://arxiv.org/pdf/2512.16301v3",
       "comment": null,
       "status": "ok"
     },
@@ -718,6 +740,21 @@
       "status": "ok"
     },
     {
+      "arxivId": "2601.11868",
+      "sourceUrl": "https://arxiv.org/abs/2601.11868",
+      "title": "Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces",
+      "abstract": "AI agents may soon become capable of autonomously completing valuable, long-horizon tasks in diverse domains. Current benchmarks either do not measure real-world tasks, or are not sufficiently difficult to meaningfully measure frontier models. To this end, we present Terminal-Bench 2.0: a carefully curated hard benchmark composed of 89 tasks in computer terminal environments inspired by problems from real workflows. Each task features a unique environment, human-written solution, and comprehensive tests for verification. We show that frontier models and agents score less than 65\\% on the benchmark and conduct an error analysis to identify areas for model and agent improvement. We publish the dataset and evaluation harness to assist developers and researchers in future work at [this https URL](https://www.tbench.ai/).",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": "Sun, 01 Mar 2026 03:34:48 GMT",
+      "updatedAt": "Sun, 01 Mar 2026 03:34:48 GMT",
+      "absUrl": "https://arxiv.org/abs/2601.11868",
+      "pdfUrl": "https://arxiv.org/pdf/2601.11868.pdf",
+      "comment": null,
+      "status": "ok"
+    },
+    {
       "arxivId": "2601.20412v1",
       "sourceUrl": null,
       "title": "Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents",
@@ -905,6 +942,21 @@
       "absUrl": "https://arxiv.org/abs/2602.02474v1",
       "pdfUrl": "https://arxiv.org/pdf/2602.02474v1",
       "comment": "Code is available at https://github.com/ViktorAxelsen/MemSkill",
+      "status": "ok"
+    },
+    {
+      "arxivId": "2602.03786",
+      "sourceUrl": "https://arxiv.org/abs/2602.03786",
+      "title": "AOrchestra: Automating Sub-Agent Creation for Agentic Orchestration",
+      "abstract": "Language agents have shown strong promise for task automation. Realizing this promise for increasingly complex, long-horizon tasks has driven the rise of a sub-agent-as-tools paradigm for multi-turn task solving. However, existing designs still lack a dynamic abstraction view of sub-agents, thereby hurting adaptability. We address this challenge with a unified, framework-agnostic agent abstraction that models any agent as a tuple Instruction, Context, Tools, Model. This tuple acts as a compositional recipe for capabilities, enabling the system to spawn specialized executors for each task on demand. Building on this abstraction, we introduce an agentic system AOrchestra, where the central orchestrator concretizes the tuple at each step: it curates task-relevant context, selects tools and models, and delegates execution via on-the-fly automatic agent creation. Such designs enable reducing human engineering efforts, and remain framework-agnostic with plug-and-play support for diverse agents as task executors. It also enables a controllable performance-cost trade-off, allowing the system to approach Pareto-efficient. Across three challenging benchmarks (GAIA, SWE-Bench, Terminal-Bench), AOrchestra achieves 16.28% relative improvement against the strongest baseline when paired with Gemini-3-Flash. The code is available at: [this https URL](https://github.com/FoundationAgents/AOrchestra)",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2602.03786",
+      "pdfUrl": "https://arxiv.org/pdf/2602.03786.pdf",
+      "comment": null,
       "status": "ok"
     },
     {
@@ -1196,7 +1248,7 @@
       "arxivId": "2602.19008v1",
       "sourceUrl": null,
       "title": "Capable but Unreliable: Canonical Path Deviation as a Causal Mechanism of Agent Failure in Long-Horizon Tasks",
-      "abstract": "Why do language agents fail on tasks they are capable of solving? We argue that many such failures are reliability failures caused by stochastic drift from a task's latent solution structure, not capability failures. Every well-defined tool-use task imposes a canonical solution path (i.e., a convergent set of tool invocations shared across successful runs) and agent success depends critically on whether a trajectory stays within this path's operating envelope. We establish this causally using a natural experiment that holds model capability and task difficulty fixed by construction. We analyze trajectories from the Toolathlon benchmark: 22 frontier models each attempt 108 real-world tool-use tasks across 3 independent runs, yielding 515 model$\\times$task units where the same model succeeds on some runs and fails on others due to LLM sampling stochasticity alone. Within these units, successful runs adhere significantly more closely to the canonical solution path than failed runs ($+$0.060 Jaccard, $p<0.0001$, $n=488$ units, 95% CI [+0.043, +0.077]). This result survives six robustness checks including cross-model-family leave-one-out validation. Critically, the causal mechanism is gradual and self-reinforcing: the adherence gap is statistically indistinguishable from zero through the first 50% of the trajectory, ruling out early-branching selection bias, and each off-canonical tool call raises the probability that the next call is also off-canonical by 22.7 percentage points ($\\hatβ=+0.227$, $p<0.0001$), more than doubling the baseline rate. These findings imply that agent reliability cannot be improved by capability scaling alone, but offer a highly actionable intervention: a simple monitor that restarts the bottom tercile of runs based on mid-trajectory canonical adherence lifts success rates by $+$8.8 percentage points among intervened runs.",
+      "abstract": "Why do language agents fail on tasks they are capable of solving? We argue that many such failures are reliability failures caused by stochastic drift from a task's latent solution structure, not capability failures. Every well-defined tool-use task imposes a canonical solution path (i.e., a convergent set of tool invocations shared across successful runs) and agent success depends critically on whether a trajectory stays within this path's operating envelope. We establish this causally using a natural experiment that holds model capability and task difficulty fixed by construction. We analyze trajectories from the Toolathlon benchmark: 22 frontier models each attempt 108 real-world tool-use tasks across 3 independent runs, yielding 515 model$\\times$task units where the same model succeeds on some runs and fails on others due to LLM sampling stochasticity alone. Within these units, successful runs adhere significantly more closely to the canonical solution path than failed runs ($+$0.060 Jaccard, $p<0.0001$, $n=488$ units, 95% CI [+0.043, +0.077]). This result survives six robustness checks including cross-model-family leave-one-out validation. Critically, the causal mechanism is gradual and self-reinforcing: the adherence gap is statistically indistinguishable from zero through the first 50% of the trajectory, ruling out early-branching selection bias, and each off-canonical tool call raises the probability that the next call is also off-canonical by 22.7 percentage points ($\\hat\u03b2=+0.227$, $p<0.0001$), more than doubling the baseline rate. These findings imply that agent reliability cannot be improved by capability scaling alone, but offer a highly actionable intervention: a simple monitor that restarts the bottom tercile of runs based on mid-trajectory canonical adherence lifts success rates by $+$8.8 percentage points among intervened runs.",
       "authors": [
         "Wilson Y. Lee"
       ],
@@ -1262,6 +1314,21 @@
       "updatedAt": "2026-02-24T13:11:38Z",
       "absUrl": "https://arxiv.org/abs/2602.20867v1",
       "pdfUrl": "https://arxiv.org/pdf/2602.20867v1",
+      "comment": null,
+      "status": "ok"
+    },
+    {
+      "arxivId": "2602.22480",
+      "sourceUrl": "https://arxiv.org/abs/2602.22480",
+      "title": "VeRO: An Evaluation Harness for Agents to Optimize Agents",
+      "abstract": "An important emerging application of coding agents is agent optimization: the iterative improvement of a target agent through edit-execute-evaluate cycles. Despite its relevance, the community lacks a systematic understanding of coding agent performance on this task. Agent optimization differs fundamentally from conventional software engineering: the target agent interleaves deterministic code with stochastic LLM completions, requiring structured capture of both intermediate reasoning and downstream execution outcomes. To address these challenges, we introduce VERO (Versioning, Rewards, and Observations), which provides (1) a reproducible evaluation harness with versioned agent snapshots, budget-controlled evaluation, and structured execution traces, and (2) a benchmark suite of target agents and tasks with reference evaluation procedures. Using VERO, we conduct an empirical study comparing optimizer configurations across tasks and analyzing which modifications reliably improve target agent performance. We release VERO to support research on agent optimization as a core capability for coding agents.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": null,
+      "updatedAt": null,
+      "absUrl": "https://arxiv.org/abs/2602.22480",
+      "pdfUrl": "https://arxiv.org/pdf/2602.22480.pdf",
       "comment": null,
       "status": "ok"
     },
@@ -1409,7 +1476,7 @@
       "abstract": "Despite significant strides in language models in the last few years, when used as agents, such models often try to perform actions that are not just suboptimal for a given state, but are strictly prohibited by the external environment. For example, in the recent Kaggle GameArena chess competition, 78% of Gemini-2.5-Flash losses were attributed to illegal moves. Often people manually write \"harnesses\" around LLMs to prevent such failures. In this paper, we demonstrate that Gemini-2.5-Flash can automatically synthesize such a code harness, using a small number of rounds of iterative code refinement given feedback from the (game) environment. The resulting harness prevents all illegal moves in 145 different TextArena games (both 1-player and 2-player), enabling the smaller Gemini-2.5-Flash model to outperform larger models, such as Gemini-2.5-Pro. Pushing our technique to the limit, we can get Gemini-2.5-Flash to generate the entire policy in code, thus eliminating the need to use the LLM at decision making time. The resulting code-policy receives a higher average reward than Gemini-2.5-Pro and GPT-5.2-High on 16 TextArena 1-player games. Our results show that using a smaller model to synthesize a custom code harness (or entire policy) can outperform a much larger model, while also being more cost effective.",
       "authors": [
         "Xinghua Lou",
-        "Miguel Lázaro-Gredilla",
+        "Miguel L\u00e1zaro-Gredilla",
         "Antoine Dedieu",
         "Carter Wendelken",
         "Wolfgang Lehrach",
@@ -1501,7 +1568,7 @@
         "Nils Loose",
         "Nico Winkel",
         "Kristoffer Hempel",
-        "Felix Mächtle",
+        "Felix M\u00e4chtle",
         "Julian Hans",
         "Thomas Eisenbarth"
       ],
@@ -1577,7 +1644,7 @@
       "updatedAt": "2026-04-19T15:19:45Z",
       "absUrl": "https://arxiv.org/abs/2603.18829v9",
       "pdfUrl": "https://arxiv.org/pdf/2603.18829v9",
-      "comment": "v1.30: Agent Governance Series (P0-P4) complete on Zenodo; cross-references and DOIs added. v1.29: Exp 13 CW=2N O(N); Exp 14 OPA+atomicity; Related Work expanded. v1.27: TLA+ 4.29B states, Exp 12 IPI DeepSeek-R1:8b, false-denial 0.00. v1.26: adversary A=(K,S,B), Exp 11. v1.25: ΔBAR+liveness. v1.24: BAR+Counterfactual. v1.23: BAR. v1.22: RISK-3.0. v1.21: TLA+",
+      "comment": "v1.30: Agent Governance Series (P0-P4) complete on Zenodo; cross-references and DOIs added. v1.29: Exp 13 CW=2N O(N); Exp 14 OPA+atomicity; Related Work expanded. v1.27: TLA+ 4.29B states, Exp 12 IPI DeepSeek-R1:8b, false-denial 0.00. v1.26: adversary A=(K,S,B), Exp 11. v1.25: \u0394BAR+liveness. v1.24: BAR+Counterfactual. v1.23: BAR. v1.22: RISK-3.0. v1.21: TLA+",
       "status": "ok"
     },
     {
@@ -1683,7 +1750,7 @@
         "Yuren Hao",
         "Shuhaib Mehri",
         "ChengXiang Zhai",
-        "Dilek Hakkani-Tür"
+        "Dilek Hakkani-T\u00fcr"
       ],
       "primaryCategory": "cs.CL",
       "categories": [
@@ -1698,31 +1765,6 @@
       "absUrl": "https://arxiv.org/abs/2603.20939v1",
       "pdfUrl": "https://arxiv.org/pdf/2603.20939v1",
       "comment": "21 pages including appendices",
-      "status": "ok"
-    },
-    {
-      "arxivId": "2603.21019v1",
-      "sourceUrl": "https://arxiv.org/html/2603.21019v1",
-      "title": "SkillProbe: Security Auditing for Emerging Agent Skill Marketplaces via Multi-Agent Collaboration",
-      "abstract": "With the rapid evolution of Large Language Model (LLM) agent ecosystems, centralized skill marketplaces have emerged as pivotal infrastructure for augmenting agent capabilities. However, these marketplaces face unprecedented security challenges, primarily stemming from semantic-behavioral inconsistency and inter-skill combinatorial risks, where individually benign skills induce malicious behaviors during collaborative invocation. To address these vulnerabilities, we propose SkillProbe, a multi-stage security auditing framework driven by multi-agent collaboration. SkillProbe introduces a \"Skills-for-Skills\" design paradigm, encapsulating auditing processes into standardized skill modules to drive specialized agents through a rigorous pipeline, including admission filtering, semantic-behavioral alignment detection, and combinatorial risk simulation. We conducted a large-scale evaluation using 8 mainstream LLM series across 2,500 real-world skills from ClawHub. Our results reveal a striking popularity-security paradox, where download volume is not a reliable proxy for security quality, as over 90% of high-popularity skills failed to pass rigorous auditing. Crucially, we discovered that high-risk skills form a single giant connected component within the risk-link dimension, demonstrating that cascaded risks are systemic rather than isolated occurrences. We hope that SkillProbe will inspire researchers to provide a scalable governance infrastructure for constructing a trustworthy Agentic Web. SkillProbe is accessible for public experience at skillhub.holosai.io.",
-      "authors": [
-        "Zihan Guo",
-        "Zhiyu Chen",
-        "Xiaohang Nie",
-        "Jianghao Lin",
-        "Yuanjian Zhou",
-        "Weinan Zhang"
-      ],
-      "primaryCategory": "cs.CR",
-      "categories": [
-        "cs.CR",
-        "cs.SE"
-      ],
-      "publishedAt": "2026-03-22T02:31:27Z",
-      "updatedAt": "2026-03-22T02:31:27Z",
-      "absUrl": "https://arxiv.org/abs/2603.21019v1",
-      "pdfUrl": "https://arxiv.org/pdf/2603.21019v1",
-      "comment": "16 pages, 6 figures",
       "status": "ok"
     },
     {
@@ -1962,6 +2004,21 @@
       "updatedAt": "2026-03-31T03:10:28Z",
       "absUrl": "https://arxiv.org/abs/2603.29199v1",
       "pdfUrl": "https://arxiv.org/pdf/2603.29199v1",
+      "comment": null,
+      "status": "ok"
+    },
+    {
+      "arxivId": "2604.00073",
+      "sourceUrl": "https://arxiv.org/abs/2604.00073",
+      "title": "Terminal Agents Suffice for Enterprise Automation",
+      "abstract": "There has been growing interest in building agents that can interact with digital platforms to execute meaningful enterprise tasks autonomously. Among the approaches explored are tool-augmented agents built on abstractions such as Model Context Protocol (MCP) and web agents that operate through graphical interfaces. Yet, it remains unclear whether such complex agentic systems are necessary given their cost and operational overhead. We argue that a coding agent equipped only with a terminal and a filesystem can solve many enterprise tasks more effectively by interacting directly with platform APIs. We evaluate this hypothesis across diverse real-world systems and show that these low-level terminal agents match or outperform more complex agent architectures. Our findings suggest that simple programmatic interfaces, combined with strong foundation models, are sufficient for practical enterprise automation.",
+      "authors": [],
+      "primaryCategory": null,
+      "categories": [],
+      "publishedAt": "Mon, 06 Apr 2026 00:47:11 GMT",
+      "updatedAt": "Mon, 06 Apr 2026 00:47:11 GMT",
+      "absUrl": "https://arxiv.org/abs/2604.00073",
+      "pdfUrl": "https://arxiv.org/pdf/2604.00073.pdf",
       "comment": null,
       "status": "ok"
     },
@@ -2409,34 +2466,6 @@
       "status": "ok"
     },
     {
-      "arxivId": "2604.13018v1",
-      "sourceUrl": "https://arxiv.org/pdf/2604.13018v1",
-      "title": "Toward Autonomous Long-Horizon Engineering for ML Research",
-      "abstract": "Autonomous AI research has advanced rapidly, but long-horizon ML research engineering remains difficult: agents must sustain coherent progress across task comprehension, environment setup, implementation, experimentation, and debugging over hours or days. We introduce AiScientist, a system for autonomous long-horizon engineering for ML research built on a simple principle: strong long-horizon performance requires both structured orchestration and durable state continuity. To this end, AiScientist combines hierarchical orchestration with a permission-scoped File-as-Bus workspace: a top-level Orchestrator maintains stage-level control through concise summaries and a workspace map, while specialized agents repeatedly re-ground on durable artifacts such as analyses, plans, code, and experimental evidence rather than relying primarily on conversational handoffs, yielding thin control over thick state. Across two complementary benchmarks, AiScientist improves PaperBench score by 10.54 points on average over the best matched baseline and achieves 81.82 Any Medal% on MLE-Bench Lite. Ablation studies further show that File-as-Bus protocol is a key driver of performance, reducing PaperBench by 6.41 points and MLE-Bench Lite by 31.82 points when removed. These results suggest that long-horizon ML research engineering is a systems problem of coordinating specialized work over durable project state, rather than a purely local reasoning problem.",
-      "authors": [
-        "Guoxin Chen",
-        "Jie Chen",
-        "Lei Chen",
-        "Jiale Zhao",
-        "Fanzhe Meng",
-        "Wayne Xin Zhao",
-        "Ruihua Song",
-        "Cheng Chen",
-        "Ji-Rong Wen",
-        "Kai Jia"
-      ],
-      "primaryCategory": "cs.CL",
-      "categories": [
-        "cs.CL"
-      ],
-      "publishedAt": "2026-04-14T17:55:16Z",
-      "updatedAt": "2026-04-14T17:55:16Z",
-      "absUrl": "https://arxiv.org/abs/2604.13018v1",
-      "pdfUrl": "https://arxiv.org/pdf/2604.13018v1",
-      "comment": "Repo: https://github.com/AweAI-Team/AiScientist",
-      "status": "ok"
-    },
-    {
       "arxivId": "2604.13151v1",
       "sourceUrl": null,
       "title": "Exploration and Exploitation Errors Are Measurable for Language Model Agents",
@@ -2470,7 +2499,7 @@
         "Amr Aly",
         "Jonathan Endres",
         "Tobias Dornstetter",
-        "Simon Weinmüller",
+        "Simon Weinm\u00fcller",
         "Andreas Maier"
       ],
       "primaryCategory": "physics.med-ph",
@@ -2751,7 +2780,7 @@
       "arxivId": "2604.21003v2",
       "sourceUrl": null,
       "title": "The Last Harness You'll Ever Build",
-      "abstract": "AI agents are increasingly deployed on complex, domain-specific workflows -- navigating enterprise web applications that require dozens of clicks and form fills, orchestrating multi-step research pipelines that span search, extraction, and synthesis, automating code review across unfamiliar repositories, and handling customer escalations that demand nuanced domain knowledge. \\textbf{Each new task domain requires painstaking, expert-driven harness engineering}: designing the prompts, tools, orchestration logic, and evaluation criteria that make a foundation model effective. We present a two-level framework that automates this process. At the first level, the \\textbf{Harness Evolution Loop} optimizes a worker agent's harness $\\mathcal{H}$ for a single task: a Worker Agent $W_{\\mathcal{H}}$ executes the task, an Evaluator Agent $V$ adversarially diagnoses failures and scores performance, and an Evolution Agent $E$ modifies the harness based on the full history of prior attempts. At the second level, the \\textbf{Meta-Evolution Loop} optimizes the evolution blueprint $Λ= (W_{\\mathcal{H}}, \\mathcal{H}^{(0)}, V, E)$ itself across diverse tasks, \\textbf{learning a blueprint $Λ^{(\\text{best})}$ that enables rapid harness convergence on any new task -- so that adapting an agent to a novel domain requires no human harness engineering at all.} We formalize the correspondence to meta-learning and present both algorithms. The framework \\textbf{shifts manual harness engineering into automated harness engineering}, and takes one step further -- \\textbf{automating the design of the automation itself}.",
+      "abstract": "AI agents are increasingly deployed on complex, domain-specific workflows -- navigating enterprise web applications that require dozens of clicks and form fills, orchestrating multi-step research pipelines that span search, extraction, and synthesis, automating code review across unfamiliar repositories, and handling customer escalations that demand nuanced domain knowledge. \\textbf{Each new task domain requires painstaking, expert-driven harness engineering}: designing the prompts, tools, orchestration logic, and evaluation criteria that make a foundation model effective. We present a two-level framework that automates this process. At the first level, the \\textbf{Harness Evolution Loop} optimizes a worker agent's harness $\\mathcal{H}$ for a single task: a Worker Agent $W_{\\mathcal{H}}$ executes the task, an Evaluator Agent $V$ adversarially diagnoses failures and scores performance, and an Evolution Agent $E$ modifies the harness based on the full history of prior attempts. At the second level, the \\textbf{Meta-Evolution Loop} optimizes the evolution blueprint $\u039b= (W_{\\mathcal{H}}, \\mathcal{H}^{(0)}, V, E)$ itself across diverse tasks, \\textbf{learning a blueprint $\u039b^{(\\text{best})}$ that enables rapid harness convergence on any new task -- so that adapting an agent to a novel domain requires no human harness engineering at all.} We formalize the correspondence to meta-learning and present both algorithms. The framework \\textbf{shifts manual harness engineering into automated harness engineering}, and takes one step further -- \\textbf{automating the design of the automation itself}.",
       "authors": [
         "Haebin Seong",
         "Li Yin",

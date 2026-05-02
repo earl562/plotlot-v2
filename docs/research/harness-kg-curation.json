@@ -3,178 +3,329 @@
     {
       "name": "Executable Specification",
       "type": "primitive",
-      "sources": ["2603.25723v1", "2604.11378v1", "2604.13346v1"],
+      "sources": [
+        "2603.25723v1",
+        "2604.11378v1",
+        "2604.13346v1"
+      ],
       "bullets": [
         "Keep harness control flow in a repo-owned artifact instead of burying it in controller code.",
         "Branches, loops, parallelism, retries, and handoffs should be inspectable and diffable as product logic.",
         "For PlotLot, the zoning/site-feasibility workflow should be editable as a stage graph: intake -> retrieve -> extract -> verify -> calculate -> report -> review."
       ],
-      "links": ["Harness Runtime", "Step-Bounded Context", "Workflow Module Interface", "Replayable Trajectory"]
+      "links": [
+        "Harness Runtime",
+        "Step-Bounded Context",
+        "Workflow Module Interface",
+        "Replayable Trajectory"
+      ]
     },
     {
       "name": "Step-Bounded Context",
       "type": "primitive",
-      "sources": ["2603.20380v1", "2604.13346v1"],
+      "sources": [
+        "2603.20380v1",
+        "2604.13346v1"
+      ],
       "bullets": [
         "Context should be granted per step, not inherited by default from one ever-growing transcript.",
         "Fresh-task vs persistent-step semantics let the harness decide when to isolate context and when to preserve it.",
         "For PlotLot, ordinance extraction should see only the parcel facts and cited ordinance sections needed for that extraction lane."
       ],
-      "links": ["Context Broker", "Executable Specification", "Workflow Verification"]
+      "links": [
+        "Context Broker",
+        "Executable Specification",
+        "Workflow Verification"
+      ]
     },
     {
       "name": "Workflow Module Interface",
       "type": "primitive",
-      "sources": ["2602.20867v1", "2603.25723v1", "2604.13346v1"],
+      "sources": [
+        "2602.20867v1",
+        "2603.25723v1",
+        "2604.13346v1"
+      ],
       "bullets": [
         "Treat skills, tools, and subagents as workflow modules with named parameters and typed return values.",
         "A reusable module boundary is the unit of delegation, testing, and replacement.",
         "PlotLot modules should include parcel facts, zoning retrieval, dimensional extraction, conflict resolution, deterministic calculation, and evidence review."
       ],
-      "links": ["Harness Runtime", "Executable Specification", "Evidence Ledger"]
+      "links": [
+        "Harness Runtime",
+        "Executable Specification",
+        "Evidence Ledger"
+      ]
     },
     {
       "name": "Replayable Trajectory",
       "type": "primitive",
-      "sources": ["2604.03610v1", "2604.13346v1"],
+      "sources": [
+        "2604.03610v1",
+        "2604.13346v1"
+      ],
       "bullets": [
         "Checkpoint after each stage with step id, context snapshot, metrics, tool outputs, and sandbox/workspace state.",
         "Selective replay lets you hold upstream evidence constant while changing a downstream prompt or verifier.",
         "For PlotLot, replay should avoid redoing GIS and ordinance fetches when only extraction, report, or review logic changes."
       ],
-      "links": ["Harness Runtime", "Evidence Ledger", "Workflow Verification"]
+      "links": [
+        "Harness Runtime",
+        "Evidence Ledger",
+        "Workflow Verification"
+      ]
     },
     {
       "name": "Workflow Verification",
       "type": "primitive",
-      "sources": ["2604.07833v2", "2604.13630v1", "2604.13346v1"],
+      "sources": [
+        "2604.07833v2",
+        "2604.13630v1",
+        "2604.13346v1"
+      ],
       "bullets": [
         "Define preconditions and postconditions at the workflow-step level so runs are testable as trajectories, not just final answers.",
         "Use both static checks over the plan and dynamic checks over the realized execution trace.",
         "For PlotLot, verification means every extracted zoning number is unit-normalized, source-cited, and reproducible by deterministic calculators."
       ],
-      "links": ["Evidence Ledger", "Governance Middleware", "Step-Bounded Context", "Replayable Trajectory"]
+      "links": [
+        "Evidence Ledger",
+        "Governance Middleware",
+        "Step-Bounded Context",
+        "Replayable Trajectory"
+      ]
     },
     {
       "name": "Agent-Supervised Tool Adaptation",
       "type": "primitive",
-      "sources": ["2512.16301v3"],
+      "sources": [
+        "2512.16301v3"
+      ],
       "bullets": [
         "Freeze the backbone and improve the surrounding searchers, memory writers, planners, and reviewers under its supervision.",
         "Narrow procedural specialists are often more data-efficient and less forgetful than retraining one monolithic agent.",
         "For PlotLot, ordinance retrieval, extraction, evidence review, and memory curation should evolve as peripheral modules around a stable orchestrator."
       ],
-      "links": ["Harness Runtime", "Workflow Module Interface", "Context Broker", "Evidence Ledger", "Graduated Subagent"]
+      "links": [
+        "Harness Runtime",
+        "Workflow Module Interface",
+        "Context Broker",
+        "Evidence Ledger",
+        "Graduated Subagent"
+      ]
     },
     {
       "name": "Adaptation Signal Design",
       "type": "primitive",
-      "sources": ["2512.16301v3"],
+      "sources": [
+        "2512.16301v3"
+      ],
       "bullets": [
         "Separate dense causal execution signals from sparse holistic utility signals; they answer different questions.",
         "Use execution-grounded metrics to debug tool mechanics and end-to-end metrics to judge final analyst value.",
         "For PlotLot, citation resolution, parser correctness, and calculator reproducibility are execution signals; report usefulness and analyst acceptance are holistic signals."
       ],
-      "links": ["Evidence Ledger", "Workflow Verification", "Context Broker", "Agent-Supervised Tool Adaptation"]
+      "links": [
+        "Evidence Ledger",
+        "Workflow Verification",
+        "Context Broker",
+        "Agent-Supervised Tool Adaptation"
+      ]
     },
     {
       "name": "Graduated Subagent",
       "type": "primitive",
-      "sources": ["2512.16301v3"],
+      "sources": [
+        "2512.16301v3"
+      ],
       "bullets": [
         "A specialist can be learned under A1/A2-style adaptation, then frozen and redeployed as a reusable T1 tool.",
         "Graduation turns fragile prompt behavior into a stable interface with measurable responsibilities.",
         "For PlotLot, stable ordinance search, extraction, or review specialists should be promoted into reusable modules callable by the main harness."
       ],
-      "links": ["Workflow Module Interface", "Harness Runtime", "Agent-Supervised Tool Adaptation"]
+      "links": [
+        "Workflow Module Interface",
+        "Harness Runtime",
+        "Agent-Supervised Tool Adaptation"
+      ]
     },
     {
       "name": "Explicit-to-Implicit Translation",
       "type": "primitive",
-      "sources": ["2408.01667v2"],
+      "sources": [
+        "2408.01667v2"
+      ],
       "bullets": [
         "Convert directly observed artifacts into model-legible signals before the agent starts searching or planning.",
         "Keep static translation tools outside the active agent loop; they reduce ambiguity without spending tool budget.",
         "For PlotLot, translate parcel/zoning pages, ordinance PDFs, tables, and map legends into normalized jurisdiction, code, and evidence candidates before LLM synthesis."
       ],
-      "links": ["Context Broker", "Workflow Module Interface", "Evidence Ledger", "Dynamic Reference Expansion"]
+      "links": [
+        "Context Broker",
+        "Workflow Module Interface",
+        "Evidence Ledger",
+        "Dynamic Reference Expansion"
+      ]
     },
     {
       "name": "Dynamic Reference Expansion",
       "type": "primitive",
-      "sources": ["2408.01667v2"],
+      "sources": [
+        "2408.01667v2"
+      ],
       "bullets": [
         "When a static registry is incomplete, the harness should actively discover additional references during execution.",
         "Reference expansion should be budgeted, queryable, and evidence-producing rather than free-form browsing.",
         "For PlotLot, discover official parcel, zoning, and ordinance hosts from jurisdiction clues instead of assuming complete prior coverage."
       ],
-      "links": ["Harness Runtime", "Budgeted Tool Loop", "Entity-to-Authority Verification"]
+      "links": [
+        "Harness Runtime",
+        "Budgeted Tool Loop",
+        "Entity-to-Authority Verification"
+      ]
     },
     {
       "name": "Entity-to-Authority Verification",
       "type": "primitive",
-      "sources": ["2408.01667v2"],
+      "sources": [
+        "2408.01667v2"
+      ],
       "bullets": [
         "Predict the governing entity, then verify that the source boundary is official before trusting downstream claims.",
         "Authority verification should absorb domain variants and mirrors while still distinguishing official hosts from lookalikes.",
         "For PlotLot, after predicting city/county/ordinance authority, verify official municipal, county, ArcGIS, or Municode domains before accepting zoning facts."
       ],
-      "links": ["Governance Middleware", "Evidence Ledger", "Dynamic Reference Expansion"]
+      "links": [
+        "Governance Middleware",
+        "Evidence Ledger",
+        "Dynamic Reference Expansion"
+      ]
     },
     {
       "name": "Budgeted Tool Loop",
       "type": "primitive",
-      "sources": ["2408.01667v2"],
+      "sources": [
+        "2408.01667v2"
+      ],
       "bullets": [
         "Dynamic discovery improves accuracy, but the harness must explicitly limit retrieval rounds, latency, and spend.",
         "Tool loops should expose cost/benefit tradeoffs and stop conditions rather than silently accumulating work.",
         "For PlotLot, ordinance retrieval and evidence resolution should run under explicit budgets for tool calls, tokens, and wall-clock time."
       ],
-      "links": ["Harness Runtime", "Dynamic Reference Expansion", "Governance Middleware"]
+      "links": [
+        "Harness Runtime",
+        "Dynamic Reference Expansion",
+        "Governance Middleware"
+      ]
     },
     {
       "name": "Skill Handbook",
       "type": "primitive",
-      "sources": ["2602.19672v1"],
+      "sources": [
+        "2602.19672v1"
+      ],
       "bullets": [
         "Keep routing knowledge in an explicit artifact containing mode-selection insights, a skill registry, and per-agent profiles.",
         "The handbook is the reusable layer between high-level workflow stages and concrete model/tool choices.",
         "For PlotLot, the handbook should encode when to retrieve, extract, calculate, review, or report, plus the skills each lane requires."
       ],
-      "links": ["Harness Runtime", "Workflow Module Interface", "Evidence Ledger", "Competence-Cost Agent Profile", "Granularity-Aware Handbook Selection"]
+      "links": [
+        "Harness Runtime",
+        "Workflow Module Interface",
+        "Evidence Ledger",
+        "Competence-Cost Agent Profile",
+        "Granularity-Aware Handbook Selection"
+      ]
     },
     {
       "name": "Competence-Cost Agent Profile",
       "type": "primitive",
-      "sources": ["2602.19672v1"],
+      "sources": [
+        "2602.19672v1"
+      ],
       "bullets": [
         "Route agents using skill-conditioned competence estimates and mode-specific cost, not global model reputation.",
         "A profile should accumulate success/failure evidence, routing caveats, and average cost per operational mode.",
         "For PlotLot, specialist lanes like ordinance retrieval, table extraction, and citation-backed synthesis should each earn their own profile statistics."
       ],
-      "links": ["Skill Handbook", "Evidence Ledger", "Workflow Verification", "Harness Runtime"]
+      "links": [
+        "Skill Handbook",
+        "Evidence Ledger",
+        "Workflow Verification",
+        "Harness Runtime"
+      ]
     },
     {
       "name": "Contrastive Skill Discovery",
       "type": "primitive",
-      "sources": ["2602.19672v1"],
+      "sources": [
+        "2602.19672v1"
+      ],
       "bullets": [
         "Learn new skills by contrasting successful and failed trajectories at the same mode to isolate the missing capability.",
         "The raw material is execution traces, not hand-authored taxonomies or expensive RL updates.",
         "For PlotLot, compare cited vs uncited retrievals, correct vs incorrect zoning extractions, and accepted vs rejected reports to discover reusable specialist skills."
       ],
-      "links": ["Replayable Trajectory", "Evidence Ledger", "Agent-Supervised Tool Adaptation", "Skill Handbook"]
+      "links": [
+        "Replayable Trajectory",
+        "Evidence Ledger",
+        "Agent-Supervised Tool Adaptation",
+        "Skill Handbook"
+      ]
     },
     {
       "name": "Granularity-Aware Handbook Selection",
       "type": "primitive",
-      "sources": ["2602.19672v1"],
+      "sources": [
+        "2602.19672v1"
+      ],
       "bullets": [
         "More skills are not always better; keep only the level of detail the orchestrator can reliably recognize and use.",
         "Select handbook subsets on a Pareto frontier of task success versus execution cost.",
         "For PlotLot, start with coarse skill buckets and split them only when eval traces show that the extra distinction improves routing quality."
       ],
-      "links": ["Skill Handbook", "Context Broker", "Competence-Cost Agent Profile", "Budgeted Tool Loop"]
+      "links": [
+        "Skill Handbook",
+        "Context Broker",
+        "Competence-Cost Agent Profile",
+        "Budgeted Tool Loop"
+      ]
+    },
+    {
+      "name": "Context Refresh + Notes Recall",
+      "type": "primitive",
+      "sources": [
+        "2509.21766"
+      ],
+      "bullets": [
+        "When long trajectories approach context limits, clear stale dialogue and reconstruct working state from durable notes instead of dragging the whole transcript forward.",
+        "Notes are not a convenience log; they are the compression boundary that preserves progress across context resets.",
+        "For PlotLot, refresh long site-feasibility runs from the evidence ledger, jurisdiction summary, open questions, and calculator state rather than raw chat history."
+      ],
+      "links": [
+        "Context Broker",
+        "Evidence Ledger",
+        "Step-Bounded Context",
+        "Replayable Trajectory"
+      ]
+    },
+    {
+      "name": "Failure Manifestation Catalog",
+      "type": "primitive",
+      "sources": [
+        "2509.21766"
+      ],
+      "bullets": [
+        "Separate root causes from visible trajectory failures so evals can diagnose why a run failed, not just that it failed.",
+        "Useful manifestations include repetitive looping, premature convergence, misaligned tool usage, memory issues, uncontrolled experiments, error propagation, and environment mis-modeling.",
+        "For PlotLot, failed analyses should be labeled by manifestation so we can distinguish bad retrieval, weak planning, stale memory, and premature report commit."
+      ],
+      "links": [
+        "Workflow Verification",
+        "Replayable Trajectory",
+        "Context Broker",
+        "Evidence Ledger"
+      ]
     }
   ],
   "overviewConnections": [
@@ -213,11 +364,25 @@
         "Connects [[Workflow Verification]] to [[Competence-Cost Agent Profile]]: per-skill success, citation coverage, and deterministic agreement become the evidence base for routing decisions.",
         "For PlotLot, this paper suggests a land-use handbook that routes among retrieval, extraction, calculation, and review specialists while explicitly monitoring cost and collapse into one expensive lane."
       ]
+    },
+    {
+      "title": "UltraHorizon (2509.21766) synthesis",
+      "bullets": [
+        "Connects [[Context Broker]] and [[Evidence Ledger]] to [[Context Refresh + Notes Recall]]: long-horizon performance depends on artifact-backed state reconstruction, not ever-growing transcripts.",
+        "Connects [[Workflow Verification]] and [[Replayable Trajectory]] to [[Failure Manifestation Catalog]]: traces should be replayable and labelable by premature convergence, looping, memory loss, and uncontrolled experiments.",
+        "For PlotLot, this paper argues that site-feasibility is a genuinely long-horizon agent problem and needs explicit context-reset, evidence-threshold, and failure-diagnosis machinery."
+      ]
     }
   ],
   "sourceConnections": {
     "2604.13346v1": {
-      "wikilinks": ["Executable Specification", "Step-Bounded Context", "Workflow Module Interface", "Replayable Trajectory", "Workflow Verification"],
+      "wikilinks": [
+        "Executable Specification",
+        "Step-Bounded Context",
+        "Workflow Module Interface",
+        "Replayable Trajectory",
+        "Workflow Verification"
+      ],
       "bullets": [
         "AgentSPEX is the clearest reviewed paper so far on converting harness logic into an executable, human-editable workflow spec.",
         "Its strongest contribution for PlotLot is not the YAML syntax itself, but the combination of explicit context boundaries, checkpointed execution, and replayable downstream experimentation.",
@@ -225,7 +390,13 @@
       ]
     },
     "2512.16301v3": {
-      "wikilinks": ["Agent-Supervised Tool Adaptation", "Adaptation Signal Design", "Graduated Subagent", "Workflow Module Interface", "Evidence Ledger"],
+      "wikilinks": [
+        "Agent-Supervised Tool Adaptation",
+        "Adaptation Signal Design",
+        "Graduated Subagent",
+        "Workflow Module Interface",
+        "Evidence Ledger"
+      ],
       "bullets": [
         "This is the clearest reviewed paper so far on where adaptation should live in an agentic system.",
         "For PlotLot, its most important consequence is strategic: freeze the orchestrator, and improve the surrounding retrieval, memory, review, and evidence modules.",
@@ -233,7 +404,14 @@
       ]
     },
     "2408.01667v2": {
-      "wikilinks": ["Explicit-to-Implicit Translation", "Dynamic Reference Expansion", "Entity-to-Authority Verification", "Budgeted Tool Loop", "Context Broker", "Evidence Ledger"],
+      "wikilinks": [
+        "Explicit-to-Implicit Translation",
+        "Dynamic Reference Expansion",
+        "Entity-to-Authority Verification",
+        "Budgeted Tool Loop",
+        "Context Broker",
+        "Evidence Ledger"
+      ],
       "bullets": [
         "The paper matters less for phishing per se than for its harness decomposition: static signal translation -> budgeted discovery -> authority verification.",
         "Its most transferable primitive for PlotLot is replacing exhaustive prior registries with on-run reference expansion backed by official-source verification.",
@@ -241,11 +419,31 @@
       ]
     },
     "2602.19672v1": {
-      "wikilinks": ["Skill Handbook", "Competence-Cost Agent Profile", "Contrastive Skill Discovery", "Granularity-Aware Handbook Selection", "Harness Runtime"],
+      "wikilinks": [
+        "Skill Handbook",
+        "Competence-Cost Agent Profile",
+        "Contrastive Skill Discovery",
+        "Granularity-Aware Handbook Selection",
+        "Harness Runtime"
+      ],
       "bullets": [
         "This is the clearest reviewed paper so far on replacing end-to-end router training with an explicit, reusable routing knowledge base.",
         "For PlotLot, its biggest architectural consequence is to route by capability lanes backed by trace-derived evidence, not by one static default model per stage.",
         "Its most important warning is granularity: a richer skill taxonomy only helps if the orchestrator can reliably classify active skills and use the distinction to improve cost or accuracy."
+      ]
+    },
+    "2509.21766": {
+      "wikilinks": [
+        "Context Refresh + Notes Recall",
+        "Failure Manifestation Catalog",
+        "Context Broker",
+        "Evidence Ledger",
+        "Workflow Verification"
+      ],
+      "bullets": [
+        "UltraHorizon is the clearest newly ingested paper so far on how long-horizon agent failures compound as trajectories, tool calls, and partial observability increase.",
+        "Its most transferable primitive for PlotLot is CRNR: reset active context and rebuild from durable notes/evidence instead of trusting one swollen transcript.",
+        "Its biggest warning for PlotLot is evaluation realism: more steps alone do not solve hard site-feasibility cases unless the harness also enforces evidence thresholds and controlled hypothesis testing."
       ]
     }
   }
