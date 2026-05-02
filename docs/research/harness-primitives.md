@@ -32,6 +32,9 @@ A running, paper-backed list of harness/agent engineering primitives we can reus
 - Progressive disclosure workspace map
 - Explore/exploit error ledger
 - Frontier + activatable-state summary
+- Output survival metric
+- User pushback telemetry
+- Clarification gate
 
 ---
 
@@ -149,3 +152,18 @@ PlotLot mapping:
 - Maintain an explicit PlotLot frontier summary: verified official hosts, unresolved likely hosts, discovered ordinance sections, unresolved dimensional questions, and claims whose prerequisites are satisfied.
 - Score land-use traces separately for search quality and synthesis quality so we can tell whether a failure came from missed discovery or bad reasoning after discovery.
 - Treat report-ready feasibility claims as activatable states: they only advance once the official source, citation, unit normalization, and conflict checks are satisfied.
+
+---
+
+## SWE-chat (2604.20779v1)
+
+- **Output survival metric**: judge agent usefulness by what survives human review into the final artifact, not by gross generated output.
+- **User pushback telemetry**: corrections, rejections, failure reports, and interruptions are structured supervision signals about where the harness created friction.
+- **Clarification gate**: when uncertainty is high, the harness should stop and ask the user before spending more autonomous effort on a likely-wrong trajectory.
+- **Real-workflow trajectory benchmark**: evaluate on multi-turn, tool-using, human-steered sessions instead of only curated one-shot tasks.
+
+PlotLot mapping:
+- Measure which generated zoning claims, citations, and calculations survive into the final site-feasibility memo, and record whether losses came from analyst deletion, overwrite, or agent self-rewrite.
+- Treat analyst pushback as a first-class improvement signal: unsupported setback claim, bad jurisdiction source, wrong unit normalization, premature conclusion, or poor report framing.
+- Add explicit clarification gates whenever PlotLot lacks a verified authority source, sees conflicting ordinance evidence, or cannot justify a dimensional conclusion with citations.
+- Build evals from real analyst review loops so the harness learns collaborative land-use work, not only synthetic benchmark completion.

@@ -1,8 +1,8 @@
 # arXiv Notes Status
 
 Total: **109**
-Reviewed: **32**
-Stub: **77**
+Reviewed: **33**
+Stub: **76**
 
 ## Reviewed
 
@@ -38,6 +38,7 @@ Stub: **77**
 - [2604.13630v1](docs/research/arxiv-notes/2604.13630v1.md) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment
 - [2604.14228v1](docs/research/arxiv-notes/2604.14228v1.md) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems
 - [2604.18071v1](docs/research/arxiv-notes/2604.18071v1.md) — Architectural Design Decisions in AI Agent Harnesses
+- [2604.20779v1](docs/research/arxiv-notes/2604.20779v1.md) — SWE-chat: Coding Agent Interactions From Real Users in the Wild
 
 ## Stubs (to review)
 
@@ -116,6 +117,5 @@ Stub: **77**
 - [2604.14004v1](docs/research/arxiv-notes/2604.14004v1.md) — Memory Transfer Learning: How Memories are Transferred Across Domains in Coding Agents
 - [2604.15034v2](docs/research/arxiv-notes/2604.15034v2.md) — Autogenesis: A Self-Evolving Agent Protocol
 - [2604.19572v2](docs/research/arxiv-notes/2604.19572v2.md) — A Self-Evolving Framework for Efficient Terminal Agents via Observational Context Compression
-- [2604.20779v1](docs/research/arxiv-notes/2604.20779v1.md) — SWE-chat: Coding Agent Interactions From Real Users in the Wild
 - [2604.21003v2](docs/research/arxiv-notes/2604.21003v2.md) — The Last Harness You'll Ever Build
 

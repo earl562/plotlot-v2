@@ -64,9 +64,17 @@ function listReviewedArxivNotes() {
 }
 
 function extractSection(md, heading) {
-  const re = new RegExp(`^##\\s+${heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$([\\s\\S]*?)(?=^##\\s+|$)`, "im");
-  const m = md.match(re);
-  return m?.[1]?.trim() || "";
+  const lines = md.split(/\r?\n/);
+  const target = `## ${heading}`.trim();
+  const start = lines.findIndex((line) => line.trim() === target);
+  if (start === -1) return "";
+
+  const out = [];
+  for (let i = start + 1; i < lines.length; i++) {
+    if (lines[i].startsWith("## ")) break;
+    out.push(lines[i]);
+  }
+  return out.join("\n").trim();
 }
 
 function bulletsFromSection(md, heading) {

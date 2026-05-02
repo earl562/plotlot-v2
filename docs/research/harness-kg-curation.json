@@ -452,6 +452,61 @@
         "Exploration-vs-Exploitation Error Ledger",
         "Workflow Verification"
       ]
+    },
+    {
+      "name": "Output Survival Metric",
+      "type": "primitive",
+      "sources": [
+        "2604.20779v1"
+      ],
+      "bullets": [
+        "Measure agent usefulness by what survives human review into the final artifact, not by gross generated output.",
+        "Separate survival from loss modes such as agent self-rewrites, human overwrites, and human deletions so failure mechanics are diagnosable.",
+        "For PlotLot, track which generated zoning claims, ordinance citations, and calculations survive into the final site-feasibility memo and why others were removed."
+      ],
+      "links": [
+        "Evidence Ledger",
+        "Structured Observation Interface",
+        "Workflow Verification",
+        "Adaptation Signal Design"
+      ]
+    },
+    {
+      "name": "User Pushback Telemetry",
+      "type": "primitive",
+      "sources": [
+        "2604.20779v1"
+      ],
+      "bullets": [
+        "Corrections, rejections, failure reports, and interruptions are trajectory-level supervision signals about where the harness created friction.",
+        "Pushback should be captured as structured telemetry rather than disappearing into raw chat history or ad hoc analyst memory.",
+        "For PlotLot, analyst objections to unsupported claims, bad jurisdiction picks, weak citations, or premature feasibility conclusions should become labeled review data."
+      ],
+      "links": [
+        "Workflow Verification",
+        "Failure Manifestation Catalog",
+        "Competence-Cost Agent Profile",
+        "Evidence Ledger",
+        "Output Survival Metric"
+      ]
+    },
+    {
+      "name": "Clarification Gate",
+      "type": "primitive",
+      "sources": [
+        "2604.20779v1"
+      ],
+      "bullets": [
+        "When uncertainty is high, the harness should stop and ask for user guidance before spending more autonomous effort on a likely-wrong trajectory.",
+        "Clarification is a control policy, not a personality trait: it should be triggered by explicit ambiguity, conflict, or evidence insufficiency thresholds.",
+        "For PlotLot, unresolved authority, conflicting ordinance interpretations, or unsupported dimensional assumptions should force an analyst check before report generation continues."
+      ],
+      "links": [
+        "Workflow Verification",
+        "Governance Middleware",
+        "Context Broker",
+        "User Pushback Telemetry"
+      ]
     }
   ],
   "overviewConnections": [
@@ -524,6 +579,15 @@
         "Connects [[Context Broker]] to [[Frontier + Activatable-State Summary]]: explicit frontier and ready-state memory helps the harness know what still needs discovery versus what is already safe to exploit.",
         "Connects [[Failure Manifestation Catalog]] to search-vs-synthesis diagnosis: a bad PlotLot run can fail because it never found the decisive source or because it mishandled evidence it already had.",
         "For PlotLot, this paper argues for frontier-aware retrieval, prerequisite-gated claims, and separate metrics for source discovery quality versus downstream synthesis quality."
+      ]
+    },
+    {
+      "title": "SWE-chat (2604.20779v1) synthesis",
+      "bullets": [
+        "Connects [[Evidence Ledger]] and [[Structured Observation Interface]] to [[Output Survival Metric]]: the harness should measure what analyst-reviewed output actually survives into the final artifact, not just what the agent generated.",
+        "Connects [[Workflow Verification]] and [[Failure Manifestation Catalog]] to [[User Pushback Telemetry]]: corrections, interruptions, and failure reports are valuable supervision about where the trajectory went off course.",
+        "Connects [[Governance Middleware]] and [[Context Broker]] to [[Clarification Gate]]: high-risk ambiguity should trigger ask-before-acting boundaries instead of letting the user discover bad work late.",
+        "For PlotLot, this paper argues for collaborative, analyst-steered site-feasibility runs optimized for accepted, cited conclusions rather than raw autonomous throughput."
       ]
     }
   ],
@@ -639,6 +703,20 @@
         "This paper is the clearest reviewed source so far on separating discovery failures from synthesis failures in partially observed agent tasks.",
         "For PlotLot, its most practical consequence is to maintain an explicit frontier/ready-state summary so the harness knows which sources still need discovery and which claims are mature enough for downstream calculation or reporting.",
         "Its biggest warning is that semantic intuition is unreliable: domain priors can help some models and hurt others, so PlotLot must gate conclusions on evidence completeness rather than plausibility."
+      ]
+    },
+    "2604.20779v1": {
+      "wikilinks": [
+        "Output Survival Metric",
+        "User Pushback Telemetry",
+        "Clarification Gate",
+        "Structured Observation Interface",
+        "Workflow Verification"
+      ],
+      "bullets": [
+        "SWE-chat is the clearest reviewed source so far on how real users supervise, interrupt, correct, and partially accept coding-agent work in the wild.",
+        "For PlotLot, its most transferable primitive is acceptance telemetry: measure which generated claims and citations survive analyst review, then learn from the deletions, overwrites, and pushback events.",
+        "Its biggest warning is that more autonomy can raise cost and safety risk while the agent still asks for clarification too rarely, so site-feasibility runs should stay collaborative and evidence-gated."
       ]
     }
   }

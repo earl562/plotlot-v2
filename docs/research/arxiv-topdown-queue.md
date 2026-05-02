@@ -2,8 +2,8 @@
 
 Generated from: `arxiv-abstracts.json`
 Total papers: **109**
-Reviewed: **32**
-Remaining: **77**
+Reviewed: **33**
+Remaining: **76**
 
 Priority tiers:
 - **P0**: governance/security/permissions/sandbox/protocol control
@@ -14,7 +14,6 @@ Priority tiers:
 
 ## Next up (highest priority stubs)
 
-- **P0** (20) [2604.20779v1](https://arxiv.org/abs/2604.20779v1) — SWE-chat: Coding Agent Interactions From Real Users in the Wild  — [note](docs/research/arxiv-notes/2604.20779v1.md) — _stub_
 - **P0** (17) [2603.03329v1](https://arxiv.org/abs/2603.03329v1) — AutoHarness: improving LLM agents by automatically synthesizing a code harness  — [note](docs/research/arxiv-notes/2603.03329v1.md) — _stub_
 - **P0** (15) [2601.22773v3](https://arxiv.org/abs/2601.22773v3) — A Structured Approach to Safety Case Construction for AI Systems  — [note](docs/research/arxiv-notes/2601.22773v3.md) — _stub_
 - **P0** (14) [2604.08756v1](https://arxiv.org/abs/2604.08756v1) — Artifacts as Memory Beyond the Agent Boundary  — [note](docs/research/arxiv-notes/2604.08756v1.md) — _stub_
@@ -74,6 +73,7 @@ Priority tiers:
 - **P2** (16) [2604.00073](https://arxiv.org/abs/2604.00073) — Terminal Agents Suffice for Enterprise Automation  — [note](docs/research/arxiv-notes/2604.00073.md) — _stub_
 - **P2** (14) [2604.21003v2](https://arxiv.org/abs/2604.21003v2) — The Last Harness You'll Ever Build  — [note](docs/research/arxiv-notes/2604.21003v2.md) — _stub_
 - **P2** (10) [2506.08119v2](https://arxiv.org/abs/2506.08119v2) — SOP-Bench: Complex Industrial SOPs for Evaluating LLM Agents  — [note](docs/research/arxiv-notes/2506.08119v2.md) — _stub_
+- **P2** (10) [2601.20412v1](https://arxiv.org/abs/2601.20412v1) — Beyond Accuracy: A Cognitive Load Framework for Mapping the Capability Boundaries of Tool-use Agents  — [note](docs/research/arxiv-notes/2601.20412v1.md) — _stub_
 
 ## Already reviewed
 
@@ -109,4 +109,5 @@ Priority tiers:
 - **✅** (24) [2604.13630v1](https://arxiv.org/abs/2604.13630v1) — SafeHarness: Lifecycle-Integrated Security Architecture for LLM-based Agent Deployment  — [note](docs/research/arxiv-notes/2604.13630v1.md) — _reviewed_
 - **✅** (51) [2604.14228v1](https://arxiv.org/abs/2604.14228v1) — Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems  — [note](docs/research/arxiv-notes/2604.14228v1.md) — _reviewed_
 - **✅** (49) [2604.18071v1](https://arxiv.org/abs/2604.18071v1) — Architectural Design Decisions in AI Agent Harnesses  — [note](docs/research/arxiv-notes/2604.18071v1.md) — _reviewed_
+- **✅** (20) [2604.20779v1](https://arxiv.org/abs/2604.20779v1) — SWE-chat: Coding Agent Interactions From Real Users in the Wild  — [note](docs/research/arxiv-notes/2604.20779v1.md) — _reviewed_
 
