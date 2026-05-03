@@ -54,19 +54,19 @@ Agent is the higher-capability workflow.
 
 ## Repository Layout
 
-- [`plotlot/`](/Users/earlperry/Desktop/Projects/EP/plotlot) - main application workspace
-- [`plotlot/frontend/`](/Users/earlperry/Desktop/Projects/EP/plotlot/frontend) - Next.js frontend
-- [`plotlot/src/plotlot/`](/Users/earlperry/Desktop/Projects/EP/plotlot/src/plotlot) - FastAPI backend, pipeline, providers, and retrieval logic
-- [`plotlot/tests/`](/Users/earlperry/Desktop/Projects/EP/plotlot/tests) - unit, integration, and evaluation coverage
-- [`plotlot/docs/PLOTLOT_FLOW_CONTRACT.md`](/Users/earlperry/Desktop/Projects/EP/plotlot/docs/PLOTLOT_FLOW_CONTRACT.md) - product, UX, and data contract for Lookup vs Agent
-- [`docs/REPO_HISTORY_REWRITE.md`](/Users/earlperry/Desktop/Projects/EP/docs/REPO_HISTORY_REWRITE.md) - collaborator recovery notes for the media purge rewrite
+- [`apps/plotlot/`](apps/plotlot/) - main application workspace (backend + frontend)
+- [`apps/plotlot/frontend/`](apps/plotlot/frontend/) - Next.js frontend
+- [`apps/plotlot/src/plotlot/`](apps/plotlot/src/plotlot/) - FastAPI backend, pipeline, providers, and retrieval logic
+- [`apps/plotlot/tests/`](apps/plotlot/tests/) - unit, integration, and evaluation coverage
+- [`apps/plotlot/docs/PLOTLOT_FLOW_CONTRACT.md`](apps/plotlot/docs/PLOTLOT_FLOW_CONTRACT.md) - product, UX, and data contract for Lookup vs Agent
+- [`docs/REPO_HISTORY_REWRITE.md`](docs/REPO_HISTORY_REWRITE.md) - collaborator recovery notes for the media purge rewrite
 
 ## Quick Start
 
 ### Backend
 
 ```bash
-cd plotlot
+cd apps/plotlot
 uv sync --frozen --dev --extra eval
 docker compose up -d db
 uv run uvicorn plotlot.api.main:app --host 127.0.0.1 --port 8000
@@ -75,7 +75,7 @@ uv run uvicorn plotlot.api.main:app --host 127.0.0.1 --port 8000
 ### Frontend
 
 ```bash
-cd plotlot/frontend
+cd apps/plotlot/frontend
 npm ci
 npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
@@ -85,10 +85,19 @@ Backend default: `http://127.0.0.1:8000`
 
 ## Useful Commands
 
+### Monorepo (repo root)
+
+```bash
+make backend-lint
+make backend-test
+make frontend-lint
+make frontend-test-ui
+```
+
 ### Python / backend
 
 ```bash
-cd plotlot
+cd apps/plotlot
 uv run ruff check src/ tests/
 uv run ruff format --check src/ tests/
 uv run mypy src/plotlot/ --no-error-summary
@@ -100,7 +109,7 @@ uv run pytest tests/eval/test_eval_offline.py -m eval -v
 ### Frontend
 
 ```bash
-cd plotlot/frontend
+cd apps/plotlot/frontend
 npm run lint
 npm run build
 npm run test:ui

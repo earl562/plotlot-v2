@@ -67,4 +67,4 @@ python3 scripts/search_harness_paperclip.py --vault-report "$HOME/Documents/Agen
 5. Convert summaries into:
    - runbooks/skills (`.pi/skills/`)
    - harness specs (`docs/prd/`, `docs/architecture/`)
-   - eval cases (`plotlot/tests/eval/`)
+   - eval cases (`apps/plotlot/tests/eval/`)

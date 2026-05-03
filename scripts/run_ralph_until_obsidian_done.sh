@@ -37,7 +37,7 @@ save_progress_if_needed() {
     return 1
   fi
 
-  git add docs/research .pi scripts docs/harness plotlot/src plotlot/tests || true
+  git add docs/research .pi scripts docs/harness apps/plotlot/src apps/plotlot/tests || true
 
   if git diff --cached --quiet; then
     log "Working tree changed, but no staged diff after scoped add."

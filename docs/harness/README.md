@@ -41,7 +41,7 @@ This repo is evolving PlotLot v2 into an **agentic harness**: the surrounding in
   - `GET /api/v1/chat/sessions/{session_id}/transcript`
   - `GET /api/v1/chat/sessions/{session_id}/tool-calls`
 - VeRO-style offline eval manifests for site-feasibility quality checks:
-  - `plotlot/src/plotlot/pipeline/eval_flow.py`
+  - `apps/plotlot/src/plotlot/pipeline/eval_flow.py`
   - logs git commit, prompt versions, dataset path, thresholds, metrics, and sample budget as eval artifacts
 
 ## Research → implementation map

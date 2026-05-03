@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Enforce no-media / no-generated-artifacts policy
-        run: python3 plotlot/scripts/check_repo_hygiene.py
+        run: python3 apps/plotlot/scripts/check_repo_hygiene.py
 
   backend-quality:
     name: Backend Quality
@@ -30,14 +30,14 @@ jobs:
     timeout-minutes: 15
     defaults:
       run:
-        working-directory: plotlot
+        working-directory: apps/plotlot
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
           python-version: "3.12"
-          cache-dependency-glob: plotlot/uv.lock
+          cache-dependency-glob: apps/plotlot/uv.lock
       - run: uv sync --frozen --extra dev --extra eval
       - run: uv run ruff check src/ tests/
       - run: uv run ruff format --check src/ tests/
@@ -50,7 +50,7 @@ jobs:
     needs: [repo-hygiene, backend-quality]
     defaults:
       run:
-        working-directory: plotlot
+        working-directory: apps/plotlot
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -73,7 +73,7 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-          cache-dependency-glob: plotlot/uv.lock
+          cache-dependency-glob: apps/plotlot/uv.lock
       - run: uv sync --frozen --extra dev --extra eval
       - run: uv run python -m pytest tests/unit/ -v --tb=short
 
@@ -84,7 +84,7 @@ jobs:
     needs: [repo-hygiene]
     defaults:
       run:
-        working-directory: plotlot/frontend
+        working-directory: apps/plotlot/frontend
     env:
       NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
@@ -99,7 +99,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: plotlot/frontend/package-lock.json
+          cache-dependency-path: apps/plotlot/frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
       - run: npm run build
@@ -112,7 +112,7 @@ jobs:
     needs: [frontend-quality]
     defaults:
       run:
-        working-directory: plotlot/frontend
+        working-directory: apps/plotlot/frontend
     env:
       NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
     steps:
@@ -121,7 +121,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: plotlot/frontend/package-lock.json
+          cache-dependency-path: apps/plotlot/frontend/package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e:no-db
@@ -131,8 +131,8 @@ jobs:
         with:
           name: playwright-no-db-artifacts
           path: |
-            plotlot/frontend/playwright-report
-            plotlot/frontend/test-results
+            apps/plotlot/frontend/playwright-report
+            apps/plotlot/frontend/test-results
           if-no-files-found: ignore
           retention-days: 7
 
@@ -164,16 +164,16 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: plotlot/frontend/package-lock.json
+          cache-dependency-path: apps/plotlot/frontend/package-lock.json
       - uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
           python-version: "3.12"
-          cache-dependency-glob: plotlot/uv.lock
+          cache-dependency-glob: apps/plotlot/uv.lock
       - run: uv sync --frozen --extra dev --extra eval
-        working-directory: plotlot
+        working-directory: apps/plotlot
       - run: uv run uvicorn plotlot.api.main:app --host 127.0.0.1 --port 8000 > /tmp/plotlot-api.log 2>&1 &
-        working-directory: plotlot
+        working-directory: apps/plotlot
       - name: Wait for backend health
         run: |
           python3 - <<'PY'
@@ -199,13 +199,13 @@ jobs:
           print(last_body)
           raise SystemExit("Backend failed db-backed preflight")
           PY
-        working-directory: plotlot
+        working-directory: apps/plotlot
       - run: npm ci
-        working-directory: plotlot/frontend
+        working-directory: apps/plotlot/frontend
       - run: npx playwright install --with-deps chromium
-        working-directory: plotlot/frontend
+        working-directory: apps/plotlot/frontend
       - run: npm run test:e2e:db
-        working-directory: plotlot/frontend
+        working-directory: apps/plotlot/frontend
       - name: Upload Playwright artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v7
@@ -213,7 +213,7 @@ jobs:
           name: playwright-db-artifacts
           path: |
             /tmp/plotlot-api.log
-            plotlot/frontend/playwright-report
-            plotlot/frontend/test-results
+            apps/plotlot/frontend/playwright-report
+            apps/plotlot/frontend/test-results
           if-no-files-found: ignore
           retention-days: 7

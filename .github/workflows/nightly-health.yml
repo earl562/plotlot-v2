@@ -44,13 +44,13 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: plotlot
+        working-directory: apps/plotlot
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
           python-version: "3.12"
-          cache-dependency-glob: plotlot/uv.lock
+          cache-dependency-glob: apps/plotlot/uv.lock
       - run: uv sync --frozen --extra dev --extra eval
       - run: uv run python -m pytest tests/integration/test_hub_live.py tests/integration/test_universal_validation.py -m live -v --tb=short
