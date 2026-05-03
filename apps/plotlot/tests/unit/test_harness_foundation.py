@@ -19,7 +19,8 @@ class _DummySkill:
     name = "dummy"
     triggers = ("dummy",)
 
-    async def run(self, skill_input: SkillInput) -> SkillOutput:
+    async def run(self, runtime, skill_input: SkillInput) -> SkillOutput:
+        _ = runtime
         return SkillOutput(status="success", summary=skill_input.prompt)
 
 

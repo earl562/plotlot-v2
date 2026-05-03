@@ -8,7 +8,10 @@ rewriting the lookup and chat endpoints.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:  # pragma: no cover
+    from plotlot.harness.runtime import HarnessRuntime
 
 
 @dataclass(slots=True)
@@ -49,7 +52,7 @@ class Skill(Protocol):
     name: str
     triggers: tuple[str, ...]
 
-    async def run(self, skill_input: SkillInput) -> SkillOutput:
+    async def run(self, runtime: "HarnessRuntime", skill_input: SkillInput) -> SkillOutput:
         """Execute the skill."""
 
 

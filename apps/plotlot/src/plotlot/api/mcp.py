@@ -52,12 +52,14 @@ MCP_TOOLS: list[dict[str, Any]] = [
 ]
 
 
-@router.post("/tools/list")
+@router.get("/tools")
+@router.post("/tools/list", include_in_schema=False)
 async def list_tools() -> dict[str, Any]:
     return {"tools": MCP_TOOLS}
 
 
-@router.post("/tools/invoke")
+@router.post("/invoke")
+@router.post("/tools/invoke", include_in_schema=False)
 async def invoke_tool(
     payload: MCPInvokeRequest,
     session: AsyncSession = Depends(get_session),

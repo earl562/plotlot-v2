@@ -23,6 +23,7 @@ from plotlot.api.auth import get_current_user
 from plotlot.api.billing import router as billing_router  # noqa: F401 — registered below
 from plotlot.api.chat import router as chat_router
 from plotlot.api.geometry import router as geometry_router
+from plotlot.api.harness import router as harness_router
 from plotlot.api.mcp import router as mcp_router
 from plotlot.api.middleware import rate_limiter
 from plotlot.api.ordinances import router as ordinances_router
@@ -195,6 +196,7 @@ app.include_router(chat_router)
 app.include_router(portfolio_router)
 app.include_router(geometry_router)
 app.include_router(render_router)
+app.include_router(harness_router)
 app.include_router(workspaces_router)
 app.include_router(ordinances_router)
 app.include_router(mcp_router)

@@ -20,6 +20,29 @@ class SkillRegistry:
     def list_names(self) -> list[str]:
         return sorted(self._skills)
 
+    def match(self, intent: str) -> Skill | None:
+        """Return a skill for a coarse intent string."""
+
+        if not intent:
+            return self._skills.get("zoning_research")
+
+        if intent in self._skills:
+            return self._skills[intent]
+
+        aliases = {
+            "zoning_lookup": "zoning_research",
+            "parcel_analysis": "zoning_research",
+            "zoning_research": "zoning_research",
+            "site_search": "site_selection",
+            "site_selection": "site_selection",
+            "data_center_site_search": "site_selection",
+        }
+        canonical = aliases.get(intent)
+        if canonical and canonical in self._skills:
+            return self._skills[canonical]
+
+        return self._skills.get("zoning_research")
+
     def route(self, prompt: str) -> Skill | None:
         """Route a prompt to a skill by simple trigger matching."""
 

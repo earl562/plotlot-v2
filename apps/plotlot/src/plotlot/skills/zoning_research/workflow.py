@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from plotlot.harness.contracts import SkillInput, SkillOutput
 from plotlot.pipeline.lookup import lookup_address, report_to_dict
+
+if TYPE_CHECKING:  # pragma: no cover
+    from plotlot.harness.runtime import HarnessRuntime
 
 
 class ZoningResearchSkill:
@@ -21,8 +26,8 @@ class ZoningResearchSkill:
         "build",
     )
 
-    async def run(self, skill_input: SkillInput) -> SkillOutput:
-        address = skill_input.payload.get("address")
+    async def run(self, runtime: "HarnessRuntime", skill_input: SkillInput) -> SkillOutput:
+        address = skill_input.payload.get("address") or skill_input.prompt
         if not address:
             return SkillOutput(
                 status="needs_input",
@@ -64,6 +69,15 @@ class ZoningResearchSkill:
                 for ref in report.source_refs
             )
 
+        evidence_ids: list[str] = []
+        if runtime.evidence is not None:
+            evidence_ids = await runtime.evidence.record_zoning_report(
+                workspace_id=skill_input.context.workspace_id,
+                project_id=skill_input.context.project_id,
+                site_id=skill_input.context.site_id,
+                report=report,
+            )
+
         return SkillOutput(
             status="success",
             summary=report.summary or f"Completed zoning research for {report.formatted_address}.",
@@ -71,8 +85,9 @@ class ZoningResearchSkill:
                 "report": report_data,
                 "evidence_candidates": evidence_sources,
             },
-            evidence_ids=[],
+            evidence_ids=evidence_ids,
             open_questions=[]
             if report.confidence != "low"
             else ["Low-confidence zoning output needs review."],
+            next_actions=["review_evidence", "generate_report", "run_site_feasibility"],
         )
