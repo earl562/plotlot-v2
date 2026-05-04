@@ -63,6 +63,8 @@ test.describe("Agent live-tool seams (UI)", () => {
     await expect(conversation.getByText("Used discover_open_data_layers")).toBeVisible({
       timeout: 15_000,
     });
+    const traceCard = page.getByTestId("workspace-trace-card");
+    await expect(traceCard.getByText("discover open data layers")).toBeVisible({ timeout: 15_000 });
     await page.screenshot({
       path: testInfo.outputPath("01-open-data-tool.png"),
       fullPage: true,
@@ -75,6 +77,7 @@ test.describe("Agent live-tool seams (UI)", () => {
     await expect(conversation.getByText("Used search_municode_live")).toBeVisible({
       timeout: 15_000,
     });
+    await expect(traceCard.getByText("search municode live")).toBeVisible({ timeout: 15_000 });
     await page.screenshot({
       path: testInfo.outputPath("02-municode-tool.png"),
       fullPage: true,

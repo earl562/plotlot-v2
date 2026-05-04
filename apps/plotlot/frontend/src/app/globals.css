@@ -113,6 +113,42 @@
   --input-fade-from: #ffffff;
 }
 
+html.dark {
+  /* PlotLot workspace design system — dark */
+  --bg-primary: #070b12;
+  --bg-surface: rgba(11, 16, 25, 0.78);
+  --bg-surface-raised: rgba(15, 21, 33, 0.92);
+  --bg-inset: rgba(9, 13, 20, 0.92);
+  --bg-sidebar: rgba(8, 12, 18, 0.98);
+  --text-primary: rgba(243, 246, 255, 0.92);
+  --text-secondary: rgba(224, 232, 245, 0.76);
+  --text-muted: rgba(224, 232, 245, 0.56);
+  --brand: #21c2ff;
+  --brand-hover: #3ad0ff;
+  --brand-strong: #21c2ff;
+  --brand-subtle: rgba(33, 194, 255, 0.1);
+  --brand-muted: rgba(33, 194, 255, 0.18);
+  --brand-soft-border: rgba(33, 194, 255, 0.28);
+  --success: #34d399;
+  --success-subtle: rgba(16, 185, 129, 0.18);
+  --danger: #f87171;
+  --danger-subtle: rgba(239, 68, 68, 0.16);
+  --warning: #fb923c;
+  --warning-subtle: rgba(251, 146, 60, 0.16);
+  --border: rgba(223, 232, 247, 0.22);
+  --border-soft: rgba(223, 232, 247, 0.12);
+  --border-hover: rgba(223, 232, 247, 0.28);
+  --shadow-card: rgba(0, 0, 0, 0.38) 0px 18px 44px;
+  --shadow-elevated: rgba(0, 0, 0, 0.45) 0px 18px 44px;
+  --shadow-nav: rgba(0, 0, 0, 0.42) 0px 12px 34px;
+  --shadow-panel: rgba(0, 0, 0, 0.54) 0px 24px 70px;
+  --nav-bg: rgba(8, 12, 18, 0.8);
+  --nav-border: rgba(223, 232, 247, 0.16);
+  --hero-glow: rgba(33, 194, 255, 0.12);
+  --hero-glow-strong: rgba(33, 194, 255, 0.18);
+  --input-fade-from: #070b12;
+}
+
 @theme inline {
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
@@ -138,6 +174,11 @@ body::before {
   z-index: -1;
   background: linear-gradient(180deg, #ffffff 0%, #ffffff 58%, #f3f6f6 100%);
   pointer-events: none;
+}
+
+html.dark body::before {
+  background: radial-gradient(circle at top, rgba(33, 194, 255, 0.16), transparent 60%),
+    linear-gradient(180deg, #070b12 0%, #070b12 55%, #090f1a 100%);
 }
 
 /* Custom scrollbar — uses design tokens */

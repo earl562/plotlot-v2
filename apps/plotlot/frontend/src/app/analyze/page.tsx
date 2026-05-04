@@ -14,13 +14,14 @@ import {
   type ChatMessageData,
   type ThinkingEvent,
   type ToolUseEvent,
+  type ToolResultEvent,
 } from "../../lib/api";
 
 type ToolActivity = {
   id: string;
   tool: string;
   message: string;
-  status: "running" | "complete";
+  status: "running" | "complete" | "error" | "blocked";
 };
 
 type ConsoleMessage = {
@@ -533,7 +534,16 @@ export default function AnalyzePage() {
           ].slice(0, 30),
         }));
       },
-      (tool) => {
+      (toolResult: ToolResultEvent) => {
+        const tool = toolResult.tool;
+        const rawStatus = toolResult.status ?? "complete";
+        const nextStatus: ToolActivity["status"] =
+          rawStatus === "error"
+            ? "error"
+            : rawStatus === "blocked" || rawStatus === "approval_required"
+              ? "blocked"
+              : "complete";
+
         updateActiveSession((session) => ({
           ...session,
           updatedAt: Date.now(),
@@ -542,19 +552,21 @@ export default function AnalyzePage() {
               ? {
                   ...message,
                   toolActivity: (message.toolActivity ?? []).map((activity) =>
-                    activity.tool === tool ? { ...activity, status: "complete" } : activity,
+                    activity.tool === tool && activity.status === "running"
+                      ? { ...activity, status: nextStatus }
+                      : activity,
                   ),
                 }
               : message,
           ),
           events: session.events.map((item) =>
             item.kind === "tool" && item.title.includes(toolLabel(tool))
-              ? { ...item, status: "complete" as const }
+              ? { ...item, status: nextStatus === "complete" ? ("complete" as const) : ("attention" as const) }
               : item,
           ),
           tasks: (session.tasks ?? []).map((task) =>
             task.title.includes(toolLabel(tool)) && task.status === "running"
-              ? { ...task, status: "complete" as const }
+              ? { ...task, status: nextStatus === "complete" ? ("complete" as const) : ("attention" as const) }
               : task,
           ),
         }));

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { UserButton } from "@clerk/nextjs";
 import ChatHistory from "@/components/ChatHistory";
+import { useTheme } from "@/components/ThemeProvider";
 import type { ChatSession } from "@/lib/sessions";
 
 export type { ChatSession };
@@ -30,6 +31,7 @@ export default function Sidebar({
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const { resolved: theme, setTheme } = useTheme();
 
   /* Filter sessions by search term */
   const filtered = search.trim()
@@ -53,6 +55,10 @@ export default function Sidebar({
     [onToggle, onNewChat]
   );
 
+  const handleToggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [setTheme, theme]);
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -66,7 +72,7 @@ export default function Sidebar({
       <div className="relative z-10 px-4 pt-6">
         <div className="rounded-[2rem] border border-[var(--border-soft)] bg-[var(--bg-surface)]/92 p-2 shadow-[var(--shadow-panel)] backdrop-blur-xl">
           <div className="rounded-[calc(2rem-0.5rem)] border border-white/50 bg-[var(--bg-surface-raised)] px-4 py-3 ">
-            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-midnight-graphite)] text-[10px] font-semibold text-white">
                   P
@@ -85,7 +91,15 @@ export default function Sidebar({
                   </p>
                 </div>
               </div>
-              <span className="rounded-full bg-[var(--color-pure-white)] px-2.5 py-1 text-[11px] text-[var(--color-cloud-mist)] shadow-[var(--shadow-subtle)]">Light</span>
+              <button
+                type="button"
+                onClick={handleToggleTheme}
+                className="rounded-full border border-[var(--border-soft)] bg-[var(--bg-primary)] px-2.5 py-1 text-[11px] text-[var(--text-muted)] shadow-[var(--shadow-subtle)] transition-colors hover:text-[var(--text-secondary)]"
+                aria-label="Toggle theme"
+                data-testid="theme-toggle"
+              >
+                {theme === "dark" ? "Dark" : "Light"}
+              </button>
             </div>
             <div className="mt-3 flex items-center gap-2">
               <span className="rounded-full bg-[var(--bg-primary)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">

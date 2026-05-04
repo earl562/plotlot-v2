@@ -431,6 +431,11 @@ export interface ToolUseEvent {
   message: string;
 }
 
+export interface ToolResultEvent {
+  tool: string;
+  status?: string;
+}
+
 /**
  * Stream a chat response with token-by-token delivery.
  * Handles tool use events and session persistence.
@@ -445,7 +450,7 @@ export async function streamChat(
   sessionId?: string | null,
   onSession?: (sessionId: string) => void,
   onToolUse?: (event: ToolUseEvent) => void,
-  onToolResult?: (tool: string) => void,
+  onToolResult?: (event: ToolResultEvent) => void,
   onThinking?: (event: ThinkingEvent) => void,
   onTaskEvent?: (event: AgentTaskEvent) => void,
   onBrowserAction?: (event: BrowserActionEvent) => void,
@@ -514,7 +519,7 @@ export async function streamChat(
       } else if (type === "tool_use") {
         onToolUse?.(parsed as ToolUseEvent);
       } else if (type === "tool_result") {
-        onToolResult?.(parsed.tool);
+        onToolResult?.(parsed as ToolResultEvent);
       } else if (
         type === "task_start" ||
         type === "task_update" ||

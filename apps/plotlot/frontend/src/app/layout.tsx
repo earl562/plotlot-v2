@@ -33,6 +33,14 @@ export default function RootLayout({
   const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const app = (
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            // Run before hydration to avoid a light→dark flash in the workspace.
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('theme');var p=window.location&&window.location.pathname?window.location.pathname:'/';var pub=(p==='/'||p==='/reference'||p==='/analyze');var theme=(t==='light'||t==='dark')?t:(pub?'light':'dark');document.documentElement.classList.toggle('dark',theme==='dark')}catch(e){}})();`,
+            }}
+          />
+        </head>
         <body
           className="min-h-screen bg-[var(--bg-primary)] font-sans antialiased"
         >

@@ -27,6 +27,7 @@ import {
   ZoningReportData,
   ChatMessageData,
   ToolUseEvent,
+  ToolResultEvent,
   ThinkingEvent,
   streamAnalysis,
   streamChat,
@@ -45,7 +46,7 @@ import {
 interface ToolActivity {
   tool: string;
   message: string;
-  status: "running" | "complete";
+  status: "running" | "complete" | "error" | "blocked";
 }
 
 interface DisplayMessage {
@@ -184,7 +185,10 @@ function getVisibleToolActivity(msg: DisplayMessage): ToolActivity[] {
 }
 
 function getToolLabel(activity: ToolActivity): string {
-  return activity.status === "complete" ? `Used ${activity.tool}` : activity.message;
+  if (activity.status === "running") return activity.message;
+  if (activity.status === "blocked") return `Blocked ${activity.tool}`;
+  if (activity.status === "error") return `Error in ${activity.tool}`;
+  return `Used ${activity.tool}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -631,14 +635,23 @@ export default function Home() {
               }),
             );
           },
-          (toolName: string) => {
+          (toolResult: ToolResultEvent) => {
+            const toolName = toolResult.tool;
+            const rawStatus = toolResult.status ?? "complete";
+            const nextStatus: ToolActivity["status"] =
+              rawStatus === "error"
+                ? "error"
+                : rawStatus === "blocked" || rawStatus === "approval_required"
+                  ? "blocked"
+                  : "complete";
+
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== assistantId) return m;
                 const tools = [...(m.toolActivity || [])];
                 for (let i = tools.length - 1; i >= 0; i -= 1) {
                   if (tools[i].tool === toolName && tools[i].status === "running") {
-                    tools[i] = { ...tools[i], status: "complete" as const };
+                    tools[i] = { ...tools[i], status: nextStatus };
                     break;
                   }
                 }
@@ -915,6 +928,51 @@ export default function Home() {
             </div>
           ) : null}
         </dl>
+      </RailCard>
+
+      <RailCard eyebrow="Agent trace" title="Live agent activity" testId="workspace-trace-card">
+        {mode !== "agent" ? (
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            Switch to agent mode to see tool calls, live Municode/OpenData usage, and the reasoning trace for each turn.
+          </p>
+        ) : latestToolMessage?.toolActivity?.length ? (
+          <div className="space-y-3">
+            <ol className="space-y-2">
+              {latestToolMessage.toolActivity.slice(-8).map((activity, idx) => {
+                const dot =
+                  activity.status === "running"
+                    ? "bg-amber-500 animate-pulse-dot"
+                    : activity.status === "complete"
+                      ? "bg-emerald-500"
+                      : "bg-red-500";
+                return (
+                  <li key={`${activity.tool}-${idx}`} className="flex gap-2">
+                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        {activity.tool.replace(/_/g, " ")}
+                      </p>
+                      <p className="mt-0.5 text-[11px] leading-5 text-[var(--text-muted)]">
+                        {getToolLabel(activity)}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+
+            <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-primary)] px-3 py-3">
+              <p className="text-xs font-medium text-[var(--text-primary)]">Traceability</p>
+              <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">
+                Tool calls are persisted in the backend audit trail and can be replayed per session.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            No tool calls yet. Ask for zoning evidence, or use the live tool cards to trigger Municode/OpenData retrieval.
+          </p>
+        )}
       </RailCard>
 
       <RailCard eyebrow="Analysis plan" title="Plan, progress, and optional lanes" testId="workspace-plan-card">
@@ -1308,14 +1366,20 @@ export default function Home() {
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                               t.status === "running"
                                 ? "border border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                                : "border border-[var(--border)] bg-[var(--bg-surface-raised)] text-[var(--text-muted)]"
+                                : t.status === "complete"
+                                  ? "border border-[var(--border)] bg-[var(--bg-surface-raised)] text-[var(--text-muted)]"
+                                  : "border border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
                             }`}
                           >
                             {t.status === "running" ? (
                               <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse-dot" />
-                            ) : (
+                            ) : t.status === "complete" ? (
                               <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            ) : (
+                              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.59c.75 1.334-.213 2.99-1.743 2.99H3.482c-1.53 0-2.493-1.656-1.743-2.99l6.518-11.59zM11 13a1 1 0 10-2 0 1 1 0 002 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
                             )}
                             {getToolLabel(t)}
