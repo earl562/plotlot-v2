@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import AsyncMock
 
 import pytest
@@ -24,6 +25,10 @@ async def test_mcp_tools_expose_contract_metadata() -> None:
         "county",
         "lat",
         "lng",
+    ]
+    assert tools["plotlot.search_municode_live"]["input_schema"]["required"] == [
+        "municipality",
+        "query",
     ]
 
 
@@ -71,3 +76,44 @@ async def test_mcp_invoke_open_data_layers_returns_serialized_datasets(monkeypat
     assert payload["status"] == "success"
     assert payload["result"]["parcels_dataset"]["dataset_type"] == "parcels"
     assert payload["result"]["zoning_dataset"]["fields_preview"] == ["ZONE", "DESC"]
+
+
+@pytest.mark.asyncio
+async def test_mcp_invoke_municode_live_returns_parsed_payload(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "plotlot.api.chat._execute_municode_live_search",
+        AsyncMock(
+            return_value=json.dumps(
+                {
+                    "status": "success",
+                    "municipality": "Miami",
+                    "source_type": "municode_live",
+                    "results": [
+                        {
+                            "heading": "Sec. 1 Setbacks",
+                            "parent_heading": "Zoning",
+                            "node_id": "123",
+                            "score": 2,
+                            "snippet": "Front setback 25 ft.",
+                        }
+                    ],
+                }
+            )
+        ),
+    )
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/mcp/invoke",
+            json={
+                "name": "plotlot.search_municode_live",
+                "input": {"municipality": "Miami", "query": "setbacks"},
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "success"
+    assert payload["tool"] == "plotlot.search_municode_live"
+    assert payload["result"]["status"] == "success"
+    assert payload["result"]["results"][0]["node_id"] == "123"
