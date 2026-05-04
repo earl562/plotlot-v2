@@ -15,6 +15,7 @@ This backlog turns reviewed research into shippable harness modules.
   - cooldown/escalation on repeated denials/anomalies
 - [ ] Prompt-injection filtering at input + tool-output boundary (SafeHarness L1)
   - scan ordinance chunks + web results for instruction injection
+  - [x] emit warnings on live Municode snippets (non-blocking)
 - [ ] Rollback/degradation strategy (SafeHarness L4)
   - fall back to safer mode on anomaly accumulation
 

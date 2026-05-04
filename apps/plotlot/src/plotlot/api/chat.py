@@ -1135,6 +1135,7 @@ async def _execute_municode_live_search(municipality: str, query: str) -> str:
     """Search live Municode sections for a municipality using heading-based matching."""
     from plotlot.ingestion.discovery import get_municode_configs
     from plotlot.ingestion.scraper import MunicodeScraper
+    from plotlot.harness.injection import detect_prompt_injection
 
     try:
         configs = await get_municode_configs()
@@ -1179,10 +1180,12 @@ async def _execute_municode_live_search(municipality: str, query: str) -> str:
                 )
 
             results = []
+            warnings: list[str] = []
             for score, leaf in top:
                 html = await scraper.get_section_content(client, config, leaf.node_id)
                 snippet = re.sub(r"<[^>]+>", " ", html)
                 snippet = re.sub(r"\s+", " ", snippet).strip()[:800]
+                warnings.extend(detect_prompt_injection(snippet))
                 results.append(
                     {
                         "heading": leaf.heading,
@@ -1193,14 +1196,15 @@ async def _execute_municode_live_search(municipality: str, query: str) -> str:
                     }
                 )
 
-        return json.dumps(
-            {
-                "status": "success",
-                "municipality": config.municipality,
-                "source_type": "municode_live",
-                "results": results,
-            }
-        )
+        payload: dict[str, Any] = {
+            "status": "success",
+            "municipality": config.municipality,
+            "source_type": "municode_live",
+            "results": results,
+        }
+        if warnings:
+            payload["warnings"] = sorted(set(warnings))
+        return json.dumps(payload)
     except Exception as e:
         logger.warning("Live Municode search failed for %s: %s", municipality, e)
         return json.dumps({"status": "error", "message": f"Live Municode search failed: {str(e)}"})
