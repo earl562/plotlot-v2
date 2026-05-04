@@ -12,12 +12,45 @@ fi
 # Opt-in to loading the Codex OAuth token from ~/.codex/auth.json.
 export PLOTLOT_USE_CODEX_OAUTH=1
 
+# If the monorepo root has a local .env (gitignored) with alternate provider
+# credentials (e.g., NVIDIA_API_KEY), load it so local runs don't hard-fail
+# when Codex OAuth is rate-limited. Existing exported vars still win.
+MONOREPO_ENV_FILE="${PLOTLOT_ROOT}/../../.env"
+if [[ -f "${MONOREPO_ENV_FILE}" ]]; then
+  while IFS= read -r line || [[ -n "${line:-}" ]]; do
+    [[ -z "${line}" ]] && continue
+    [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+    line="${line#"export "}"
+
+    if [[ "${line}" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+      var_name="${BASH_REMATCH[1]}"
+      var_value="${BASH_REMATCH[2]}"
+
+      # Ignore empty assignments and anything already configured upstream.
+      [[ -z "${var_value}" ]] && continue
+      [[ -n "${!var_name-}" ]] && continue
+
+      # Strip surrounding quotes, matching the common dotenv formats.
+      if [[ "${var_value}" =~ ^\"(.*)\"$ ]] || [[ "${var_value}" =~ ^\'(.*)\'$ ]]; then
+        var_value="${BASH_REMATCH[1]}"
+      fi
+
+      export "${var_name}=${var_value}"
+    fi
+  done < "${MONOREPO_ENV_FILE}"
+fi
+
 # Local dev defaults: Codex OAuth can be rate-limited for larger models.
 # Keep this overrideable by exporting OPENAI_MODEL / OPENAI_REASONING_EFFORT.
 export OPENAI_MODEL="${OPENAI_MODEL:-gpt-4.1-mini}"
 export OPENAI_REASONING_EFFORT="${OPENAI_REASONING_EFFORT:-low}"
 
-if [[ ! -f "${PLOTLOT_CODEX_AUTH_FILE:-$HOME/.codex/auth.json}" ]]; then
+CODEX_AUTH_FILE="${PLOTLOT_CODEX_AUTH_FILE:-$HOME/.codex/auth.json}"
+if [[ "${CODEX_AUTH_FILE}" == "~"* ]]; then
+  CODEX_AUTH_FILE="${CODEX_AUTH_FILE/#\~/$HOME}"
+fi
+
+if [[ ! -f "${CODEX_AUTH_FILE}" ]]; then
   echo "Codex OAuth token file not found. Run ./scripts/login_with_codex_oauth.sh first." >&2
   exit 1
 fi
