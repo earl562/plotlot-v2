@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, FormEvent, useId, type ReactNode, type RefObject } from "react";
+import { useState, useRef, useEffect, useCallback, FormEvent, useId, type RefObject } from "react";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItem, fadeUp, springGentle } from "@/lib/motion";
 import ReactMarkdown from "react-markdown";
@@ -9,7 +9,7 @@ import ZoningReport from "@/components/ZoningReport";
 import TabbedReport from "@/components/TabbedReport";
 import DealTypeSelector from "@/components/DealTypeSelector";
 import type { DealType } from "@/components/DealTypeSelector";
-import PipelineApproval, { PIPELINE_STEPS } from "@/components/PipelineApproval";
+import PipelineApproval from "@/components/PipelineApproval";
 import AnalysisStream from "@/components/AnalysisStream";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import ModeToggle from "@/components/ModeToggle";
@@ -69,6 +69,7 @@ interface DisplayMessage {
 
 const FL_PATTERNS = /\b(miami|fort lauderdale|hollywood|hialeah|pembroke|miramar|coral|doral|homestead|aventura|boca|delray|boynton|west palm|palm beach|broward|dade|FL|florida)\b/i;
 const ADDRESS_PATTERN = /\d+\s+(?:\w+\s+)+(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|ter|terrace|ct|court|ln|lane|way|pl|place|cir|circle|pkwy|parkway|hwy|highway|trl|trail|real|path)\b/i;
+const DIRECT_TOOL_PROMPT_PATTERN = /Use the tool `(?:search_municode_live|discover_open_data_layers)` with:/i;
 // Broader fallback: "123 Something, City, FL 33xxx" pattern (number + comma + FL indicator + zip)
 const ADDRESS_WITH_ZIP = /\d+\s+[\w\s]+,\s*[\w\s]+,\s*FL\s+\d{5}/i;
 
@@ -99,80 +100,6 @@ const FOLLOWUP_SUGGESTIONS = [
   "What setback variances could I request?",
   "Is this suitable for multifamily?",
 ];
-
-const WORKSPACE_PLAN_STEPS = [
-  {
-    key: "geocoding",
-    label: "Resolve address",
-    description: "Confirm the site location and jurisdiction before deeper analysis.",
-  },
-  {
-    key: "property",
-    label: "Pull parcel record",
-    description: "Fetch parcel facts, lot dimensions, and ownership context.",
-  },
-  ...PIPELINE_STEPS.map((step) => ({
-    key: step.key,
-    label: step.label,
-    description: step.description,
-  })),
-  {
-    key: "report",
-    label: "Assemble report",
-    description: "Package evidence, recommendations, and follow-up actions.",
-  },
-] as const;
-
-function getDealTypeLabel(dealType: DealType | null): string {
-  if (!dealType) return "standard analysis";
-  return dealType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function RailCard({
-  eyebrow,
-  title,
-  children,
-  testId,
-}: {
-  eyebrow: string;
-  title: string;
-  children: ReactNode;
-  testId: string;
-}) {
-  return (
-    <section
-      className="rounded-[1.5rem] border border-[var(--border-soft)] bg-[var(--bg-surface)] p-2 shadow-[var(--shadow-card)]"
-      data-testid={testId}
-    >
-      <div className="rounded-[calc(1.5rem-0.5rem)] border border-white/50 bg-[var(--bg-surface-raised)] p-4 dark:border-white/5">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">{eyebrow}</p>
-        <h3 className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
-        <div className="mt-3 space-y-3">{children}</div>
-      </div>
-    </section>
-  );
-}
-
-function PlanStepPill({
-  state,
-  children,
-}: {
-  state: "complete" | "active" | "pending" | "skipped";
-  children: ReactNode;
-}) {
-  const styles = {
-    complete: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400",
-    active: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400",
-    pending: "border-[var(--border-soft)] bg-[var(--bg-primary)] text-[var(--text-muted)]",
-    skipped: "border-[var(--border-soft)] bg-[var(--bg-primary)] text-[var(--text-muted)] opacity-70",
-  } as const;
-
-  return (
-    <span className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${styles[state]}`}>
-      {children}
-    </span>
-  );
-}
 
 function getVisibleToolActivity(msg: DisplayMessage): ToolActivity[] {
   const tools = msg.toolActivity || [];
@@ -208,7 +135,6 @@ export default function Home() {
   const [awaitingApproval, setAwaitingApproval] = useState(false);
   const [docCanvasOpen, setDocCanvasOpen] = useState(false);
   const [contextualSuggestions, setContextualSuggestions] = useState<string[]>([]);
-  const [lastSkipSteps, setLastSkipSteps] = useState<string[]>([]);
   const [inputError, setInputError] = useState<string | null>(null);
   const [localSessionId, setLocalSessionId] = useState<string | null>(null);
   const [editingUserMessageId, setEditingUserMessageId] = useState<string | null>(null);
@@ -293,7 +219,6 @@ export default function Home() {
     setSelectedDealType(null);
     setAwaitingApproval(false);
     setContextualSuggestions([]);
-    setLastSkipSteps([]);
   }, [mode]);
 
   // Persist backend sessionId
@@ -397,7 +322,6 @@ export default function Home() {
       setPendingAddress(null);
       setSelectedDealType(null);
       setAwaitingApproval(false);
-      setLastSkipSteps([]);
       setIsProcessing(false);
     };
     window.addEventListener("plotlot:session-selected", handler);
@@ -535,7 +459,7 @@ export default function Home() {
     async (text: string) => {
       if (!text.trim() || isProcessing) return;
 
-      const address = extractAddress(text);
+      const address = DIRECT_TOOL_PROMPT_PATTERN.test(text) ? null : extractAddress(text);
 
       // Lookup mode: validate address BEFORE adding to chat
       if (mode === "lookup" && !address) {
@@ -769,67 +693,6 @@ export default function Home() {
   };
 
   const hasReport = messages.some((m) => m.report);
-  const latestPipelineMessage = [...messages].reverse().find((m) => (m.pipelineSteps?.length ?? 0) > 0) ?? null;
-  const latestToolMessage = [...messages].reverse().find((m) => getVisibleToolActivity(m).length > 0) ?? null;
-  const visibleToolActivity = latestToolMessage ? getVisibleToolActivity(latestToolMessage) : [];
-  const latestPipelineMap = new Map((latestPipelineMessage?.pipelineSteps ?? []).map((step) => [step.step, step]));
-  const inferredCompletedSteps = new Set<string>();
-  if (currentReport) {
-    inferredCompletedSteps.add("geocoding");
-    inferredCompletedSteps.add("property");
-    inferredCompletedSteps.add("search");
-    inferredCompletedSteps.add("analysis");
-    inferredCompletedSteps.add("report");
-    if (currentReport.density_analysis) inferredCompletedSteps.add("calculation");
-    if (currentReport.comp_analysis) inferredCompletedSteps.add("comps");
-    if (currentReport.pro_forma) inferredCompletedSteps.add("proforma");
-  }
-  const activeAddress =
-    currentReport?.formatted_address ||
-    pendingAddress ||
-    [...messages]
-      .reverse()
-      .map((m) => extractAddress(m.content))
-      .find(Boolean) ||
-    null;
-  const dealTypeLabel = getDealTypeLabel(selectedDealType);
-  const workspaceStage = awaitingApproval
-    ? {
-        label: "Approval needed",
-        detail: `Review the ${dealTypeLabel} pipeline before PlotLot runs it.`,
-        tone: "amber" as const,
-      }
-    : latestPipelineMessage
-      ? {
-          label: "Gathering evidence",
-          detail:
-            latestPipelineMessage.pipelineSteps?.find((step) => !step.complete)?.message ||
-            "PlotLot is collecting parcel, zoning, and feasibility evidence.",
-          tone: "amber" as const,
-        }
-      : currentReport
-        ? {
-            label: "Report ready",
-            detail: "The latest report, evidence, and follow-up actions are ready in this workspace.",
-            tone: "emerald" as const,
-          }
-        : mode === "agent" && messages.length > 0
-          ? {
-              label: "Agent follow-up",
-              detail: "Use the conversation thread to refine conclusions and request deeper analysis.",
-              tone: "blue" as const,
-            }
-          : {
-              label: "Ready",
-              detail: "Start with an address or a zoning question to create a new analysis.",
-              tone: "slate" as const,
-            };
-  const stageBadgeStyles = {
-    amber: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400",
-    blue: "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-400",
-    slate: "border-[var(--border-soft)] bg-[var(--bg-primary)] text-[var(--text-secondary)]",
-  } as const;
 
   // Handle deal type selection in lookup mode — show pipeline approval
   const handleDealTypeSelect = useCallback(
@@ -846,7 +709,6 @@ export default function Home() {
     async (skipSteps: string[]) => {
       if (!pendingAddress) return;
       const address = pendingAddress;
-      setLastSkipSteps(skipSteps);
       setAwaitingApproval(false);
       setPendingAddress(null);
       setIsProcessing(true);
@@ -874,7 +736,6 @@ export default function Home() {
     setPendingAddress(null);
     setSelectedDealType(null);
     setAwaitingApproval(false);
-    setLastSkipSteps([]);
     setInput("");
     setIsProcessing(false);
     localStorage.removeItem("plotlot_backend_session");
@@ -882,217 +743,16 @@ export default function Home() {
     setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
 
-  const getWorkspacePlanState = (key: string): "complete" | "active" | "pending" | "skipped" => {
-    if (lastSkipSteps.includes(key)) return "skipped";
-    if (inferredCompletedSteps.has(key)) return "complete";
-    const pipelineStep = latestPipelineMap.get(key);
-    if (pipelineStep?.complete) return "complete";
-    if (pipelineStep && !pipelineStep.complete) return "active";
-    return "pending";
-  };
-
-  const workspaceRail = (
-    <div className="space-y-4">
-      <RailCard eyebrow="Workspace status" title={workspaceStage.label} testId="workspace-status-card">
-        <span className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${stageBadgeStyles[workspaceStage.tone]}`}>
-          {workspaceStage.label}
-        </span>
-        <p className="text-sm leading-6 text-[var(--text-secondary)]">{workspaceStage.detail}</p>
-        <dl className="grid gap-2 text-xs text-[var(--text-secondary)]">
-          <div className="flex items-start justify-between gap-4">
-            <dt className="text-[var(--text-muted)]">Mode</dt>
-            <dd className="font-medium text-[var(--text-primary)]">{mode === "lookup" ? "Lookup workspace" : "Agent workspace"}</dd>
-          </div>
-          {activeAddress && (
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-[var(--text-muted)]">Current site</dt>
-              <dd className="max-w-[16rem] text-right font-medium text-[var(--text-primary)]">{activeAddress}</dd>
-            </div>
-          )}
-          <div className="flex items-start justify-between gap-4">
-            <dt className="text-[var(--text-muted)]">Deal lane</dt>
-            <dd className="font-medium text-[var(--text-primary)]">{dealTypeLabel}</dd>
-          </div>
-          {visibleToolActivity.length > 0 && (
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-[var(--text-muted)]">Live tool</dt>
-              <dd className="max-w-[16rem] text-right font-medium text-[var(--text-primary)]">
-                {getToolLabel(visibleToolActivity[0])}
-              </dd>
-            </div>
-          )}
-          {latestToolMessage?.thinkingEvents?.length ? (
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-[var(--text-muted)]">Thinking trace</dt>
-              <dd className="font-medium text-[var(--text-primary)]">{latestToolMessage.thinkingEvents.length} event{latestToolMessage.thinkingEvents.length === 1 ? "" : "s"}</dd>
-            </div>
-          ) : null}
-        </dl>
-      </RailCard>
-
-      <RailCard eyebrow="Agent trace" title="Live agent activity" testId="workspace-trace-card">
-        {mode !== "agent" ? (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Switch to agent mode to see tool calls, live Municode/OpenData usage, and the reasoning trace for each turn.
-          </p>
-        ) : latestToolMessage?.toolActivity?.length ? (
-          <div className="space-y-3">
-            <ol className="space-y-2">
-              {latestToolMessage.toolActivity.slice(-8).map((activity, idx) => {
-                const dot =
-                  activity.status === "running"
-                    ? "bg-amber-500 animate-pulse-dot"
-                    : activity.status === "complete"
-                      ? "bg-emerald-500"
-                      : "bg-red-500";
-                return (
-                  <li key={`${activity.tool}-${idx}`} className="flex gap-2">
-                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">
-                        {activity.tool.replace(/_/g, " ")}
-                      </p>
-                      <p className="mt-0.5 text-[11px] leading-5 text-[var(--text-muted)]">
-                        {getToolLabel(activity)}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-
-            <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-primary)] px-3 py-3">
-              <p className="text-xs font-medium text-[var(--text-primary)]">Traceability</p>
-              <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">
-                Tool calls are persisted in the backend audit trail and can be replayed per session.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            No tool calls yet. Ask for zoning evidence, or use the live tool cards to trigger Municode/OpenData retrieval.
-          </p>
-        )}
-      </RailCard>
-
-      <RailCard eyebrow="Analysis plan" title="Plan, progress, and optional lanes" testId="workspace-plan-card">
-        <p className="text-sm leading-6 text-[var(--text-secondary)]">
-          PlotLot keeps the workflow explicit: parcel intake, zoning evidence, optional market/financial work, then a report you can refine.
-        </p>
-        <div className="space-y-2">
-          {WORKSPACE_PLAN_STEPS.map((step) => {
-            const state = getWorkspacePlanState(step.key);
-            return (
-              <div key={step.key} className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-primary)] px-3 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{step.label}</p>
-                    <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">{step.description}</p>
-                  </div>
-                  <PlanStepPill state={state}>{state}</PlanStepPill>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </RailCard>
-
-      <RailCard eyebrow="Evidence snapshot" title="What the current analysis has produced" testId="workspace-evidence-card">
-        {currentReport ? (
-          <>
-            <dl className="grid gap-2 text-xs text-[var(--text-secondary)]">
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[var(--text-muted)]">Jurisdiction</dt>
-                <dd className="max-w-[16rem] text-right font-medium text-[var(--text-primary)]">
-                  {currentReport.municipality}, {currentReport.county}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[var(--text-muted)]">Zoning</dt>
-                <dd className="font-medium text-[var(--text-primary)]">{currentReport.zoning_district || "Pending"}</dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[var(--text-muted)]">Confidence</dt>
-                <dd className="font-medium uppercase text-[var(--text-primary)]">{currentReport.confidence}</dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[var(--text-muted)]">Sources</dt>
-                <dd className="font-medium text-[var(--text-primary)]">{currentReport.sources.length}</dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-[var(--text-muted)]">Evidence refs</dt>
-                <dd className="font-medium text-[var(--text-primary)]">{currentReport.source_refs?.length ?? 0}</dd>
-              </div>
-              {currentReport.density_analysis?.max_units != null && (
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-[var(--text-muted)]">Max units</dt>
-                  <dd className="font-medium text-[var(--text-primary)]">{currentReport.density_analysis.max_units}</dd>
-                </div>
-              )}
-            </dl>
-            {currentReport.confidence_warning && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs leading-5 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
-                {currentReport.confidence_warning}
-              </div>
-            )}
-          </>
-        ) : latestPipelineMessage ? (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Evidence is being assembled from parcel records, ordinance search, and optional market/financial steps. This card will summarize the results as soon as the report is ready.
-          </p>
-        ) : (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            No evidence yet. Start with an address to generate parcel facts, zoning context, and structured report outputs.
-          </p>
-        )}
-      </RailCard>
-
-      <RailCard eyebrow="Report actions" title="How to work from the current result" testId="workspace-report-card">
-        {currentReport ? (
-          <>
-            <p className="text-sm leading-6 text-[var(--text-secondary)]">
-              Use the report panel for deep review, then keep the conversation focused on follow-up questions and document generation.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setDocCanvasOpen(true)}
-                className="rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50"
-              >
-                Open documents
-              </button>
-              {mode !== "agent" && (
-                <button
-                  onClick={() => setMode("agent")}
-                  className="rounded-full border border-[var(--border)] bg-[var(--bg-primary)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-surface-raised)]"
-                >
-                  Continue in agent mode
-                </button>
-              )}
-            </div>
-          </>
-        ) : awaitingApproval ? (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            The next action is to approve or trim the analysis plan so PlotLot can begin gathering evidence.
-          </p>
-        ) : (
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Once PlotLot produces a report, this workspace will expose document generation and follow-up actions here instead of leaving everything buried in chat.
-          </p>
-        )}
-      </RailCard>
-    </div>
-  );
-
   // Mode toggle is now the imported ModeToggle component
 
   // ─── Welcome State (both modes) ────────────────────────────────────
   if (isWelcome) {
     return (
       <main className="w-full max-w-full overflow-x-hidden px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-7xl flex-col gap-8 py-12 md:py-20 xl:flex-row xl:items-start">
+        <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-5xl flex-col justify-center gap-8 py-10 md:py-16">
           <div className="flex min-w-0 flex-1 flex-col justify-center">
             <motion.div
-              className="mb-6 inline-flex w-fit items-center gap-2 self-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)] shadow-[var(--shadow-card)] xl:self-start"
+              className="mb-6 inline-flex w-fit items-center gap-2 self-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--text-secondary)] shadow-[var(--shadow-card)]"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...springGentle, delay: 0.08 }}
@@ -1137,7 +797,7 @@ export default function Home() {
               onSubmit={handleSubmit}
               {...fadeUp}
               transition={{ ...springGentle, delay: 0.25 }}
-              className="relative z-30 mb-8 w-full max-w-4xl self-center xl:self-start"
+              className="relative z-30 mb-8 w-full max-w-4xl self-center"
             >
               <div
                 className="glass-panel flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 transition-all focus-within:border-amber-400/60 focus-within:ring-2 focus-within:ring-amber-400/15 sm:px-5 sm:py-4"
@@ -1204,7 +864,7 @@ export default function Home() {
             <motion.div
               {...fadeUp}
               transition={{ ...springGentle, delay: 0.35 }}
-              className="relative z-0 min-h-[72px] w-full max-w-4xl self-center xl:self-start"
+              className="relative z-0 min-h-[72px] w-full max-w-4xl self-center"
             >
               {mode === "lookup" ? (
                 <CapabilityChips mode={mode} onSelect={sendMessage} disabled={isProcessing} />
@@ -1227,15 +887,12 @@ export default function Home() {
             <motion.p
               {...fadeUp}
               transition={{ ...springGentle, delay: 0.45 }}
-              className="mt-12 text-center text-xs text-[var(--text-muted)] xl:text-left"
+              className="mt-12 text-center text-xs text-[var(--text-muted)]"
             >
               PlotLot analyzes zoning, density, comps &amp; pro forma for any US property
             </motion.p>
           </div>
 
-          <aside className="w-full xl:sticky xl:top-6 xl:w-[340px] xl:shrink-0">
-            {workspaceRail}
-          </aside>
         </div>
       </main>
     );
@@ -1265,8 +922,8 @@ export default function Home() {
         className="flex-1 overflow-y-auto pb-52"
         data-testid="conversation-scroll"
       >
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-3 py-4 sm:px-4 sm:py-6 xl:flex-row xl:items-start">
-          <div className="min-w-0 flex-1">
+        <div className="mx-auto w-full max-w-5xl px-3 py-4 sm:px-4 sm:py-6">
+          <div className="min-w-0">
             <div className="space-y-4 sm:space-y-6" role="log" aria-live="polite" aria-label="Analysis conversation">
               {messages.map((msg, msgIndex) => (
                 <div key={msg.id} className="animate-fade-up">
@@ -1348,21 +1005,26 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tool use badges (ChatGPT-style) */}
+              {/* Inline tool evidence */}
               {msg.toolActivity && msg.toolActivity.length > 0 && (() => {
                 const visibleTools = getVisibleToolActivity(msg);
                 if (visibleTools.length === 0) return null;
 
                 return (
-                  <div className="mb-2 flex justify-start">
+                  <div className="mb-3 flex justify-start" data-testid="inline-tool-activity">
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-800 text-xs font-black text-white">
                         P
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-surface)] px-3 py-2 shadow-[var(--shadow-card)]">
+                        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                          Evidence used
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
                         {visibleTools.map((t, i) => (
                           <span
                             key={i}
+                            data-testid={`inline-tool-${t.tool}`}
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                               t.status === "running"
                                 ? "border border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
@@ -1385,6 +1047,7 @@ export default function Home() {
                             {getToolLabel(t)}
                           </span>
                         ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1629,9 +1292,6 @@ export default function Home() {
             </div>
           </div>
 
-          <aside className="xl:sticky xl:top-6 xl:w-[340px] xl:shrink-0">
-            {workspaceRail}
-          </aside>
         </div>
       </div>
 

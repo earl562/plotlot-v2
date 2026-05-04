@@ -11,12 +11,15 @@ import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from httpx import ASGITransport, AsyncClient
 
+from plotlot.api.main import app
 from plotlot.api.chat import (
     CHAT_TOOLS,
     _execute_municode_live_search,
     _execute_open_data_discovery,
     _execute_tool,
+    _extract_direct_tool_request,
     _get_tools_for_turn,
     _sessions,
 )
@@ -84,6 +87,44 @@ def test_get_tools_for_turn_exposes_live_tools_in_core_runtime_set() -> None:
     assert "search_zoning_ordinance" in names
     assert "search_municode_live" in names
     assert "discover_open_data_layers" in names
+
+
+def test_extract_direct_tool_request_parses_open_data_card_prompt() -> None:
+    parsed = _extract_direct_tool_request(
+        "\n".join(
+            [
+                "Use the tool `discover_open_data_layers` with:",
+                "- county: \"Broward County\"",
+                "- state: \"FL\"",
+                "- lat: 25.9873",
+                "- lng: -80.2323",
+                "",
+                "Return what parcel + zoning GIS layers exist.",
+            ]
+        )
+    )
+
+    assert parsed == (
+        "discover_open_data_layers",
+        {"county": "Broward", "state": "FL", "lat": 25.9873, "lng": -80.2323},
+    )
+
+
+def test_extract_direct_tool_request_parses_municode_card_prompt() -> None:
+    parsed = _extract_direct_tool_request(
+        "\n".join(
+            [
+                "Use the tool `search_municode_live` with:",
+                "- municipality: \"Miramar\"",
+                "- query: \"setbacks\"",
+            ]
+        )
+    )
+
+    assert parsed == (
+        "search_municode_live",
+        {"municipality": "Miramar", "query": "setbacks"},
+    )
 
 
 @pytest.mark.asyncio
@@ -172,3 +213,63 @@ async def test_execute_tool_routes_new_live_tools() -> None:
 
     assert open_data_payload["kind"] == "open_data"
     assert municode_payload["kind"] == "municode"
+
+
+@pytest.mark.asyncio
+async def test_chat_direct_tool_prompt_executes_open_data_before_summary() -> None:
+    _sessions._conversations.clear()
+    _sessions._last_access.clear()
+
+    prompt = "\n".join(
+        [
+            "Use the tool `discover_open_data_layers` with:",
+            "- county: \"Broward\"",
+            "- state: \"FL\"",
+            "- lat: 25.9873",
+            "- lng: -80.2323",
+            "",
+            "Return what parcel + zoning GIS layers exist.",
+        ]
+    )
+
+    with patch(
+        "plotlot.api.chat._execute_open_data_discovery",
+        new=AsyncMock(
+            return_value=json.dumps(
+                {
+                    "status": "success",
+                    "parcels_dataset": {
+                        "name": "Broward Parcels",
+                        "url": "https://example.com/parcels",
+                    },
+                    "zoning_dataset": {
+                        "name": "Broward Zoning",
+                        "url": "https://example.com/zoning",
+                    },
+                }
+            )
+        ),
+    ) as execute_open_data, patch(
+        "plotlot.api.chat.call_llm",
+        new=AsyncMock(
+            return_value={
+                "content": "I found Broward Parcels and Broward Zoning, with dataset URLs included.",
+                "tool_calls": [],
+            }
+        ),
+    ) as mock_llm:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/chat",
+                json={"message": prompt, "session_id": "direct-open-data"},
+            )
+
+    assert response.status_code == 200
+    body = response.text
+    assert "tool_use" in body
+    assert "Discovering Open Data layers" in body
+    assert "tool_result" in body
+    assert "I found Broward Parcels" in body
+    execute_open_data.assert_awaited_once_with("Broward", "FL", 25.9873, -80.2323)
+    assert mock_llm.await_count == 1
+    assert "tools" not in mock_llm.await_args.kwargs

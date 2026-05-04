@@ -109,38 +109,31 @@ export default function ToolCards({
       if (card.id === "search_comps") {
         prompt = `Find comparable sales near this property within a 3-mile radius${county ? ` in ${county}` : " in your area"}`;
       } else if (card.id === "open_data_layers") {
-        const resolvedCounty = county ? `${county} County` : "the county";
-        if (county && typeof lat === "number" && typeof lng === "number") {
-          prompt = [
-            "Use the tool `discover_open_data_layers` with:",
-            `- county: ${JSON.stringify(county ?? "")}`,
-            "- state: \"FL\"",
-            `- lat: ${lat}`,
-            `- lng: ${lng}`,
-            "",
-            `Return what parcel + zoning GIS layers exist for ${resolvedCounty} near this location, including any dataset URLs.`,
-          ].join("\n");
-        } else {
-          prompt = [
-            "I want to discover parcel + zoning open data layers (ArcGIS/Hub).",
-            "Ask me for the county and a representative lat/lng near the property, then use `discover_open_data_layers`.",
-          ].join("\n");
-        }
+        const toolCounty = county || "Broward";
+        const toolLat = typeof lat === "number" ? lat : 25.9873;
+        const toolLng = typeof lng === "number" ? lng : -80.2323;
+        const contextNote = county
+          ? `${toolCounty} County near this property`
+          : "Broward County near Miramar as a sample South Florida check";
+        prompt = [
+          "Use the tool `discover_open_data_layers` with:",
+          `- county: ${JSON.stringify(toolCounty)}`,
+          "- state: \"FL\"",
+          `- lat: ${toolLat}`,
+          `- lng: ${toolLng}`,
+          "",
+          `Return what parcel + zoning GIS layers exist for ${contextNote}, including any dataset URLs.`,
+        ].join("\n");
       } else if (card.id === "municode_live") {
-        if (municipality) {
-          prompt = [
-            "Use the tool `search_municode_live` with:",
-            `- municipality: ${JSON.stringify(municipality)}`,
-            "- query: \"setbacks\"",
-            "",
-            "Return the top matching headings + snippets and summarize the rule in plain English.",
-          ].join("\n");
-        } else {
-          prompt = [
-            "I want to search live Municode zoning code.",
-            "Ask me for the municipality/jurisdiction name, then use `search_municode_live` with query \"setbacks\".",
-          ].join("\n");
-        }
+        prompt = [
+          "Use the tool `search_municode_live` with:",
+          `- municipality: ${JSON.stringify(municipality || "Miramar")}`,
+          "- query: \"setbacks\"",
+          "",
+          municipality
+            ? "Return the top matching headings + snippets and summarize the rule in plain English."
+            : "Return the top matching headings + snippets for this sample Miramar search and summarize the rule in plain English.",
+        ].join("\n");
       }
       onSendPrompt(prompt);
     }

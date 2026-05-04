@@ -72,6 +72,23 @@ WRITE_TOOLS = {
 }
 _governance = GovernanceMiddleware()
 
+DIRECT_TOOL_REQUESTS = {"search_municode_live", "discover_open_data_layers"}
+TOOL_STATUS_MESSAGES = {
+    "geocode_address": "Resolving address...",
+    "lookup_property_info": "Looking up property record...",
+    "search_zoning_ordinance": "Searching zoning ordinances...",
+    "search_municode_live": "Searching live Municode...",
+    "discover_open_data_layers": "Discovering Open Data layers...",
+    "web_search": "Searching the web...",
+    "create_spreadsheet": "Creating spreadsheet...",
+    "create_document": "Creating document...",
+    "generate_document": "Generating document...",
+    "search_properties": "Searching property records...",
+    "filter_dataset": "Filtering results...",
+    "get_dataset_info": "Checking dataset...",
+    "export_dataset": "Exporting to Google Sheets...",
+}
+
 
 class SessionStore:
     """Bounded in-memory session store with LRU eviction and TTL.
@@ -1016,6 +1033,117 @@ def _get_tools_for_turn(
     return tools
 
 
+_DIRECT_TOOL_RE = re.compile(r"Use the tool\s+`(?P<name>[a-z0-9_]+)`\s+with:", re.IGNORECASE)
+_DIRECT_TOOL_ARG_RE = re.compile(r"^\s*-\s*(?P<key>[a-zA-Z_][\w]*)\s*:\s*(?P<value>.+?)\s*$")
+
+
+def _parse_direct_tool_value(value: str) -> str | float | int | bool | None:
+    stripped = value.strip().rstrip(",")
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        pass
+
+    if re.fullmatch(r"-?\d+", stripped):
+        return int(stripped)
+    if re.fullmatch(r"-?(?:\d+\.\d*|\d*\.\d+)", stripped):
+        return float(stripped)
+    return stripped.strip("\"'")
+
+
+def _extract_direct_tool_request(message: str) -> tuple[str, dict[str, Any]] | None:
+    """Parse explicit frontend tool-card prompts into executable read-only tools."""
+    match = _DIRECT_TOOL_RE.search(message)
+    if not match:
+        return None
+
+    tool_name = match.group("name")
+    if tool_name not in DIRECT_TOOL_REQUESTS:
+        return None
+
+    args: dict[str, Any] = {}
+    for line in message[match.end() :].splitlines():
+        arg_match = _DIRECT_TOOL_ARG_RE.match(line)
+        if not arg_match:
+            if args:
+                break
+            continue
+        args[arg_match.group("key")] = _parse_direct_tool_value(arg_match.group("value"))
+
+    if tool_name == "discover_open_data_layers":
+        county = str(args.get("county") or "").replace(" County", "").strip()
+        lat = args.get("lat")
+        lng = args.get("lng")
+        if not county or not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+            return None
+        return (
+            tool_name,
+            {
+                "county": county,
+                "state": str(args.get("state") or "FL").strip() or "FL",
+                "lat": float(lat),
+                "lng": float(lng),
+            },
+        )
+
+    municipality = str(args.get("municipality") or "").strip()
+    query = str(args.get("query") or "").strip()
+    if not municipality or not query:
+        return None
+    return (tool_name, {"municipality": municipality, "query": query})
+
+
+def _tool_status_from_result(result: str) -> str:
+    try:
+        parsed = json.loads(result)
+    except Exception:
+        return "complete"
+    if isinstance(parsed, dict) and parsed.get("status") == "error":
+        return "error"
+    return "complete"
+
+
+def _direct_tool_fallback_summary(tool_name: str, args: dict[str, Any], result: str) -> str:
+    try:
+        payload = json.loads(result)
+    except Exception:
+        payload = {"status": "success", "raw": result}
+
+    if isinstance(payload, dict) and payload.get("status") == "error":
+        message = payload.get("message") or payload.get("detail") or "The live tool returned an error."
+        return f"I tried `{tool_name}`, but it failed: {message}"
+
+    if tool_name == "discover_open_data_layers" and isinstance(payload, dict):
+        lines = [
+            f"I checked live Open Data layers for {args.get('county', 'the county')} County."
+        ]
+        for key, label in (("parcels_dataset", "Parcels"), ("zoning_dataset", "Zoning")):
+            dataset = payload.get(key)
+            if isinstance(dataset, dict):
+                name = dataset.get("name") or dataset.get("dataset_id") or "dataset"
+                url = dataset.get("url")
+                lines.append(f"- {label}: {name}{f' — {url}' if url else ''}")
+        if len(lines) == 1:
+            lines.append("No parcel or zoning dataset details were returned.")
+        return "\n".join(lines)
+
+    if tool_name == "search_municode_live" and isinstance(payload, dict):
+        results = payload.get("results") if isinstance(payload.get("results"), list) else []
+        lines = [
+            f"I searched live Municode for {args.get('municipality', 'the jurisdiction')} using `{args.get('query', '')}`."
+        ]
+        for row in results[:3]:
+            if isinstance(row, dict):
+                heading = row.get("heading") or "Matching section"
+                snippet = row.get("snippet") or ""
+                lines.append(f"- {heading}: {snippet[:220]}")
+        if len(lines) == 1:
+            lines.append("No matching section snippets were returned.")
+        return "\n".join(lines)
+
+    return f"I ran `{tool_name}` and received:\n\n```json\n{json.dumps(payload, indent=2)[:1800]}\n```"
+
+
 # ---------------------------------------------------------------------------
 # Tool execution
 # ---------------------------------------------------------------------------
@@ -1794,6 +1922,96 @@ async def chat(request: ChatRequest):
                 yield _sse_event("done", {})
                 return
 
+            direct_tool_request = _extract_direct_tool_request(request.message)
+            if direct_tool_request:
+                fn_name, fn_args = direct_tool_request
+                yield _sse_event(
+                    "thinking",
+                    {
+                        "step": "tool_request",
+                        "thoughts": [
+                            f"Running requested tool: {fn_name.replace('_', ' ')}",
+                            "Using the explicit tool arguments from the web client.",
+                        ],
+                    },
+                )
+                yield _sse_event(
+                    "tool_use",
+                    {
+                        "tool": fn_name,
+                        "args": fn_args,
+                        "message": TOOL_STATUS_MESSAGES.get(fn_name, f"Using {fn_name}..."),
+                    },
+                )
+
+                decision = _governance.decide(fn_name)
+                if not decision.allowed:
+                    tool_status = decision.status.value
+                    result = json.dumps({"status": "error", "message": decision.reason})
+                else:
+                    try:
+                        result = await _execute_tool(fn_name, fn_args, session_id=session_id)
+                        tool_status = _tool_status_from_result(result)
+                    except Exception as exc:
+                        logger.exception("Direct tool execution error: %s", exc)
+                        result = json.dumps({"status": "error", "message": str(exc)})
+                        tool_status = "error"
+
+                yield _sse_event(
+                    "tool_result",
+                    {
+                        "tool": fn_name,
+                        "status": tool_status,
+                    },
+                )
+
+                try:
+                    await append_tool_call(
+                        session_id,
+                        tool_name=fn_name,
+                        tool_args=fn_args,
+                        tool_result=result,
+                        status=tool_status,
+                    )
+                except Exception as exc:
+                    logger.warning("Tool call audit write failed: %s", exc)
+
+                summary_messages = messages + [
+                    {
+                        "role": "assistant",
+                        "content": f"Tool `{fn_name}` returned this result:\n\n```json\n{result}\n```",
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            "Summarize the tool result for my original request. Include useful "
+                            "dataset URLs, section headings, snippets, or next checks when they are present. "
+                            "If the tool failed or returned no matches, say what is missing."
+                        ),
+                    },
+                ]
+                try:
+                    final = await call_llm(summary_messages)
+                except Exception as exc:
+                    logger.warning("Direct tool summary LLM call failed: %s", exc)
+                    final = None
+                final_content = final.get("content", "") if final else ""
+                if not final_content:
+                    final_content = _direct_tool_fallback_summary(fn_name, fn_args, result)
+
+                yield _sse_event("token", {"content": final_content})
+                memory.append({"role": "assistant", "content": final_content})
+                try:
+                    await append_chat_message(session_id, "assistant", final_content)
+                except Exception as exc:
+                    logger.warning("Chat transcript write failed: %s", exc)
+
+                if len(memory) > MAX_MEMORY_MESSAGES:
+                    del memory[:-MAX_MEMORY_MESSAGES]
+
+                yield _sse_event("done", {"full_content": final_content})
+                return
+
             # Agent loop — may use tools before responding
             for turn in range(MAX_AGENT_TURNS):
                 turn_tools = _get_tools_for_turn(session_id, request.message, intent)
@@ -1846,27 +2064,12 @@ async def chat(request: ChatRequest):
                         fn_args = {}
 
                     # Tell the frontend a tool is being used
-                    tool_messages = {
-                        "geocode_address": "Resolving address...",
-                        "lookup_property_info": "Looking up property record...",
-                        "search_zoning_ordinance": "Searching zoning ordinances...",
-                        "search_municode_live": "Searching live Municode...",
-                        "discover_open_data_layers": "Discovering Open Data layers...",
-                        "web_search": "Searching the web...",
-                        "create_spreadsheet": "Creating spreadsheet...",
-                        "create_document": "Creating document...",
-                        "generate_document": "Generating document...",
-                        "search_properties": "Searching property records...",
-                        "filter_dataset": "Filtering results...",
-                        "get_dataset_info": "Checking dataset...",
-                        "export_dataset": "Exporting to Google Sheets...",
-                    }
                     yield _sse_event(
                         "tool_use",
                         {
                             "tool": fn_name,
                             "args": fn_args,
-                            "message": tool_messages.get(fn_name, f"Using {fn_name}..."),
+                            "message": TOOL_STATUS_MESSAGES.get(fn_name, f"Using {fn_name}..."),
                         },
                     )
 
@@ -1879,13 +2082,7 @@ async def chat(request: ChatRequest):
                         tool_status = "complete"
                         try:
                             result = await _execute_tool(fn_name, fn_args, session_id=session_id)
-                            # Heuristic: tools generally return JSON with {status: "success"|"error"}
-                            try:
-                                parsed = json.loads(result)
-                                if isinstance(parsed, dict) and parsed.get("status") == "error":
-                                    tool_status = "error"
-                            except Exception:
-                                pass
+                            tool_status = _tool_status_from_result(result)
                         except Exception as exc:
                             logger.exception("Tool execution error: %s", exc)
                             result = json.dumps({"status": "error", "message": str(exc)})
