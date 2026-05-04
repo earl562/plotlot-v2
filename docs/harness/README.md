@@ -88,3 +88,26 @@ Use the pi dev extension Ralph loop (max 50 iters by default):
 - In headless RPC: `scripts/pi-ralph.sh --max 50 -- "<goal>"`
 
 See also: `docs/research/arxiv-topdown-queue.md` for the next papers to review.
+
+## Learnings we are baking into the goal (from `../objective.md` resources)
+
+All URLs listed in the Codex `/goal` objective (`../objective.md`) are mapped to repo-owned notes:
+
+- URL inventory + map: `docs/research/objective-url-map.md` (136 total)
+- arXiv review tracker: `docs/research/arxiv-notes-status.md` (reviewed vs stub)
+
+Condensed takeaways we treat as invariants for PlotLot’s harness:
+
+1. **Repo-owned artifacts are the system of record** (runbooks/skills/evals/logs live in-repo, not in a provider UI):
+   - `docs/research/vendor-notes/openai__harness-engineering.md`
+   - `docs/research/vendor-notes/langchain__anatomy-of-agent-harness.md`
+2. **Skills are procedural memory** with lifecycle + metadata + evaluation, not just ad-hoc prompts:
+   - `docs/research/vendor-notes/techrxiv__176857932_cloudfront.md`
+3. **API-first, adapters second**: build stable internal product APIs; MCP/tool schemas are thin adapters over the same core.
+4. **Middleware boundaries** are where we enforce policy, evidence requirements, and tool-output validation:
+   - `docs/research/vendor-notes/langchain__middleware-customize-harness.md`
+   - `docs/research/arxiv-notes/2604.13630v1.md` (SafeHarness)
+5. **Eval-driven improvement**: harness changes should be hill-climbed against gold sets / offline evals (VeRO-style):
+   - `apps/plotlot/src/plotlot/pipeline/eval_flow.py`
+   - `docs/research/x-notes/tweet__2041927488918413589.md`
+6. **Avoid lock-in**: memory/evidence must be portable and stored in PlotLot’s DB/ledgers (provider state is never authoritative).
