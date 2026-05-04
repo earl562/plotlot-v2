@@ -1,0 +1,1101 @@
+{
+  "source": "../objective.md",
+  "total_urls": 136,
+  "image_refs": [
+    "Pasted image 20260413111144.png",
+    "Pasted image 20260413111601.png"
+  ],
+  "derived_urls": [
+    "https://d197for5662m48.cloudfront.net/documents/publicationstatus/301837/preprint_pdf/30c77607793c78fb0b5a9ef10908536f.pdf"
+  ],
+  "entries": [
+    {
+      "url": "https://arxiv.org/abs/2604.08224",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.08224",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://alexzhang13.github.io/blog/2025/rlm/",
+      "host": "alexzhang13.github.io",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/NousResearch/autoreason/blob/main/paper/autoreason.pdf",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "NousResearch/autoreason",
+      "x_status": null
+    },
+    {
+      "url": "https://x.com/sydneyrunkle/status/2037184580143243751",
+      "host": "x.com",
+      "bucket": "x",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": "2037184580143243751"
+    },
+    {
+      "url": "https://x.com/Vtrivedy10/status/2031408954517971368",
+      "host": "x.com",
+      "bucket": "x",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": "2031408954517971368"
+    },
+    {
+      "url": "https://x.com/zuchka_/status/2042666023405699113",
+      "host": "x.com",
+      "bucket": "x",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": "2042666023405699113"
+    },
+    {
+      "url": "https://x.com/Vtrivedy10/status/2041927488918413589",
+      "host": "x.com",
+      "bucket": "x",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": "2041927488918413589"
+    },
+    {
+      "url": "https://github.com/letta-ai/letta",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "letta-ai/letta",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/HKUDS/OpenHarness",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "HKUDS/OpenHarness",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/emcie-co/parlant",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "emcie-co/parlant",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/lobehub/lobehub",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "lobehub/lobehub",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/langchain-ai/deepagents",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "langchain-ai/deepagents",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/mindfold-ai/Trellis",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "mindfold-ai/Trellis",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/keli-wen/agentic-harness-patterns-skill",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "keli-wen/agentic-harness-patterns-skill",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "x1xhlol/system-prompts-and-models-of-ai-tools",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/anthropics/skills",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "anthropics/skills",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/OpenHands/OpenHands",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "OpenHands/OpenHands",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/bytedance/deer-flow",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "bytedance/deer-flow",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/aaif-goose/goose",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "aaif-goose/goose",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/bytedance/UI-TARS-desktop",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "bytedance/UI-TARS-desktop",
+      "x_status": null
+    },
+    {
+      "url": "https://blog.langchain.com/the-anatomy-of-an-agent-harness/",
+      "host": "blog.langchain.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.28052",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.28052",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.25723",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.25723",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.08590",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.08590",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.07833",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.07833",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.03088",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.03088",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.03610",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.03610",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.00362",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.00362",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.29199",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.29199",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.28088",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.28088",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.26996",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.26996",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.20380",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.20380",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.20075",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.20075",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.19347",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.19347",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.08616",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.08616",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.03329",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.03329",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.16069",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.16069",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.11304",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.11304",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.10971",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.10971",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2509.19349",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2509.19349",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2508.20465",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2508.20465",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "http://arxiv.org/abs/2508.00828",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2508.00828",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2507.18755",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2507.18755",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2408.01667",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2408.01667",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2311.02018",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2311.02018",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.05344",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.05344",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.03212",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.03212",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2603.02239",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.02239",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2512.04535",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2512.04535",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.26778",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.26778",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.02474",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.02474",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.06025",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.06025",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21545",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.21545",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.03192",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.03192",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6170126",
+      "host": "papers.ssrn.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.22148",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.22148",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2601.03204",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.03204",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.10652",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.10652",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2602.22680",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.22680",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.01493",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.01493",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.12430",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.12430",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://www.techrxiv.org/doi/pdf/10.36227/techrxiv.176857932.25697838/v1",
+      "host": "www.techrxiv.org",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21684",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.21684",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.08603",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.08603",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.27813",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.27813",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.10498",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.10498",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.20412",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.20412",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.19672",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.19672",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://ucp.dev/documentation/ucp-and-ap2/",
+      "host": "ucp.dev",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.18897",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.18897",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11394729",
+      "host": "ieeexplore.ieee.org",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.02334",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.02334",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2506.08119",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2506.08119",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.07379",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.07379",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.10338",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.10338",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.08004",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.08004",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.12670",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.12670",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.02176",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.02176",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.19008",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.19008",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.22773",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.22773",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.20867",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.20867",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/html/2512.16301v3",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2512.16301v3",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.02007",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.02007",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.14878",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2602.14878",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.20939",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.20939",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/html/2603.21019v1",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.21019v1",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.18829",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.18829",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.07670",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.07670",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.08670",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.08670",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.08773",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.08773",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.07372",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.07372",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.21123",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2601.21123",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.12658",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.12658",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2509.23206",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2509.23206",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2508.00007",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2508.00007",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2507.23361",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2507.23361",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2504.19413",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2504.19413",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2505.02279",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2505.02279",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2511.07568",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2511.07568",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2512.03627",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2512.03627",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://blog.langchain.com/deep-agents-v0-5/",
+      "host": "blog.langchain.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/AltimateAI/altimate-code",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "AltimateAI/altimate-code",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/math-ai-org/mathcode",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "math-ai-org/mathcode",
+      "x_status": null
+    },
+    {
+      "url": "https://openai.com/index/harness-engineering/",
+      "host": "openai.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.11548",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11548",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://blog.langchain.com/how-middleware-lets-you-customize-your-agent-harness/",
+      "host": "blog.langchain.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13151",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13151",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.12064",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.12064",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11548",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11548",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11535",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11535",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11378",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11378",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.14004",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.14004",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13630",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13630",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13346",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13346",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13282",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13282",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11811",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11811",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.11784",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.11784",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13018v1",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13018v1",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.15034",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.15034",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13759",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13759",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.13318",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.13318",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://www.frontierswe.com/blog",
+      "host": "www.frontierswe.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.12162",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.12162",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.08756",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.08756",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/deepagents/deploy#subagents",
+      "host": "docs.langchain.com",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.10664",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.10664",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.21003",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.21003",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.18071",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.18071",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.05344",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2603.05344",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/pdf/2604.14228",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.14228",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.20779",
+      "host": "arxiv.org",
+      "bucket": "arxiv",
+      "arxiv_id": "2604.20779",
+      "github_repo": null,
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/MoonshotAI/kimi-cli",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "MoonshotAI/kimi-cli",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/badlogic/pi-mono",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "badlogic/pi-mono",
+      "x_status": null
+    },
+    {
+      "url": "https://github.com/anomalyco/opencode",
+      "host": "github.com",
+      "bucket": "github",
+      "arxiv_id": null,
+      "github_repo": "anomalyco/opencode",
+      "x_status": null
+    },
+    {
+      "url": "https://x.com/_lopopolo/status/2045245935228510213",
+      "host": "x.com",
+      "bucket": "x",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": "2045245935228510213"
+    },
+    {
+      "url": "https://d197for5662m48.cloudfront.net/documents/publicationstatus/301837/preprint_pdf/30c77607793c78fb0b5a9ef10908536f.pdf",
+      "host": "d197for5662m48.cloudfront.net",
+      "bucket": "vendor",
+      "arxiv_id": null,
+      "github_repo": null,
+      "x_status": null
+    }
+  ]
+}

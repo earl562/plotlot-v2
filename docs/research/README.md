@@ -17,6 +17,13 @@ Refresh via scripts in `.pi/skills/autoresearch/scripts/`.
 - `obsidian-urls.txt` / `obsidian-urls.json` — all URLs extracted from the Obsidian vault snapshot (with source files).
 - `obsidian-url-map.md` — categorized URL map + counts.
 
+## Objective URL registry
+
+`objective.md` (repo root) is treated as the current goal’s “source of truth” URL list for harness research.
+
+- `objective-urls.txt` / `objective-urls.json` — URLs extracted from `../objective.md` (plus any explicitly added derived URLs during research).
+- `objective-url-map.md` — objective URLs mapped to repo-owned notes (`arxiv-notes/`, `github-notes/`, `vendor-notes/`, `x-notes/`).
+
 ## Query profiles + search backends
 
 - `arxiv-search-profiles/harness-agents.json` — default topic profile for harness engineering / long-horizon / terminal / multi-agent discovery.

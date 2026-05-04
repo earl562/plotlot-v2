@@ -1,8 +1,8 @@
 # GitHub Notes Status
 
-Total: **35**
+Total: **38**
 Reviewed: **5**
-Stub: **30**
+Stub: **33**
 
 ## Reviewed
 
@@ -19,7 +19,9 @@ Stub: **30**
 - [alexzhang13/rlm](docs/research/github-notes/alexzhang13__rlm.md)
 - [AltimateAI/altimate-code](docs/research/github-notes/AltimateAI__altimate-code.md)
 - [amazon-science/sop-bench](docs/research/github-notes/amazon-science__sop-bench.md)
+- [anomalyco/opencode](docs/research/github-notes/anomalyco__opencode.md)
 - [anthropics/skills](docs/research/github-notes/anthropics__skills.md)
+- [badlogic/pi-mono](docs/research/github-notes/badlogic__pi-mono.md)
 - [borislavmavrin/harmonyagent](docs/research/github-notes/borislavmavrin__harmonyagent.md)
 - [bytedance/UI-TARS-desktop](docs/research/github-notes/bytedance__UI-TARS-desktop.md)
 - [chelof100/acp-framework-en](docs/research/github-notes/chelof100__acp-framework-en.md)
@@ -36,6 +38,7 @@ Stub: **30**
 - [lobehub/lobehub](docs/research/github-notes/lobehub__lobehub.md)
 - [math-ai-org/mathcode](docs/research/github-notes/math-ai-org__mathcode.md)
 - [MemTensor/MemRL](docs/research/github-notes/MemTensor__MemRL.md)
+- [MoonshotAI/kimi-cli](docs/research/github-notes/MoonshotAI__kimi-cli.md)
 - [nomic-ai/aec-bench](docs/research/github-notes/nomic-ai__aec-bench.md)
 - [NousResearch/autoreason](docs/research/github-notes/NousResearch__autoreason.md)
 - [OpenHands/OpenHands](docs/research/github-notes/OpenHands__OpenHands.md)
@@ -44,4 +47,3 @@ Stub: **30**
 - [x1xhlol/system-prompts-and-models-of-ai-tools](docs/research/github-notes/x1xhlol__system-prompts-and-models-of-ai-tools.md)
 - [ynulihao/AgentSkillOS](docs/research/github-notes/ynulihao__AgentSkillOS.md)
 - [YurenHao0426/VARS](docs/research/github-notes/YurenHao0426__VARS.md)
-
