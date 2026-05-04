@@ -12,6 +12,7 @@ interface ToolCardDef {
   prompt?: string;
   docType?: string;
   requiresReport?: boolean;
+  requiresLocation?: boolean;
 }
 
 const TOOL_CARDS: ToolCardDef[] = [
@@ -21,6 +22,20 @@ const TOOL_CARDS: ToolCardDef[] = [
     description: "Screen one property for zoning, density, comps & pricing",
     icon: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z",
     action: "analyze",
+  },
+  {
+    id: "open_data_layers",
+    label: "Open Data Layers",
+    description: "Discover parcel + zoning GIS layers (ArcGIS/Hub)",
+    icon: "M4.5 12a7.5 7.5 0 0014.997.08 3 3 0 00-.348-.138 2.5 2.5 0 00-1.86.268 2.5 2.5 0 01-2.2.19 2.5 2.5 0 00-2.35.323 2.5 2.5 0 01-2.35.323 2.5 2.5 0 00-2.35.323 2.5 2.5 0 01-2.2.19 2.5 2.5 0 00-1.86-.268 3 3 0 00-.348.138A7.48 7.48 0 004.5 12z",
+    action: "send_prompt",
+  },
+  {
+    id: "municode_live",
+    label: "Municode Live",
+    description: "Search live Municode headings for zoning sections",
+    icon: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m0 0H9.75m2.25 0h2.25M12 3.75a6 6 0 00-6 6v1.5m6-7.5a6 6 0 016 6v1.5m-6-7.5V.75",
+    action: "send_prompt",
   },
   {
     id: "generate_loi",
@@ -66,6 +81,10 @@ interface ToolCardsProps {
   disabled?: boolean;
   hasReport?: boolean;
   county?: string;
+  municipality?: string;
+  lat?: number | null;
+  lng?: number | null;
+  visibleIds?: string[];
 }
 
 export default function ToolCards({
@@ -75,6 +94,10 @@ export default function ToolCards({
   disabled = false,
   hasReport = false,
   county,
+  municipality,
+  lat,
+  lng,
+  visibleIds,
 }: ToolCardsProps) {
   const handleClick = (card: ToolCardDef) => {
     if (card.action === "analyze") {
@@ -85,6 +108,39 @@ export default function ToolCards({
       let prompt = card.prompt ?? "";
       if (card.id === "search_comps") {
         prompt = `Find comparable sales near this property within a 3-mile radius${county ? ` in ${county}` : " in your area"}`;
+      } else if (card.id === "open_data_layers") {
+        const resolvedCounty = county ? `${county} County` : "the county";
+        if (county && typeof lat === "number" && typeof lng === "number") {
+          prompt = [
+            "Use the tool `discover_open_data_layers` with:",
+            `- county: ${JSON.stringify(county ?? "")}`,
+            "- state: \"FL\"",
+            `- lat: ${lat}`,
+            `- lng: ${lng}`,
+            "",
+            `Return what parcel + zoning GIS layers exist for ${resolvedCounty} near this location, including any dataset URLs.`,
+          ].join("\n");
+        } else {
+          prompt = [
+            "I want to discover parcel + zoning open data layers (ArcGIS/Hub).",
+            "Ask me for the county and a representative lat/lng near the property, then use `discover_open_data_layers`.",
+          ].join("\n");
+        }
+      } else if (card.id === "municode_live") {
+        if (municipality) {
+          prompt = [
+            "Use the tool `search_municode_live` with:",
+            `- municipality: ${JSON.stringify(municipality)}`,
+            "- query: \"setbacks\"",
+            "",
+            "Return the top matching headings + snippets and summarize the rule in plain English.",
+          ].join("\n");
+        } else {
+          prompt = [
+            "I want to search live Municode zoning code.",
+            "Ask me for the municipality/jurisdiction name, then use `search_municode_live` with query \"setbacks\".",
+          ].join("\n");
+        }
       }
       onSendPrompt(prompt);
     }
@@ -92,8 +148,9 @@ export default function ToolCards({
 
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {TOOL_CARDS.map((card) => {
-        const isDisabled = disabled || (card.requiresReport && !hasReport);
+      {(visibleIds ? TOOL_CARDS.filter((card) => visibleIds.includes(card.id)) : TOOL_CARDS).map((card) => {
+        const missingLocation = card.requiresLocation && !(typeof lat === "number" && typeof lng === "number");
+        const isDisabled = disabled || (card.requiresReport && !hasReport) || missingLocation;
 
         return (
           <motion.button
@@ -104,6 +161,7 @@ export default function ToolCards({
             whileTap={!isDisabled ? { scale: 0.97 } : {}}
             transition={spring}
             className="group flex flex-col items-start gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left transition-colors hover:border-amber-300 hover:bg-amber-50/30 disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:bg-[var(--bg-surface)] dark:hover:bg-amber-950/20 sm:p-3.5"
+            data-testid={`tool-card-${card.id}`}
           >
             <svg
               className="h-4 w-4 text-amber-600 transition-colors group-hover:text-amber-500 group-disabled:text-[var(--text-muted)]"
@@ -125,6 +183,11 @@ export default function ToolCards({
             {card.requiresReport && !hasReport && (
               <span className="text-[9px] text-amber-600/70">
                 Analyze a property first
+              </span>
+            )}
+            {card.requiresLocation && hasReport && missingLocation && (
+              <span className="text-[9px] text-amber-600/70">
+                Missing lat/lng
               </span>
             )}
           </motion.button>

@@ -450,6 +450,7 @@ export async function streamChat(
   onTaskEvent?: (event: AgentTaskEvent) => void,
   onBrowserAction?: (event: BrowserActionEvent) => void,
   onReasoning?: (event: ReasoningEvent) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   let response: Response;
   try {
@@ -462,8 +463,10 @@ export async function streamChat(
         report_context: reportContext,
         session_id: sessionId || undefined,
       }),
+      signal,
     });
   } catch {
+    if (signal?.aborted) return;
     onError("Connection failed. Is the backend running?");
     return;
   }
@@ -562,6 +565,7 @@ export async function streamChat(
       }
     }
   } catch {
+    if (signal?.aborted) return;
     onError("Connection interrupted while streaming the chat response.");
     return;
   }
@@ -796,6 +800,43 @@ export interface EvidenceItemData {
   created_at?: string | null;
 }
 
+export interface HarnessRunRequest {
+  workspace_id?: string | null;
+  project_id?: string | null;
+  site_id?: string | null;
+  skill?: string | null;
+  intent?: string | null;
+  prompt: string;
+  payload?: Record<string, unknown>;
+}
+
+export interface HarnessRunResult {
+  status: string;
+  summary: string;
+  data: Record<string, unknown>;
+  evidence_ids: string[];
+  open_questions: string[];
+  next_actions: string[];
+}
+
+export interface McpToolContract {
+  name: string;
+  description: string;
+  risk_class?: string;
+  input_schema: Record<string, unknown>;
+  output_schema?: Record<string, unknown>;
+}
+
+export interface McpToolListResult {
+  tools: McpToolContract[];
+}
+
+export interface McpInvokeResult {
+  status: string;
+  tool: string;
+  result: Record<string, unknown>;
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
@@ -858,4 +899,22 @@ export function createSite(params: {
 
 export function listProjectEvidence(projectId: string): Promise<EvidenceItemData[]> {
   return requestJson<EvidenceItemData[]>(`/api/v1/projects/${projectId}/evidence`);
+}
+
+export function runHarness(params: HarnessRunRequest): Promise<HarnessRunResult> {
+  return requestJson<HarnessRunResult>("/api/v1/harness/run", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+export function listMcpTools(): Promise<McpToolListResult> {
+  return requestJson<McpToolListResult>("/api/v1/mcp/tools");
+}
+
+export function invokeMcpTool(name: string, input: Record<string, unknown>): Promise<McpInvokeResult> {
+  return requestJson<McpInvokeResult>("/api/v1/mcp/invoke", {
+    method: "POST",
+    body: JSON.stringify({ name, input }),
+  });
 }

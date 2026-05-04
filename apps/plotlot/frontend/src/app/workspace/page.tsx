@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, FormEvent, useId, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, FormEvent, useId, type ReactNode, type RefObject } from "react";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItem, fadeUp, springGentle } from "@/lib/motion";
 import ReactMarkdown from "react-markdown";
@@ -20,6 +20,7 @@ import DocumentCanvas from "@/components/DocumentCanvas";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputBar from "@/components/InputBar";
 import ThinkingIndicator from "@/components/ThinkingIndicator";
+import { useToast } from "@/components/Toast";
 import {
   AnalysisError,
   PipelineStatus,
@@ -206,8 +207,14 @@ export default function Home() {
   const [lastSkipSteps, setLastSkipSteps] = useState<string[]>([]);
   const [inputError, setInputError] = useState<string | null>(null);
   const [localSessionId, setLocalSessionId] = useState<string | null>(null);
+  const [editingUserMessageId, setEditingUserMessageId] = useState<string | null>(null);
+  const [editingUserDraft, setEditingUserDraft] = useState("");
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const forceAutoScrollUntilRef = useRef<number>(0);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const { toast } = useToast();
   const idPrefix = useId();
   const msgCounterRef = useRef(0);
   const localSessionIdRef = useRef<string | null>(null);
@@ -215,10 +222,48 @@ export default function Home() {
   const currentReportRef = useRef<ZoningReportData | null>(null);
   const modeRef = useRef<AppMode>("lookup");
   const hasProcessedRef = useRef(false);
+  const chatAbortRef = useRef<AbortController | null>(null);
+  const chatAssistantIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!autoScrollEnabled) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, autoScrollEnabled]);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (Date.now() < forceAutoScrollUntilRef.current) {
+      setAutoScrollEnabled((prev) => (prev ? prev : true));
+      return;
+    }
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const nearBottom = distanceFromBottom < 160;
+    setAutoScrollEnabled((prev) => (prev === nearBottom ? prev : nearBottom));
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    forceAutoScrollUntilRef.current = Date.now() + 1000;
+    setAutoScrollEnabled(true);
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
+  const copyToClipboard = useCallback(
+    async (text: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("Copied to clipboard", "success");
+      } catch {
+        toast("Copy failed", "error");
+      }
+    },
+    [toast],
+  );
 
   // Re-focus input on mount and when switching from welcome to conversation
   const isWelcome = messages.length === 0;
@@ -497,6 +542,7 @@ export default function Home() {
       setIsProcessing(true);
       setInput("");
       setInputError(null);
+      setAutoScrollEnabled(true);
 
       addMessage({ role: "user", content: text.trim() });
 
@@ -530,9 +576,11 @@ export default function Home() {
         toolActivity: [],
         thinkingEvents: [],
       });
+      chatAssistantIdRef.current = assistantId;
+      chatAbortRef.current = new AbortController();
 
       const history: ChatMessageData[] = [
-        ...messages
+        ...messagesRef.current
           .filter((m) => m.role === "user" || (m.role === "assistant" && m.content))
           .slice(-9)
           .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
@@ -609,6 +657,10 @@ export default function Home() {
               }),
             );
           },
+          undefined,
+          undefined,
+          undefined,
+          chatAbortRef.current.signal,
         );
       } catch {
         updateMessage(assistantId, {
@@ -618,8 +670,71 @@ export default function Home() {
       }
 
       setIsProcessing(false);
+      chatAbortRef.current = null;
+      chatAssistantIdRef.current = null;
     },
-    [messages, isProcessing, currentReport, sessionId, mode, addMessage, updateMessage, runAnalysis],
+    [isProcessing, currentReport, sessionId, mode, addMessage, updateMessage, runAnalysis],
+  );
+
+  const stopGenerating = useCallback(() => {
+    const controller = chatAbortRef.current;
+    const assistantId = chatAssistantIdRef.current;
+    if (!controller || !assistantId) return;
+    controller.abort();
+    chatAbortRef.current = null;
+    chatAssistantIdRef.current = null;
+    updateMessage(assistantId, { isStreaming: false });
+    setIsProcessing(false);
+  }, [updateMessage]);
+
+  const beginEditUserMessage = useCallback((messageId: string, content: string) => {
+    setEditingUserMessageId(messageId);
+    setEditingUserDraft(content);
+    toast("Editing prompt", "info");
+  }, [toast]);
+
+  const cancelEditUserMessage = useCallback(() => {
+    setEditingUserMessageId(null);
+    setEditingUserDraft("");
+  }, []);
+
+  const saveEditUserMessage = useCallback(() => {
+    const messageId = editingUserMessageId;
+    const nextText = editingUserDraft.trim();
+    if (!messageId) return;
+    if (!nextText) {
+      toast("Prompt cannot be empty", "error");
+      return;
+    }
+
+    const snapshot = messagesRef.current;
+    const index = snapshot.findIndex((m) => m.id === messageId);
+    if (index < 0) {
+      cancelEditUserMessage();
+      return;
+    }
+
+    // Trim conversation to before the edited prompt, then re-run the prompt.
+    const trimmed = snapshot.slice(0, index);
+    messagesRef.current = trimmed;
+    setMessages(trimmed);
+    cancelEditUserMessage();
+    void sendMessage(nextText);
+  }, [editingUserDraft, editingUserMessageId, cancelEditUserMessage, sendMessage, toast]);
+
+  const retryFromAssistantIndex = useCallback(
+    (assistantIndex: number) => {
+      const snapshot = messagesRef.current;
+      for (let i = assistantIndex - 1; i >= 0; i -= 1) {
+        const candidate = snapshot[i];
+        if (candidate?.role === "user" && candidate.content.trim()) {
+          void sendMessage(candidate.content);
+          return;
+        }
+      }
+      toast("Nothing to retry yet", "info");
+    },
+    [sendMessage, toast],
   );
 
   const handleSave = useCallback(
@@ -972,7 +1087,7 @@ export default function Home() {
               >
                 {mode === "lookup" ? (
                   <AddressAutocomplete
-                    inputRef={inputRef}
+                    inputRef={inputRef as RefObject<HTMLInputElement | null>}
                     value={input}
                     onChange={(v) => { setInput(v); if (inputError) setInputError(null); }}
                     onSelect={(address) => sendMessage(address)}
@@ -980,14 +1095,25 @@ export default function Home() {
                     disabled={isProcessing}
                   />
                 ) : (
-                  <input
-                    ref={inputRef}
-                    type="text"
+                  <textarea
+                    ref={inputRef as RefObject<HTMLTextAreaElement>}
+                    rows={1}
                     value={input}
-                    onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(null); }}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      if (inputError) setInputError(null);
+                      e.currentTarget.style.height = "0px";
+                      e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }}
                     placeholder="Ask about zoning, density, or property data..."
                     disabled={isProcessing}
-                    className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+                    className="min-w-0 flex-1 resize-none bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
                     data-testid="agent-input"
                   />
                 )}
@@ -1032,6 +1158,9 @@ export default function Home() {
                   disabled={isProcessing}
                   hasReport={!!currentReport}
                   county={currentReport?.county}
+                  municipality={currentReport?.municipality}
+                  lat={currentReport?.lat}
+                  lng={currentReport?.lng}
                 />
               )}
             </motion.div>
@@ -1072,11 +1201,16 @@ export default function Home() {
         </button>
       </div>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto pb-52">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto pb-52"
+        data-testid="conversation-scroll"
+      >
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-3 py-4 sm:px-4 sm:py-6 xl:flex-row xl:items-start">
           <div className="min-w-0 flex-1">
             <div className="space-y-4 sm:space-y-6" role="log" aria-live="polite" aria-label="Analysis conversation">
-              {messages.map((msg) => (
+              {messages.map((msg, msgIndex) => (
                 <div key={msg.id} className="animate-fade-up">
               {/* Pipeline progress — inline stepper */}
               {msg.pipelineSteps && msg.pipelineSteps.length > 0 && !msg.report && (
@@ -1198,12 +1332,74 @@ export default function Home() {
                 <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.role === "user" ? (
                     /* User message — right-aligned plain text, no bubble */
-                    <div className="max-w-[90%] text-sm leading-relaxed text-[var(--text-secondary)] sm:max-w-[75%]">
-                      {msg.content}
+                    <div className="max-w-[90%] sm:max-w-[75%]">
+                      {editingUserMessageId === msg.id ? (
+                        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-elevated)]">
+                          <textarea
+                            value={editingUserDraft}
+                            onChange={(e) => setEditingUserDraft(e.target.value)}
+                            rows={3}
+                            className="w-full resize-none bg-transparent text-sm leading-relaxed text-[var(--text-secondary)] focus:outline-none"
+                            data-testid="user-edit-input"
+                            autoFocus
+                          />
+                          <div className="mt-2 flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={cancelEditUserMessage}
+                              className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                              data-testid="user-edit-cancel"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={saveEditUserMessage}
+                              className="rounded-lg bg-[var(--text-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--bg-primary)] hover:opacity-90"
+                              data-testid="user-edit-save"
+                            >
+                              Save &amp; run
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="group text-sm leading-relaxed text-[var(--text-secondary)]">
+                          <div>{msg.content}</div>
+                          {mode === "agent" && (
+                            <div className="mt-1 flex justify-end gap-1.5 text-[10px] font-semibold text-[var(--text-muted)] opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(msg.content)}
+                                className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 hover:text-[var(--text-secondary)]"
+                                aria-label="Copy prompt"
+                                data-testid="user-copy"
+                              >
+                                <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M8 2a2 2 0 00-2 2v1H5a2 2 0 00-2 2v9a2 2 0 002 2h7a2 2 0 002-2v-1h1a2 2 0 002-2V7.414A2 2 0 0016.414 6L13 2.586A2 2 0 0011.586 2H8z" />
+                                </svg>
+                                Copy
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => beginEditUserMessage(msg.id, msg.content)}
+                                className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 hover:text-[var(--text-secondary)] disabled:opacity-40"
+                                aria-label="Edit prompt"
+                                data-testid="user-edit"
+                                disabled={isProcessing}
+                              >
+                                <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.25 8.25a1 1 0 01-.43.263l-3 1a1 1 0 01-1.263-1.263l1-3a1 1 0 01.263-.43l8.25-8.25z" />
+                                </svg>
+                                Edit
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     /* Assistant message — left-aligned with avatar */
-                    <div className="flex items-start gap-2 max-w-[95%] sm:gap-3 sm:max-w-[85%]">
+                    <div className="group flex items-start gap-2 max-w-[95%] sm:gap-3 sm:max-w-[85%]">
                       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-800 text-xs font-black text-white">
                         P
                       </div>
@@ -1229,8 +1425,34 @@ export default function Home() {
                             h2: ({ children }) => <h2 className="mb-2 text-base font-bold text-[var(--text-primary)]">{children}</h2>,
                             h3: ({ children }) => <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)]">{children}</h3>,
                             a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-amber-700 underline hover:text-amber-600">{children}</a>,
-                            code: ({ children }) => <code className="rounded bg-[var(--bg-surface-raised)] px-1.5 py-0.5 text-xs font-mono text-[var(--text-secondary)]">{children}</code>,
-                            pre: ({ children }) => <pre className="mb-2 overflow-x-auto rounded-lg bg-[var(--bg-surface-raised)] p-3 text-xs">{children}</pre>,
+                            pre: ({ children }) => {
+                              const child = Array.isArray(children) ? children[0] : children;
+                              const codeChildren =
+                                child && typeof child === "object" && "props" in child
+                                  ? (child as { props?: { children?: unknown } }).props?.children
+                                  : children;
+                              const codeText = String(codeChildren ?? "").replace(/\n$/, "");
+                              return (
+                                <div className="group relative mb-2">
+                                  <pre className="overflow-x-auto rounded-lg bg-[var(--bg-surface-raised)] p-3 text-xs">
+                                    <code className="font-mono text-[var(--text-secondary)]">{codeText}</code>
+                                  </pre>
+                                  <button
+                                    type="button"
+                                    aria-label="Copy code"
+                                    onClick={() => copyToClipboard(codeText)}
+                                    className="absolute right-2 top-2 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 text-[10px] font-semibold text-[var(--text-muted)] opacity-0 transition-opacity hover:text-[var(--text-secondary)] group-hover:opacity-100"
+                                  >
+                                    Copy
+                                  </button>
+                                </div>
+                              );
+                            },
+                            code: ({ children }) => (
+                              <code className="rounded bg-[var(--bg-surface-raised)] px-1.5 py-0.5 text-xs font-mono text-[var(--text-secondary)]">
+                                {children}
+                              </code>
+                            ),
                             table: ({ children }) => (
                               <div className="my-2 overflow-x-auto rounded-lg border border-[var(--border)]">
                                 <table className="min-w-full text-xs">{children}</table>
@@ -1253,6 +1475,35 @@ export default function Home() {
                             <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse-dot" />
                             <span className="text-xs">Thinking...</span>
                           </span>
+                        )}
+
+                        {!msg.isStreaming && msg.content && (
+                          <div className="mt-2 flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)] opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(msg.content)}
+                              className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 hover:text-[var(--text-secondary)]"
+                              aria-label="Copy response"
+                              data-testid="assistant-copy"
+                            >
+                              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8 2a2 2 0 00-2 2v1H5a2 2 0 00-2 2v9a2 2 0 002 2h7a2 2 0 002-2v-1h1a2 2 0 002-2V7.414A2 2 0 0016.414 6L13 2.586A2 2 0 0011.586 2H8z" />
+                              </svg>
+                              Copy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => retryFromAssistantIndex(msgIndex)}
+                              className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 hover:text-[var(--text-secondary)]"
+                              aria-label="Retry prompt"
+                              data-testid="assistant-retry"
+                            >
+                              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M15.312 11.424a5.5 5.5 0 00-9.17-5.24l-.191.182V4.5a.75.75 0 00-1.5 0v3.25c0 .414.336.75.75.75h3.25a.75.75 0 000-1.5H6.61l.57-.54a4 4 0 016.677 3.814.75.75 0 001.455.39zm.239 1.151a.75.75 0 00-1.455-.39 4 4 0 01-6.676-3.814l.57.54H10a.75.75 0 000-1.5H6.75a.75.75 0 00-.75.75v3.25a.75.75 0 001.5 0v-1.866l.191.182a5.5 5.5 0 009.17 5.24z" clipRule="evenodd" />
+                              </svg>
+                              Retry
+                            </button>
+                          </div>
                         )}
                         {/* Error recovery buttons */}
                         {msg.errorType && !msg.isStreaming && (
@@ -1322,6 +1573,22 @@ export default function Home() {
 
       {/* Bottom area — gradient fade + suggestions + floating input */}
       <div className="absolute bottom-0 left-0 right-0">
+        {!autoScrollEnabled && (
+          <div className="pointer-events-none absolute -top-12 left-0 right-0 flex justify-center">
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-[var(--shadow-elevated)] hover:bg-[var(--bg-surface-raised)]"
+              data-testid="scroll-to-bottom"
+              aria-label="Scroll to latest"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 14a.75.75 0 01-.53-.22l-4-4a.75.75 0 111.06-1.06L10 12.19l3.47-3.47a.75.75 0 111.06 1.06l-4 4A.75.75 0 0110 14z" clipRule="evenodd" />
+              </svg>
+              Jump to latest
+            </button>
+          </div>
+        )}
         {/* Gradient fade */}
         <div className="input-fade-bg h-8 pointer-events-none" />
 
@@ -1357,6 +1624,24 @@ export default function Home() {
             </div>
           )}
 
+          {/* Live tool shortcuts — agent mode */}
+          {mode === "agent" && (
+            <div className="mx-auto mb-3 w-full max-w-3xl px-3 sm:px-0" data-testid="agent-live-tools">
+              <ToolCards
+                onAnalyze={() => inputRef.current?.focus()}
+                onGenerateDoc={() => setDocCanvasOpen(true)}
+                onSendPrompt={sendMessage}
+                disabled={isProcessing}
+                hasReport={!!currentReport}
+                county={currentReport?.county}
+                municipality={currentReport?.municipality}
+                lat={currentReport?.lat}
+                lng={currentReport?.lng}
+                visibleIds={["open_data_layers", "municode_live"]}
+              />
+            </div>
+          )}
+
           {/* Input bar — hidden in lookup mode after report is shown */}
           {!(mode === "lookup" && hasReport) && (
             <div>
@@ -1374,9 +1659,17 @@ export default function Home() {
                     ? "Ask about this property's zoning..."
                     : "Ask about zoning, density, or property data..."
                 }
-                disabled={isProcessing || !!pendingAddress || awaitingApproval}
-                isProcessing={isProcessing}
-              />
+                  disabled={isProcessing || !!pendingAddress || awaitingApproval}
+                  isProcessing={isProcessing}
+                  canStop={
+                    mode === "agent" &&
+                    isProcessing &&
+                    messages.length > 0 &&
+                    messages[messages.length - 1]?.role === "assistant" &&
+                    !!messages[messages.length - 1]?.isStreaming
+                  }
+                  onStop={stopGenerating}
+                />
               {inputError && (
                 <p className="mt-2 px-4 text-xs text-red-500">{inputError}</p>
               )}

@@ -24,14 +24,74 @@ def main() -> None:
     )
     _init_mlflow()
 
-    if len(sys.argv) < 2:
-        print("Usage: plotlot <address>")
+    args = sys.argv[1:]
+    use_harness = False
+    if args and args[0] == "--harness":
+        use_harness = True
+        args = args[1:]
+
+    if not args:
+        print("Usage: plotlot [--harness] <address>")
         print('  Example: plotlot "7940 Plantation Blvd, Miramar, FL"')
+        print('  Example: plotlot --harness "171 NE 209th Ter, Miami, FL 33179"')
         print('  Example: plotlot "171 NE 209th Ter, Miami, FL 33179"')
         sys.exit(1)
 
-    address = " ".join(sys.argv[1:])
-    asyncio.run(_property_lookup(address))
+    address = " ".join(args)
+    if use_harness:
+        asyncio.run(_harness_lookup(address))
+    else:
+        asyncio.run(_property_lookup(address))
+
+
+async def _harness_lookup(address: str) -> None:
+    """Run the first harness skill through the CLI."""
+    from plotlot.harness.bootstrap import build_default_runtime
+    from plotlot.harness.contracts import SkillInput
+
+    print("\nPlotLot Harness Analysis")
+    print(f"{'=' * 50}")
+    print(f"Looking up: {address}\n")
+
+    runtime = build_default_runtime()
+    output = await runtime.run_skill(
+        "zoning_research",
+        SkillInput(prompt=address, payload={"address": address}),
+    )
+
+    if output.status != "success":
+        print(output.summary)
+        for question in output.open_questions:
+            print(f"  - {question}")
+        return
+
+    report = output.data.get("report", {})
+    print(f"Address:      {report.get('formatted_address') or report.get('address') or address}")
+    print(f"Municipality: {report.get('municipality', '')}")
+    print(f"County:       {report.get('county', '')}")
+    if report.get("zoning_district"):
+        print(f"Zoning District: {report['zoning_district']}")
+    if report.get("zoning_description"):
+        print(f"Description:     {report['zoning_description']}")
+    print()
+
+    summary = report.get("summary") or output.summary
+    if summary:
+        print("Summary:")
+        print(f"  {summary}")
+        print()
+
+    allowed_uses = report.get("allowed_uses") or []
+    if allowed_uses:
+        print("Allowed Uses:")
+        for use in allowed_uses[:10]:
+            print(f"  - {use}")
+        print()
+
+    if output.evidence_ids:
+        print(f"Evidence IDs: {', '.join(output.evidence_ids)}")
+    if output.next_actions:
+        print(f"Next Actions: {', '.join(output.next_actions)}")
 
 
 async def _property_lookup(address: str) -> None:

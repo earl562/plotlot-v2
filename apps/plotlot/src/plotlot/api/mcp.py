@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plotlot.api.ordinances import ExtractRulesRequest, extract_rules, search_ordinance_records
+from plotlot.property.hub_discovery import discover_datasets
 from plotlot.storage.db import get_session
 
 router = APIRouter(prefix="/api/v1/mcp", tags=["mcp"])
@@ -27,6 +28,7 @@ MCP_TOOLS: list[dict[str, Any]] = [
     {
         "name": "plotlot.search_ordinance",
         "description": "Search PlotLot's ordinance intelligence index for cited zoning sections.",
+        "risk_class": "read_only",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -36,10 +38,30 @@ MCP_TOOLS: list[dict[str, Any]] = [
             },
             "required": ["municipality", "query"],
         },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "section_id": {"type": "string"},
+                            "section": {"type": "string"},
+                            "title": {"type": "string"},
+                            "text_preview": {"type": "string"},
+                            "municipality": {"type": "string"},
+                            "score": {"type": "number"},
+                        },
+                    },
+                }
+            },
+        },
     },
     {
         "name": "plotlot.get_zoning_rules",
         "description": "Return candidate normalized zoning rules for a zoning code.",
+        "risk_class": "read_only",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -47,6 +69,38 @@ MCP_TOOLS: list[dict[str, Any]] = [
                 "zoning_code": {"type": "string"},
             },
             "required": ["municipality", "zoning_code"],
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "zoning_code": {"type": "string"},
+                "rules": {"type": "array"},
+                "open_questions": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+    },
+    {
+        "name": "plotlot.discover_open_data_layers",
+        "description": "Discover parcel and zoning ArcGIS/Open Data layers for a county and location.",
+        "risk_class": "read_only",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "county": {"type": "string"},
+                "state": {"type": "string"},
+                "lat": {"type": "number"},
+                "lng": {"type": "number"},
+            },
+            "required": ["county", "lat", "lng"],
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "county": {"type": "string"},
+                "state": {"type": "string"},
+                "parcels_dataset": {"type": ["object", "null"]},
+                "zoning_dataset": {"type": ["object", "null"]},
+            },
         },
     },
 ]
@@ -91,5 +145,46 @@ async def invoke_tool(
             session,
         )
         return {"status": "success", "tool": payload.name, "result": result.model_dump()}
+
+    if payload.name == "plotlot.discover_open_data_layers":
+        county = payload.input.get("county")
+        lat = payload.input.get("lat")
+        lng = payload.input.get("lng")
+        if county is None or lat is None or lng is None:
+            raise HTTPException(status_code=422, detail="county, lat, and lng are required")
+
+        state = payload.input.get("state", "FL")
+        parcels_dataset, zoning_dataset = await discover_datasets(
+            float(lat),
+            float(lng),
+            str(county),
+            str(state),
+        )
+
+        def _serialize(dataset: Any) -> dict[str, Any] | None:
+            if dataset is None:
+                return None
+            return {
+                "dataset_id": dataset.dataset_id,
+                "name": dataset.name,
+                "url": dataset.url,
+                "layer_id": dataset.layer_id,
+                "dataset_type": dataset.dataset_type,
+                "county": dataset.county,
+                "state": dataset.state,
+                "field_count": len(dataset.fields),
+                "fields_preview": dataset.fields[:15],
+            }
+
+        return {
+            "status": "success",
+            "tool": payload.name,
+            "result": {
+                "county": str(county),
+                "state": str(state),
+                "parcels_dataset": _serialize(parcels_dataset),
+                "zoning_dataset": _serialize(zoning_dataset),
+            },
+        }
 
     raise HTTPException(status_code=404, detail=f"Unsupported MCP tool: {payload.name}")

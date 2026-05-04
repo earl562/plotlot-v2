@@ -5,8 +5,10 @@ import AddressAutocomplete from "@/components/AddressAutocomplete";
 import ModeToggle from "@/components/ModeToggle";
 import type { AppMode } from "@/components/ModeToggle";
 
+type InputElement = HTMLInputElement | HTMLTextAreaElement;
+
 interface InputBarProps {
-  inputRef: RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<InputElement | null>;
   value: string;
   onChange: (value: string) => void;
   onSubmit: (e: FormEvent) => void;
@@ -16,6 +18,8 @@ interface InputBarProps {
   placeholder?: string;
   disabled?: boolean;
   isProcessing?: boolean;
+  canStop?: boolean;
+  onStop?: () => void;
 }
 
 export default function InputBar({
@@ -29,6 +33,8 @@ export default function InputBar({
   placeholder = "Enter an address or ask a question...",
   disabled = false,
   isProcessing = false,
+  canStop = false,
+  onStop,
 }: InputBarProps) {
   return (
     <div className="mx-auto max-w-3xl">
@@ -39,7 +45,7 @@ export default function InputBar({
         >
           {mode === "lookup" ? (
             <AddressAutocomplete
-              inputRef={inputRef}
+              inputRef={inputRef as RefObject<HTMLInputElement | null>}
               value={value}
               onChange={onChange}
               onSelect={onAddressSelect}
@@ -47,26 +53,47 @@ export default function InputBar({
               disabled={disabled}
             />
           ) : (
-            <input
-              ref={inputRef}
-              type="text"
+            <textarea
+              ref={inputRef as RefObject<HTMLTextAreaElement | null>}
+              rows={1}
               value={value}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={(e) => {
+                onChange(e.target.value);
+                e.currentTarget.style.height = "0px";
+                e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  e.currentTarget.form?.requestSubmit();
+                }
+              }}
               placeholder={placeholder}
               disabled={disabled}
-              className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+              className="min-w-0 flex-1 resize-none bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
               data-testid="agent-input"
             />
           )}
           <ModeToggle mode={mode} onChange={onModeChange} />
           <button
-            type="submit"
-            disabled={!value.trim() || isProcessing}
-            aria-label="Send message"
+            type={canStop ? "button" : "submit"}
+            onClick={
+              canStop
+                ? () => {
+                    onStop?.();
+                  }
+                : undefined
+            }
+            disabled={canStop ? false : !value.trim() || isProcessing}
+            aria-label={canStop ? "Stop generating" : "Send message"}
             data-testid="send-button"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20"
           >
-            {isProcessing ? (
+            {canStop ? (
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 7h10v10H7z" />
+              </svg>
+            ) : isProcessing ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />

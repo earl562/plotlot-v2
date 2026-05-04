@@ -4,6 +4,7 @@ test.describe("Agent chat seamless UX", () => {
   test("keeps focus ready and shows completed tool context after streaming", async ({ page }) => {
     await gotoHome(page);
     await switchToAgent(page);
+    const conversation = page.getByLabel("Analysis conversation");
     await stubAgentChatSse(page, {
       fullContent:
         "Based on the zoning context, review setbacks, density, and parking before underwriting.",
@@ -15,7 +16,7 @@ test.describe("Agent chat seamless UX", () => {
     await page.getByTestId("send-button").click();
 
     await expect(page.getByText("review setbacks")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Used search_zoning_ordinance")).toBeVisible();
+    await expect(conversation.getByText("Used search_zoning_ordinance")).toBeVisible();
     await expect(page.getByTestId("agent-input")).toBeFocused();
   });
 });

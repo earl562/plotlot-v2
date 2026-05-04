@@ -12,6 +12,7 @@ Uses SSE streaming for real-time token delivery + tool status events.
 
 import json
 import logging
+import re
 import time
 import uuid
 from datetime import datetime, timezone
@@ -358,6 +359,64 @@ CHAT_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "search_municode_live",
+            "description": (
+                "Live Municode fallback for ordinance lookups when local indexed ordinance "
+                "search returns weak, stale, or irrelevant results. Resolves the municipality's "
+                "Municode authority, searches likely section headings, and returns live section snippets."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "municipality": {
+                        "type": "string",
+                        "description": "Municipality or jurisdiction name (e.g., 'Fort Lauderdale', 'Miramar')",
+                    },
+                    "query": {
+                        "type": "string",
+                        "description": "What regulation to look up live (e.g., 'RS-8 setbacks density height')",
+                    },
+                },
+                "required": ["municipality", "query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "discover_open_data_layers",
+            "description": (
+                "Live ArcGIS/Open Data dataset discovery. Use this when you need to inspect which "
+                "parcel or zoning layers are available for a county at a given location before making "
+                "a zoning or owner-data claim."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "description": "County name (e.g., 'Miami-Dade', 'Broward', 'Palm Beach')",
+                    },
+                    "state": {
+                        "type": "string",
+                        "description": "Two-letter state code (default FL)",
+                    },
+                    "lat": {
+                        "type": "number",
+                        "description": "Latitude for coverage validation",
+                    },
+                    "lng": {
+                        "type": "number",
+                        "description": "Longitude for coverage validation",
+                    },
+                },
+                "required": ["county", "lat", "lng"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "web_search",
             "description": (
                 "LAST RESORT — ONLY use when search_zoning_ordinance returns nothing "
@@ -663,6 +722,8 @@ CORE_TOOLS = [
         "geocode_address",
         "lookup_property_info",
         "search_zoning_ordinance",
+        "search_municode_live",
+        "discover_open_data_layers",
         "web_search",
         "search_properties",
     }
@@ -1070,6 +1131,117 @@ async def _execute_zoning_search(municipality: str, query: str) -> str:
         return json.dumps({"status": "success", "results": chunks})
 
 
+async def _execute_municode_live_search(municipality: str, query: str) -> str:
+    """Search live Municode sections for a municipality using heading-based matching."""
+    from plotlot.ingestion.discovery import get_municode_configs
+    from plotlot.ingestion.scraper import MunicodeScraper
+
+    try:
+        configs = await get_municode_configs()
+        config = configs.get(municipality.lower().replace("-", "_").replace(" ", "_"))
+        if not config:
+            candidates = [
+                cfg for cfg in configs.values() if cfg.municipality.lower() == municipality.lower()
+            ]
+            config = candidates[0] if candidates else None
+        if not config:
+            return json.dumps(
+                {
+                    "status": "no_results",
+                    "message": f"No live Municode authority found for {municipality}",
+                }
+            )
+
+        scraper = MunicodeScraper(max_concurrent=3)
+        raw_terms = [term.lower() for term in re.findall(r"[a-z0-9-]+", query) if len(term) >= 3]
+        query_terms: list[str] = []
+        for term in raw_terms:
+            query_terms.append(term)
+            if term.endswith("s") and len(term) > 3:
+                query_terms.append(term[:-1])
+
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            leaves = await scraper.walk_toc(client, config, config.zoning_node_id, max_depth=3)
+            ranked = []
+            for leaf in leaves:
+                haystack = f"{leaf.heading} {leaf.parent_heading or ''}".lower()
+                score = sum(1 for term in query_terms if term in haystack)
+                if score > 0:
+                    ranked.append((score, leaf))
+            ranked.sort(key=lambda item: item[0], reverse=True)
+            top = ranked[:3]
+            if not top:
+                return json.dumps(
+                    {
+                        "status": "no_results",
+                        "message": f"No live Municode sections matched '{query}' for {municipality}",
+                    }
+                )
+
+            results = []
+            for score, leaf in top:
+                html = await scraper.get_section_content(client, config, leaf.node_id)
+                snippet = re.sub(r"<[^>]+>", " ", html)
+                snippet = re.sub(r"\s+", " ", snippet).strip()[:800]
+                results.append(
+                    {
+                        "heading": leaf.heading,
+                        "parent_heading": leaf.parent_heading,
+                        "node_id": leaf.node_id,
+                        "score": score,
+                        "snippet": snippet,
+                    }
+                )
+
+        return json.dumps(
+            {
+                "status": "success",
+                "municipality": config.municipality,
+                "source_type": "municode_live",
+                "results": results,
+            }
+        )
+    except Exception as e:
+        logger.warning("Live Municode search failed for %s: %s", municipality, e)
+        return json.dumps({"status": "error", "message": f"Live Municode search failed: {str(e)}"})
+
+
+async def _execute_open_data_discovery(county: str, state: str, lat: float, lng: float) -> str:
+    """Discover live parcel/zoning datasets via ArcGIS Hub for a county/location."""
+    from plotlot.property.hub_discovery import discover_datasets
+
+    try:
+        parcels_ds, zoning_ds = await discover_datasets(lat, lng, county, state or "FL")
+
+        def _serialize(ds: Any) -> dict[str, Any] | None:
+            if not ds:
+                return None
+            return {
+                "dataset_id": ds.dataset_id,
+                "name": ds.name,
+                "url": ds.url,
+                "layer_id": ds.layer_id,
+                "dataset_type": ds.dataset_type,
+                "county": ds.county,
+                "state": ds.state,
+                "field_count": len(ds.fields),
+                "fields_preview": ds.fields[:15],
+            }
+
+        return json.dumps(
+            {
+                "status": "success",
+                "county": county,
+                "state": state or "FL",
+                "parcels_dataset": _serialize(parcels_ds),
+                "zoning_dataset": _serialize(zoning_ds),
+            }
+        )
+    except Exception as e:
+        logger.warning("Open data discovery failed for %s, %s: %s", county, state, e)
+        return json.dumps({"status": "error", "message": f"Open data discovery failed: {str(e)}"})
+
+
 async def _execute_web_search(query: str) -> str:
     """Search the web via Jina.ai Search API."""
     if not settings.jina_api_key:
@@ -1439,6 +1611,18 @@ async def _execute_tool(name: str, args: dict, session_id: str = "") -> str:
             args.get("municipality", ""),
             args.get("query", ""),
         )
+    elif name == "search_municode_live":
+        return await _execute_municode_live_search(
+            args.get("municipality", ""),
+            args.get("query", ""),
+        )
+    elif name == "discover_open_data_layers":
+        return await _execute_open_data_discovery(
+            args.get("county", ""),
+            args.get("state", "FL"),
+            args.get("lat", 0.0),
+            args.get("lng", 0.0),
+        )
     elif name == "web_search":
         return await _execute_web_search(args.get("query", ""))
     elif name == "create_spreadsheet":
@@ -1648,6 +1832,8 @@ async def chat(request: ChatRequest):
                         "geocode_address": "Resolving address...",
                         "lookup_property_info": "Looking up property record...",
                         "search_zoning_ordinance": "Searching zoning ordinances...",
+                        "search_municode_live": "Searching live Municode...",
+                        "discover_open_data_layers": "Discovering Open Data layers...",
                         "web_search": "Searching the web...",
                         "create_spreadsheet": "Creating spreadsheet...",
                         "create_document": "Creating document...",
