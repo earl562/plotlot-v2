@@ -90,6 +90,44 @@ _breakers: dict[str, CircuitBreaker] = {}
 
 
 # ---------------------------------------------------------------------------
+# Recent provider failures — surfaced for user-facing degraded-mode messaging.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ProviderFailure:
+    provider: str
+    error_type: str
+    message: str
+    occurred_at: float
+
+
+_recent_failures: list[ProviderFailure] = []
+
+
+def record_provider_failure(provider: str, exc: Exception) -> None:
+    _recent_failures.append(
+        ProviderFailure(
+            provider=provider,
+            error_type=type(exc).__name__,
+            message=str(exc),
+            occurred_at=time.time(),
+        )
+    )
+    if len(_recent_failures) > 25:
+        del _recent_failures[:-25]
+
+
+def get_recent_provider_failure(prefixes: tuple[str, ...] | None = None) -> ProviderFailure | None:
+    for failure in reversed(_recent_failures):
+        if not prefixes:
+            return failure
+        if any(failure.provider.startswith(prefix) for prefix in prefixes):
+            return failure
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Tool format conversions preserved for compatibility with existing tests.
 # ---------------------------------------------------------------------------
 
@@ -403,6 +441,7 @@ async def _call_openai(
                 }
             )
             retries_used = 0
+            last_transient_exc: Exception | None = None
 
             for attempt in range(MAX_RETRIES):
                 try:
@@ -447,6 +486,7 @@ async def _call_openai(
                         "tool_calls": tool_calls,
                     }
                 except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
+                    last_transient_exc = exc
                     retries_used += 1
                     delay = BASE_DELAY * (2**attempt)
                     logger.warning(
@@ -459,6 +499,7 @@ async def _call_openai(
                     )
                     await asyncio.sleep(delay)
                 except Exception as exc:
+                    record_provider_failure(active_provider_name, exc)
                     logger.error("%s failed: %s: %s", active_provider_name, type(exc).__name__, exc)
                     breaker.record_failure()
                     span.set_outputs(
@@ -467,6 +508,8 @@ async def _call_openai(
                     return None
 
             breaker.record_failure()
+            if last_transient_exc is not None:
+                record_provider_failure(active_provider_name, last_transient_exc)
             span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
             return None
 

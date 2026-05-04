@@ -35,7 +35,7 @@ from plotlot.retrieval.bulk_search import (
     _safe_filter,
 )
 from plotlot.retrieval.google_workspace import create_document, create_spreadsheet
-from plotlot.retrieval.llm import call_llm
+from plotlot.retrieval.llm import call_llm, get_recent_provider_failure
 from plotlot.retrieval.search import hybrid_search
 from plotlot.storage.chat_store import (
     append_chat_message,
@@ -194,6 +194,20 @@ def _llm_unavailable_detail() -> str:
             "Chat is temporarily unavailable because the configured NVIDIA NIM model "
             "returned no usable response. Verify the model slug or try the fallback model."
         )
+
+    recent_failure = get_recent_provider_failure(prefixes=("OpenAI/", "NVIDIA/", "OpenRouter/"))
+    if recent_failure and recent_failure.error_type == "RateLimitError":
+        return (
+            "Chat is temporarily unavailable because the LLM provider is rate-limited. "
+            "Try again shortly, or configure an OpenRouter fallback (OPENROUTER_API_KEY), "
+            "or switch to a smaller OpenAI model (OPENAI_MODEL=gpt-4.1-mini)."
+        )
+    if recent_failure and recent_failure.error_type in {"APITimeoutError", "APIConnectionError"}:
+        return (
+            "Chat is temporarily unavailable because the LLM provider timed out or could not be reached. "
+            "Try again shortly, or configure an OpenRouter fallback (OPENROUTER_API_KEY)."
+        )
+
     return "Chat is temporarily unavailable because the LLM returned an empty response."
 
 
