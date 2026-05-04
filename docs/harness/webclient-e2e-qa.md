@@ -33,6 +33,20 @@ Expected artifacts:
 - `apps/plotlot/frontend/test-results/agent-live-tools-Agent-liv-93989-penData-Municode-live-tools-chromium/01-open-data-tool.png`
 - `apps/plotlot/frontend/test-results/agent-live-tools-Agent-liv-93989-penData-Municode-live-tools-chromium/02-municode-tool.png`
 
+## Manual E2E (browser-use CLI)
+
+If you want interactive/manual clicks with saved screenshots from the terminal:
+
+```bash
+uvx "browser-use[cli]" doctor
+uvx "browser-use[cli]" --session plotlot-e2e open http://127.0.0.1:3000/workspace
+uvx "browser-use[cli]" --session plotlot-e2e state
+uvx "browser-use[cli]" --session plotlot-e2e click <element-index>
+uvx "browser-use[cli]" --session plotlot-e2e screenshot --full /private/tmp/plotlot-e2e.png
+```
+
+Tip: `state` prints interactable element indices, which you can pass to `click`.
+
 ## Backend seam checks (tool contracts + real invocations)
 
 Tool contract inventory:
@@ -71,4 +85,3 @@ If you see errors like:
 - `Failed to connect to browser-use backend "chrome"... native host is installed`
 
 …use the Playwright UI seam test above as the repo-owned fallback evidence, and/or run the web client in a normal browser for manual interaction.
-
