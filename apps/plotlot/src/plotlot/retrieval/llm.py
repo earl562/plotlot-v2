@@ -37,6 +37,7 @@ BASE_DELAY = 1.0
 DEFAULT_OPENAI_MODEL = "gpt-4.1"
 OPENAI_TIMEOUT_SECONDS = 60.0
 DEFAULT_OPENROUTER_MODEL = "openai/gpt-4.1"
+RATE_LIMIT_FALLBACK_OPENAI_MODEL = "gpt-4.1-mini"
 
 
 # ---------------------------------------------------------------------------
@@ -517,6 +518,21 @@ async def _call_openai(
     primary_result = await _call_model(primary_model, provider_name)
     if primary_result and (primary_result.get("content") or primary_result.get("tool_calls")):
         return primary_result
+
+    if not _using_nvidia_mainline() and primary_model != RATE_LIMIT_FALLBACK_OPENAI_MODEL:
+        recent_failure = get_recent_provider_failure(prefixes=(provider_name,))
+        if recent_failure and recent_failure.error_type == "RateLimitError":
+            fallback_model = RATE_LIMIT_FALLBACK_OPENAI_MODEL
+            logger.warning(
+                "Primary OpenAI model %s rate-limited; retrying with %s",
+                primary_model,
+                fallback_model,
+            )
+            fallback_result = await _call_model(fallback_model, f"OpenAI/{fallback_model}")
+            if fallback_result and (
+                fallback_result.get("content") or fallback_result.get("tool_calls")
+            ):
+                return fallback_result
 
     if _using_nvidia_mainline() and settings.nvidia_fallback_model:
         fallback_model = settings.nvidia_fallback_model

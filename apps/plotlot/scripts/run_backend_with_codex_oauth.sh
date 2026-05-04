@@ -12,6 +12,11 @@ fi
 # Opt-in to loading the Codex OAuth token from ~/.codex/auth.json.
 export PLOTLOT_USE_CODEX_OAUTH=1
 
+# Local dev defaults: Codex OAuth can be rate-limited for larger models.
+# Keep this overrideable by exporting OPENAI_MODEL / OPENAI_REASONING_EFFORT.
+export OPENAI_MODEL="${OPENAI_MODEL:-gpt-4.1-mini}"
+export OPENAI_REASONING_EFFORT="${OPENAI_REASONING_EFFORT:-low}"
+
 if [[ ! -f "${PLOTLOT_CODEX_AUTH_FILE:-$HOME/.codex/auth.json}" ]]; then
   echo "Codex OAuth token file not found. Run ./scripts/login_with_codex_oauth.sh first." >&2
   exit 1
