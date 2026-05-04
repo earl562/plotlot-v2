@@ -167,6 +167,8 @@ export default function BuildingRenderViewer({
         </div>
       ) : currentImage ? (
         <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+          {/* Data URL; Next/Image doesn't add value here. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`data:image/png;base64,${currentImage.image_base64}`}
             alt={`AI-rendered ${VIEW_LABELS[currentImage.view] || currentImage.view} view of ${propType.replace(/_/g, " ")} building`}

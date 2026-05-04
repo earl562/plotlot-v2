@@ -15,9 +15,11 @@ export async function POST(req: Request) {
   fal.config({ credentials: falKey });
 
   try {
+    const coordinates =
+      typeof lat === "number" && typeof lng === "number" ? ` near (${lat}, ${lng})` : "";
     const result = await fal.subscribe("fal-ai/veo3", {
       input: {
-        prompt: `Aerial drone flyover of ${address} in ${municipality}, Florida. Real estate development context, cinematic quality, golden hour lighting with warm amber sky, smooth cinematic camera arc slowly revealing the property and surrounding neighborhood, 8K resolution, professional real estate videography.`,
+        prompt: `Aerial drone flyover of ${address}${coordinates} in ${municipality}, Florida. Real estate development context, cinematic quality, golden hour lighting with warm amber sky, smooth cinematic camera arc slowly revealing the property and surrounding neighborhood, 8K resolution, professional real estate videography.`,
         duration: "8s",
         aspect_ratio: "16:9",
         generate_audio: false,

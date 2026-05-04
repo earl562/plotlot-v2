@@ -159,7 +159,6 @@ export default function PropertyFlyoverVideo({
             animate={{ opacity: 1 }}
             transition={springGentle}
           >
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video
               src={videoUrl}
               autoPlay

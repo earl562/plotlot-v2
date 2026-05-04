@@ -1,3 +1,8 @@
 import { createRouteHandler } from "@fal-ai/server-proxy/nextjs";
 
-export const { GET, POST, PUT } = createRouteHandler();
+const ALLOWED_ENDPOINTS = ["fal-ai/veo3"];
+
+export const { GET, POST, PUT } = createRouteHandler({
+  allowedEndpoints: ALLOWED_ENDPOINTS,
+  allowUnauthorizedRequests: process.env.NODE_ENV !== "production",
+});

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { generateFloorPlan, FloorPlanInput } from "@/lib/floorplan-generator";
+import { generateFloorPlan } from "@/lib/floorplan-generator";
 import FloorPlanSVG from "./FloorPlanSVG";
 
 interface FloorPlanViewerProps {
