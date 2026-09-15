@@ -1,0 +1,61 @@
+name: Land feasibility build and test
+on:
+  push:
+    branches: [feat/cpt-pro-land-feasibility]
+  pull_request:
+    branches: [cpt-pro]
+    paths:
+      - 'plotlot/src/plotlot/land_use/readiness/**'
+      - 'plotlot/src/plotlot/api/readiness.py'
+      - 'plotlot/src/plotlot/api/workspaces.py'
+      - 'plotlot/tests/**readiness*'
+      - 'plotlot/tests/unit/test_readiness*'
+      - 'plotlot/scripts/readiness_demo.py'
+      - '.github/workflows/land-feasibility.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: land-feasibility-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated verification dependencies
+        run: >-
+          python -m pip install 'pydantic>=2,<3' 'fastapi>=0.115,<1'
+          'httpx>=0.27,<1' 'sqlalchemy>=2,<3' 'pytest>=8,<10'
+          'uvicorn>=0.32,<1' 'playwright>=1.50,<2'
+      - name: Compile implementation and run behavioral tests
+        env:
+          PYTHONPATH: plotlot/src
+        run: |
+          mkdir -p .readiness-results
+          python -m compileall -q plotlot/src/plotlot/land_use/readiness plotlot/src/plotlot/api/readiness.py plotlot/scripts/readiness_demo.py
+          python -m pytest -c /dev/null --noconftest plotlot/tests/unit/test_readiness_engine.py plotlot/tests/unit/test_readiness_store.py plotlot/tests/unit/test_readiness_api.py -v --junitxml=.readiness-results/junit.xml
+      - name: Install browser
+        run: python -m playwright install --with-deps chromium
+      - name: Exercise actual browser and preview API
+        env:
+          PYTHONPATH: plotlot/src
+          READINESS_BROWSER_OUTPUT: .readiness-results/browser
+        run: python plotlot/tests/readiness_browser.py
+      - name: Export branch source snapshot
+        if: always()
+        run: |
+          mkdir -p .readiness-results
+          git archive --format=zip HEAD -o .readiness-results/source-snapshot.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: land-feasibility-verification
+          path: .readiness-results/
+          retention-days: 7
