@@ -12,11 +12,13 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
+from plotlot.api.readiness import router as readiness_router
 from plotlot.storage.db import get_session
 from plotlot.storage.models import Project, Site, Workspace
 
 
 router = APIRouter(prefix="/api/v1", tags=["workspace"])
+router.include_router(readiness_router)
 
 
 class WorkspaceCreateRequest(BaseModel):

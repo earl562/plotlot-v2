@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlotLot · Site readiness workbench</title>
+<style nonce="__NONCE__">
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#192831;background:#f3f5f4;font-size:15px;line-height:1.55}
+*{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit}button{cursor:pointer;min-height:42px;border:1px solid #cbd5d0;border-radius:8px;padding:8px 14px;background:white;color:#173b32;font-weight:600}button:hover{background:#edf3ef}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#173f35;color:white;border-color:#173f35}.primary:hover{background:#215645}input,select,textarea{min-width:0;width:100%;border:1px solid #c7d0ca;border-radius:7px;padding:9px 10px;background:#fff;color:#192831}textarea{resize:vertical}label{display:block;font-size:.83rem;font-weight:650;margin:10px 0 5px}input[type=checkbox]{width:auto;margin-right:8px}.check{display:flex;gap:4px;align-items:flex-start;font-weight:450}.check input{margin-top:5px}h1,h2,h3,p{margin-top:0}h1{font-size:2rem;line-height:1.15;letter-spacing:-.035em;margin-bottom:9px}h2{font-size:1.05rem;letter-spacing:-.01em;margin-bottom:10px}h3{font-size:.95rem;margin-bottom:6px}.shell{max-width:1450px;margin:auto;padding:28px 34px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:28px}.brand{font-size:1.15rem;font-weight:800;letter-spacing:-.05em}.pill{font-size:.7rem;letter-spacing:.07em;border:1px solid #cbd7ce;border-radius:30px;padding:4px 10px;background:#fff}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.69rem;font-weight:750;color:#557366;margin-bottom:12px}.muted{color:#61736b}.small{font-size:.8rem}.intro{max-width:790px;margin-bottom:24px}.intro p{color:#53665b}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}.stack{display:grid;gap:18px}.panel{background:#fff;border:1px solid #dce3de;border-radius:13px;padding:23px;min-width:0;box-shadow:0 3px 14px #172e2210}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:15px}.notice{border-left:3px solid #567c64;padding:11px 14px;background:#eaf0eb;white-space:pre-wrap;overflow-wrap:anywhere;margin:18px 0}.warning{background:#fff4dc;border:1px solid #ead6a5;border-radius:8px;padding:12px;font-size:.85rem;color:#674916}.decision{font-size:1.9rem;line-height:1.15;font-weight:800;letter-spacing:-.03em;margin:8px 0 14px}.decision[data-state=hold]{color:#805b13}.decision[data-state=do_not_proceed]{color:#983e35}.decision[data-state=ready_for_review]{color:#225c48}.metrics{display:flex;flex-wrap:wrap;gap:25px;border-block:1px solid #e0e5df;padding:14px 0;margin:17px 0}.metric strong{display:block;font-size:1.35rem}.metric span{font-size:.75rem;color:#61736b}.list{padding:0;list-style:none;margin:0}.list li{padding:14px 0;border-bottom:1px solid #e7ece7;overflow-wrap:anywhere}.list li:last-child{border-bottom:0}.tag{font-size:.69rem;font-weight:700;padding:3px 7px;border-radius:4px;background:#edf1ed;display:inline-block;margin:0 5px 5px 0}.tag[data-status=confirmed_conflict]{background:#fae9e7;color:#873e36}.tag[data-status=contradiction],.tag[data-status=missing_evidence],.tag[data-status=potential_constraint]{background:#fff1d5;color:#805b13}.tag[data-status=supported]{background:#e2eee6;color:#2c6044}.list p{margin:5px 0}.list button{font-size:.75rem;min-height:33px;padding:5px 9px}.rule{height:1px;background:#e3e8e3;margin:22px 0}details{margin-top:15px}summary{cursor:pointer;font-weight:650;color:#3b6151}.code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.76rem;line-height:1.45}.footer{margin-top:24px;color:#627467;font-size:.77rem}.hidden,[hidden]{display:none!important}:focus-visible{outline:3px solid #84ad9b;outline-offset:3px}#notice:empty{display:none}
+@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}.shell{padding:20px 16px 40px}.panel{padding:18px}.row{grid-template-columns:minmax(0,1fr)}h1{font-size:1.7rem}.top{align-items:flex-start}.metrics{gap:18px}.decision{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><div class="brand">PlotLot<span class="muted"> / site readiness</span></div><span class="pill">INTERNAL WORKBENCH · DRAFT</span></header>
+<section class="intro"><div class="eyebrow">Evidence before commitment</div><h1>What is standing between this site<br>and a defensible next decision?</h1><p>Review source records against a defined project. Keep unknowns visible, resolve conflicting evidence, and assign the next diligence action.</p></section>
+<div class="warning"><strong>Structured evidence only.</strong> No external research or raw-PDF extraction is performed here. Source-check flags are your recorded checks, not independent verification by PlotLot. A completed checklist is ready for review, not approved for development.</div>
+<div id="notice" class="notice" role="status" aria-live="polite"></div>
+<div class="grid">
+<div class="stack">
+<section class="panel"><div class="eyebrow">01 / Define the case</div><h2>Site and development scenario</h2>
+<p class="small muted">Use existing site and parcel IDs to save, or local identifiers for an unsaved preview.</p>
+<div class="row"><div><label for="site-id">Site ID</label><input id="site-id" autocomplete="off" placeholder="Site identifier"></div><div><label for="parcel-id">Parcel ID</label><input id="parcel-id" autocomplete="off" placeholder="Parcel / folio"></div></div>
+<div class="row"><div><label for="scenario-id">Scenario ID</label><input id="scenario-id" value="base"></div><div><label for="playbook">Starter checklist</label><select id="playbook"><option value="residential">Residential</option><option value="industrial">Industrial</option><option value="data_center">Data center</option></select></div></div>
+<label for="intended-use">Proposed use</label><input id="intended-use" placeholder="Describe the proposed development">
+<div class="actions"><button id="load-checklist">Load checklist</button><span id="requirements-count" class="small muted">Loading checklist…</span></div>
+<details><summary>See supplied requirements</summary><ul id="requirements-list" class="list small"></ul></details>
+<div class="rule"></div><h3>Test the workflow, not a real property</h3><label for="sample">Synthetic sample</label><select id="sample"><option value="missing">Missing evidence</option><option value="contradiction">Contradictory documents</option><option value="conflict">Confirmed scenario conflict</option><option value="supported">Supported supplied requirements</option></select><div class="actions"><button id="load-sample">Load synthetic sample</button></div>
+</section>
+<section class="panel"><div class="eyebrow">02 / Record evidence</div><h2>Evidence register</h2><p class="small muted">Changing the parcel, scenario, or proposed use does not silently reassign old evidence.</p><ul id="evidence-list" class="list"></ul>
+<details id="add-evidence"><summary>Add a source record</summary>
+<form id="evidence-form">
+<label for="e-requirement">Requirement</label><select id="e-requirement"></select>
+<label for="e-value">Value (true, false, number, or exact text)</label><input id="e-value" placeholder="Leave blank for unknown">
+<div class="row"><div><label for="e-source-kind">Source kind</label><select id="e-source-kind"><option value="professional_report">Professional report</option><option value="official_record">Official record</option><option value="utility_correspondence">Utility correspondence</option><option value="broker_material">Broker material</option><option value="user_note">User note</option></select></div><div><label for="e-date">Source observation date</label><input id="e-date" type="date"></div></div>
+<label for="e-title">Source title</label><input id="e-title" required maxlength="500">
+<div class="row"><div><label for="e-document">Document ID</label><input id="e-document" maxlength="120"></div><div><label for="e-locator">Page / section locator</label><input id="e-locator" maxlength="500"></div></div>
+<label for="e-url">Source URL (optional)</label><input id="e-url" type="url" placeholder="https://…">
+<label for="e-excerpt">Supporting excerpt</label><textarea id="e-excerpt" rows="3" maxlength="4000"></textarea>
+<label class="check"><input id="e-checked" type="checkbox">I checked this record against its cited source. This does not record a professional approval.</label>
+<label class="check"><input id="e-specific" type="checkbox">The finding is site-specific, not only a screening or proximity observation.</label>
+<div class="actions"><button type="submit">Add evidence</button></div>
+</form></details>
+<details id="advanced"><summary>Advanced case JSON / import</summary><p class="small muted">Custom numeric thresholds require explicit units. Existing evidence must stay associated with its original site, scenario, and proposed use.</p><label for="case-json">Structured case</label><textarea id="case-json" rows="14" class="code" spellcheck="false"></textarea><div class="actions"><button id="apply-json">Apply JSON</button><button id="export-case">Export case</button></div><label for="import-file">Import a case JSON file (maximum 2 MB)</label><input id="import-file" type="file" accept="application/json,.json"></details>
+</section>
+</div>
+<div class="stack">
+<section class="panel"><div class="eyebrow">03 / Decision memo</div><div class="actions"><button id="run-review" class="primary">Run review</button><button id="export-memo" disabled>Export memo</button></div>
+<div id="stale-banner" class="warning" hidden>Inputs changed. The memo below is stale until you run the review again.</div>
+<div id="decision" class="decision" aria-live="polite">NOT REVIEWED</div><p id="review-meta" class="small muted">Only the requirements you supply will be evaluated.</p>
+<div class="metrics"><div class="metric"><strong id="supported">—</strong><span>Supported requirements</span></div><div class="metric"><strong id="unresolved">—</strong><span>Unresolved requirements</span></div><div class="metric"><strong id="critical">—</strong><span>Critical unresolved</span></div></div>
+<h2>Findings and risk register</h2><ul id="findings" class="list"><li class="muted">Run a review to see findings.</li></ul><div class="rule"></div><h2>Next diligence actions</h2><ul id="next-actions" class="list"><li class="muted">Actions will include dependencies and an explicit close condition.</li></ul><p id="disclaimer" class="small muted footer"></p>
+</section>
+<section class="panel"><div class="eyebrow">04 / Versioned workspace record</div><h2>Keep the decision traceable</h2><p class="small muted">Saving requires authenticated access to an existing workspace and site. The local demo does not grant that access. A save records a new snapshot; it does not certify the findings.</p><label for="workspace-id">Workspace ID</label><input id="workspace-id" autocomplete="off"><div class="actions"><button id="load-case">Load saved case</button><button id="save-case">Save revision</button><span id="revision" class="small muted">Unsaved case</span></div><ul id="changes" class="list small"></ul></section>
+</div>
+</div>
+<footer class="footer">PlotLot site readiness · No external actions · No automatic professional sign-off · Case data stays in this page until you explicitly save or export it.</footer>
+</main>
+<script nonce="__NONCE__">
+"use strict";
+const $ = id => document.getElementById(id);
+const apiRoot = new URL("../", location.href);
+let state = {site_id:"",parcel_id:"",scenario_id:"base",intended_use:"",requirements:[],evidence:[]};
+let report = null, revision = 0, editVersion = 0, jsonDirty = false;
+const labels = {supported:"Supported",missing_evidence:"Missing evidence",potential_constraint:"Potential constraint",confirmed_conflict:"Confirmed conflict",contradiction:"Contradiction",dependency_blocked:"Dependency blocked"};
+function node(tag,text,className){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n;}
+function notice(text){$("notice").textContent=text;}
+function markDirty(){editVersion++;$("stale-banner").hidden=!report;$("export-memo").disabled=true;}
+function syncJSON(){jsonDirty=false;$("case-json").value=JSON.stringify(state,null,2);}
+function resetRevision(){revision=0;$("revision").textContent="Unsaved case";$("changes").replaceChildren();}
+async function request(path, options={}){
+  let response;
+  try {response=await fetch(new URL(path,apiRoot),{credentials:"same-origin",cache:"no-store",...options});}
+  catch {throw new Error("The API could not be reached. No new result or saved revision is being reported.");}
+  let body;
+  try {body=await response.json();} catch {throw new Error("The API returned an unreadable response. No success is being reported.");}
+  if(!response.ok){const detail=body.detail;throw new Error(Array.isArray(detail)?detail.map(x=>x.loc.join(".")+": "+x.msg).join("\n"):(detail||"Request failed ("+response.status+")"));}
+  return body;
+}
+function renderRequirements(){
+  $("requirements-count").textContent=state.requirements.length+" requirements";
+  $("requirements-list").replaceChildren();$("e-requirement").replaceChildren();
+  for(const r of state.requirements){$("requirements-list").append(node("li",r.label+" · "+(r.critical===false?"Optional":"Critical")));const o=node("option",r.label);o.value=r.id;$("e-requirement").append(o);}
+}
+function renderEvidence(){
+  $("evidence-list").replaceChildren();
+  if(!state.evidence.length){$("evidence-list").append(node("li","No evidence recorded. Missing records remain unresolved.","small muted"));return;}
+  for(const e of state.evidence){
+    const li=node("li");li.append(node("span",e.active===false?"Inactive / superseded":"Active source record","tag"));li.append(node("h3",e.source_title));
+    li.append(node("p",e.requirement_id+" = "+String(e.value)+(e.unit?" "+e.unit:""),"small"));
+    li.append(node("p",[e.document_id||e.source_url||"No source reference",e.locator||"No locator",e.observed_on||"No date"].join(" · "),"small muted"));
+    li.append(node("p",e.excerpt||"No source excerpt recorded.","small"));
+    li.append(node("p","Scope: "+e.parcel_id+" / "+e.scenario_id+" / "+(e.intended_use||"proposed use not recorded"),"small muted"));
+    const b=node("button",e.active===false?"Reactivate record":"Mark inactive");b.type="button";b.addEventListener("click",()=>{e.active=e.active===false;markDirty();renderEvidence();syncJSON();});li.append(b);$("evidence-list").append(li);
+  }
+}
+function installCase(next, reset=true){
+  if(!next||typeof next!=="object"||!Array.isArray(next.requirements)||!Array.isArray(next.evidence))throw new Error("Case JSON must include requirements and evidence arrays.");
+  state=structuredClone(next);
+  for(const [id,key] of [["site-id","site_id"],["parcel-id","parcel_id"],["scenario-id","scenario_id"],["intended-use","intended_use"]])$(id).value=state[key]||"";
+  if(reset)resetRevision();markDirty();renderRequirements();renderEvidence();syncJSON();
+}
+function showReport(next){
+  report=next;$("stale-banner").hidden=true;$("export-memo").disabled=false;
+  $("decision").textContent=next.decision.replaceAll("_"," ").toUpperCase();$("decision").dataset.state=next.decision;
+  $("review-meta").textContent="DRAFT · Evaluated "+next.evaluated_on+" · Supplied requirements only · User-recorded source checks";
+  $("supported").textContent=next.supported_count;$("unresolved").textContent=next.unresolved_count;$("critical").textContent=next.critical_unresolved_count;
+  $("findings").replaceChildren();
+  for(const f of next.findings){const li=node("li"),tag=node("span",labels[f.status]||f.status,"tag");tag.dataset.status=f.status;li.append(tag,node("span",f.critical?"Critical":"Optional","tag"),node("h3",f.label),node("p",f.explanation,"small"));if(f.issues.length)li.append(node("p","Review flags: "+f.issues.join(", "),"small muted"));li.append(node("p","Evidence: "+(f.evidence_ids.join(", ")||"not supplied"),"small muted"));$("findings").append(li);}
+  $("next-actions").replaceChildren();
+  for(const a of next.actions){const li=node("li");li.append(node("span",a.status==="blocked"?"Blocked by prerequisites":"Ready to assign","tag"),node("h3",a.title),node("p","Suggested owner: "+a.suggested_owner,"small"),node("p",a.close_condition,"small muted"));if(a.depends_on.length)li.append(node("p","Depends on: "+a.depends_on.join(", "),"small"));$("next-actions").append(li);}
+  if(!next.actions.length)$("next-actions").append(node("li","No unresolved actions in the supplied checklist. Responsible reviewer acceptance is still required.","small"));
+  $("disclaimer").textContent=next.disclaimer;
+}
+function downloadJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)+"\n"],{type:"application/json"}));const a=node("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+for(const [id,key] of [["site-id","site_id"],["parcel-id","parcel_id"],["scenario-id","scenario_id"],["intended-use","intended_use"]])$(id).addEventListener("input",()=>{state[key]=$(id).value;if(id==="site-id"||id==="parcel-id")resetRevision();markDirty();syncJSON();});
+$("workspace-id").addEventListener("input",()=>{resetRevision();editVersion++;});
+$("case-json").addEventListener("input",()=>{jsonDirty=true;markDirty();});
+$("apply-json").addEventListener("click",()=>{try{installCase(JSON.parse($("case-json").value));notice("Case imported. Run a review to validate the supplied records.");}catch(e){notice("Could not apply case: "+e.message);}});
+$("export-case").addEventListener("click",()=>downloadJSON(state,"plotlot-readiness-case.json"));
+$("export-memo").addEventListener("click",()=>{if(report&&!$("export-memo").disabled)downloadJSON(report,"plotlot-readiness-memo.json");});
+$("import-file").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>2*1024*1024)throw new Error("Maximum import size is 2 MB");installCase(JSON.parse(await file.text()));notice("Case imported. Run review to validate it.");}catch(e){notice("Import failed: "+e.message);}event.target.value="";});
+async function loadChecklist(initial=false){try{if(!initial&&state.evidence.length&&!confirm("Replace this checklist and its evidence? Export the case first to keep a copy."))return;const version=editVersion;const data=await request("readiness/playbooks/"+$("playbook").value);if((initial&&state.requirements.length)||(!initial&&version!==editVersion))return;state.requirements=data.requirements;state.evidence=[];markDirty();renderRequirements();renderEvidence();syncJSON();}catch(e){notice(e.message);}}
+$("load-checklist").addEventListener("click",()=>loadChecklist());
+$("load-sample").addEventListener("click",()=>{
+  const kind=$("sample").value;const sample={site_id:"s1",parcel_id:"p1",scenario_id:"base",intended_use:"Residential development",requirements:[{id:"access",category:"access",label:"Legal access for the proposed development",expected:true,critical:true}],evidence:[]};
+  if(kind!=="missing"){const e={id:"demo-1",requirement_id:"access",site_id:"s1",parcel_id:"p1",scenario_id:"base",intended_use:sample.intended_use,value:kind!=="conflict",source_kind:"professional_report",source_title:"SYNTHETIC DEMO — not property evidence",document_id:"synthetic-demo",locator:"Example page 2",excerpt:"Synthetic source record used only to exercise the workflow.",observed_on:new Date().toISOString().slice(0,10),review_state:"source_checked",screening_only:false};sample.evidence.push(e);if(kind==="contradiction")sample.evidence.push({...e,id:"demo-2",value:false,source_title:"SYNTHETIC DEMO — conflicting record"});}
+  installCase(sample);notice("Synthetic example loaded. This is not a real-property finding.");
+});
+$("evidence-form").addEventListener("submit",event=>{
+  event.preventDefault();try{const r=state.requirements.find(r=>r.id===$("e-requirement").value);if(!r)throw new Error("Choose a requirement first");const raw=$("e-value").value.trim();let value=null;if(raw!==""){if(typeof r.expected==="boolean"){if(!["true","false"].includes(raw.toLowerCase()))throw new Error("Use true or false for this requirement");value=raw.toLowerCase()==="true";}else if(typeof r.expected==="number"){value=Number(raw);if(!Number.isFinite(value))throw new Error("Use a finite numeric value");}else value=raw;}
+    state.evidence.push({id:crypto.randomUUID(),requirement_id:r.id,site_id:state.site_id,parcel_id:state.parcel_id,scenario_id:state.scenario_id,intended_use:state.intended_use,value,unit:r.unit||null,source_kind:$("e-source-kind").value,source_title:$("e-title").value,source_url:$("e-url").value||null,document_id:$("e-document").value||null,locator:$("e-locator").value,excerpt:$("e-excerpt").value,observed_on:$("e-date").value||null,review_state:$("e-checked").checked?"source_checked":"unreviewed",screening_only:!$("e-specific").checked});markDirty();renderEvidence();syncJSON();notice("Source record added. Run review to validate applicability and completeness.");
+  }catch(e){notice(e.message);}
+});
+$("run-review").addEventListener("click",async()=>{
+  if(jsonDirty){notice("Apply your JSON edits before running a review.");return;}
+  const button=$("run-review"),version=editVersion;button.disabled=true;$("export-memo").disabled=true;if(report)$("stale-banner").hidden=false;notice("Reviewing supplied evidence…");
+  try{const next=await request("readiness/preview",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});if(version!==editVersion){notice("Inputs changed during review. Run it again to refresh the memo.");return;}showReport(next);notice("Draft review complete. No external research or professional approval was performed.");}catch(e){notice(e.message);}finally{button.disabled=false;}
+});
+function savedPath(){const workspace=$("workspace-id").value.trim();if(!workspace||!state.site_id)throw new Error("Enter a workspace ID and stored site ID first.");return "workspaces/"+encodeURIComponent(workspace)+"/sites/"+encodeURIComponent(state.site_id)+"/readiness";}
+function showSaved(saved){installCase(saved.case,false);revision=saved.revision;$("revision").textContent="Saved revision "+revision;showReport(saved.report);$("changes").replaceChildren();for(const c of saved.changes)$("changes").append(node("li",(c.requirement_id||c.field)+": "+(c.before||"absent")+" → "+(c.after||"absent")));}
+$("load-case").addEventListener("click",async()=>{const version=editVersion;try{const saved=await request(savedPath());if(version!==editVersion){notice("Inputs changed while loading. Load again when ready.");return;}showSaved(saved);notice("Loaded saved revision "+saved.revision+". Check its evaluation date before relying.");}catch(e){notice(e.message);}});
+$("save-case").addEventListener("click",async()=>{if(jsonDirty){notice("Apply your JSON edits before saving.");return;}const button=$("save-case"),version=editVersion;button.disabled=true;try{const saved=await request(savedPath(),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({case:state,expected_revision:revision})});if(version!==editVersion){notice("Revision "+saved.revision+" was saved, but the page changed during saving. Reload the saved case before another save.");return;}showSaved(saved);notice("Saved revision "+saved.revision+" with an audit snapshot. No professional approval is implied.");}catch(e){notice(e.message);}finally{button.disabled=false;}});
+loadChecklist(true);
+</script>
+</body>
+</html>
