@@ -58,3 +58,45 @@ async def test_local_record_limit_reports_discarded_county_evidence(
     assert tuple(feature.attributes["OBJECTID"] for feature in result.features) == expected_ids
     assert result.partial is expected_partial
     assert bool(result.notes) is expected_partial
+
+
+async def test_short_spatial_page_advances_by_requested_window() -> None:
+    # Given: spatial filtering returns fewer rows than the requested page window.
+    def handler(request: httpx.Request) -> httpx.Response:
+        if not request.url.path.endswith("/query"):
+            return httpx.Response(
+                200,
+                json={
+                    "maxRecordCount": 3,
+                    "objectIdField": "OBJECTID",
+                    "advancedQueryCapabilities": {"supportsPagination": True},
+                    "fields": [{"name": "OBJECTID", "type": "esriFieldTypeOID"}],
+                },
+            )
+        offset = int(request.url.params["resultOffset"])
+        ids = (1, 2) if offset == 0 else (4, 5) if offset == 3 else (2, 4, 5)
+        return httpx.Response(
+            200,
+            json={
+                "features": [{"attributes": {"OBJECTID": value}} for value in ids],
+                "exceededTransferLimit": offset == 0,
+            },
+        )
+
+    # When: the shared SDK crosses both short-page and subsequent-page boundaries.
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        result = await query_arcgis_features(
+            client,
+            ArcGISQuery(
+                layer_url="https://gis.pbcgov.org/arcgis/rest/services/Parcels/PARCEL_INFO/FeatureServer/4",
+                latitude=26.712,
+                longitude=-80.052,
+                radius_miles=3,
+                out_fields=("OBJECTID",),
+                max_records=5,
+            ),
+        )
+
+    # Then: each intended page is consumed without a false repeated-record warning.
+    assert tuple(feature.attributes["OBJECTID"] for feature in result.features) == (1, 2, 4, 5)
+    assert result.partial is False

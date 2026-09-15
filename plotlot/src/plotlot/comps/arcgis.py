@@ -174,6 +174,7 @@ async def query_arcgis_features(
 
     while len(features) < query.max_records:
         remaining = query.max_records - len(features)
+        requested_count = min(page_size, remaining)
         params: dict[str, str | int | float] = {
             "f": "json",
             "where": query.where,
@@ -189,7 +190,7 @@ async def query_arcgis_features(
         }
         if supports_pagination:
             params["resultOffset"] = request_offset
-            params["resultRecordCount"] = min(page_size, remaining)
+            params["resultRecordCount"] = requested_count
             if object_id_field:
                 params["orderByFields"] = f"{object_id_field} ASC"
         try:
@@ -221,7 +222,7 @@ async def query_arcgis_features(
                 seen_records.setdefault(object_id, []).append(feature)
             new_features.append(feature)
         features.extend(new_features[:remaining])
-        request_offset += len(envelope.features)
+        request_offset += requested_count
         exceeded = envelope.exceededTransferLimit or len(new_features) > remaining
         if not supports_pagination or not exceeded or not envelope.features or not new_features:
             break

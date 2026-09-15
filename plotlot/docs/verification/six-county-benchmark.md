@@ -61,6 +61,11 @@ insufficient-data cases before claiming market readiness. San Diego is excluded.
 
 ## Saved live baseline, September 14, 2026
 
+This is the pre-repair baseline. See the later
+[retrieval repair receipt](2026-09-14-retrieval-repair.md) and
+[new raw observations](2026-09-14-retrieval-repair.jsonl) for the bounded
+Miami-Dade query and ArcGIS spatial-page fixes. Approved comps remain zero.
+
 The [raw JSON lines](2026-09-14-six-county-baseline.jsonl) preserve both repetitions
 for each county, including every emitted warning and readiness blocker.
 Miami-Dade, Broward, Palm Beach and Mecklenburg resolved the expected parcel. Lee and Gaston could
