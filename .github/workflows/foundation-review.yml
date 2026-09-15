@@ -1,0 +1,30 @@
+name: Foundation Review Snapshot
+
+on:
+  push:
+    branches: ["codex/plotlot-foundation-20260914"]
+    paths: [".github/workflows/foundation-review.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Archive tracked baseline for isolated review
+        run: |
+          git archive --format=tar.gz --output=foundation-source.tar.gz HEAD
+          git rev-parse HEAD > foundation-commit.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: foundation-review-source
+          path: |
+            foundation-source.tar.gz
+            foundation-commit.txt
+          retention-days: 1
