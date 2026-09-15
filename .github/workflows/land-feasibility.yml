@@ -38,24 +38,24 @@ jobs:
         env:
           PYTHONPATH: plotlot/src
         run: |
-          mkdir -p .readiness-results
+          mkdir -p readiness-results
           python -m compileall -q plotlot/src/plotlot/land_use/readiness plotlot/src/plotlot/api/readiness.py plotlot/scripts/readiness_demo.py
-          python -m pytest -c /dev/null --noconftest plotlot/tests/unit/test_readiness_engine.py plotlot/tests/unit/test_readiness_store.py plotlot/tests/unit/test_readiness_api.py -v --junitxml=.readiness-results/junit.xml
+          python -m pytest -c /dev/null --rootdir=. --noconftest plotlot/tests/unit/test_readiness_engine.py plotlot/tests/unit/test_readiness_store.py plotlot/tests/unit/test_readiness_api.py -v --junitxml=readiness-results/junit.xml
       - name: Install browser
         run: python -m playwright install --with-deps chromium
       - name: Exercise actual browser and preview API
         env:
           PYTHONPATH: plotlot/src
-          READINESS_BROWSER_OUTPUT: .readiness-results/browser
+          READINESS_BROWSER_OUTPUT: readiness-results/browser
         run: python plotlot/tests/readiness_browser.py
       - name: Export branch source snapshot
         if: always()
         run: |
-          mkdir -p .readiness-results
-          git archive --format=zip HEAD -o .readiness-results/source-snapshot.zip
+          mkdir -p readiness-results
+          git archive --format=zip HEAD -o readiness-results/source-snapshot.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: land-feasibility-verification
-          path: .readiness-results/
+          path: readiness-results/
           retention-days: 7

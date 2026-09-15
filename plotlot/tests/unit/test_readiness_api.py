@@ -7,8 +7,8 @@ import pytest
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
-from test_readiness_engine import case_dict
-from test_readiness_store import database  # noqa: F401 -- shared DB fixture
+from .test_readiness_engine import case_dict
+from .test_readiness_store import database  # noqa: F401 -- shared DB fixture
 
 
 def api_module():

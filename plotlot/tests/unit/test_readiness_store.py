@@ -8,7 +8,7 @@ from sqlalchemy import Column, DateTime, JSON, MetaData, String, Table, create_e
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from test_readiness_engine import case_dict, record
+from .test_readiness_engine import case_dict, record
 
 
 def store_module():

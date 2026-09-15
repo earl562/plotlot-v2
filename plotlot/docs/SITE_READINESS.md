@@ -68,7 +68,7 @@ to the supplied input; the saving actor is recorded separately.
 From the repository root:
 
 ```bash
-PYTHONPATH=plotlot/src python -m pytest -c /dev/null --noconftest \
+PYTHONPATH=plotlot/src python -m pytest -c /dev/null --rootdir=. --noconftest \
   plotlot/tests/unit/test_readiness_engine.py \
   plotlot/tests/unit/test_readiness_store.py \
   plotlot/tests/unit/test_readiness_api.py -v
