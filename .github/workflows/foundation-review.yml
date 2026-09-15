@@ -28,3 +28,17 @@ jobs:
             foundation-source.tar.gz
             foundation-commit.txt
           retention-days: 1
+  offline-tooling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Download test tooling without application secrets
+        run: python -m pip download --only-binary=:all: --dest foundation-wheels ruff mypy openai
+      - uses: actions/upload-artifact@v7
+        with:
+          name: foundation-offline-tooling
+          path: foundation-wheels/
+          retention-days: 1
