@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Final
+from datetime import date, datetime, timezone
+from typing import Final, assert_never
 
 import anyio
 import httpx
@@ -24,6 +24,7 @@ from plotlot.comps.models import (
     Qualification,
     SaleEvidence,
 )
+from plotlot.comps.dates import DateWindow
 from plotlot.comps.sources import SourceResult
 
 MIAMI_DADE_SALES_URL: Final = (
@@ -137,12 +138,27 @@ async def fetch_miami_dade_candidates(
     """Fetch Miami-Dade parcel sales without mixing the three transaction slots."""
     if subject.latitude is None or subject.longitude is None:
         return SourceResult((), "unavailable", ("Subject coordinates are required.",), ())
+    window = DateWindow(date.fromisoformat(policy.as_of), policy.months)
+    match subject.category:
+        case "land":
+            land_only = True
+        case "resale" | "new_construction" | "incomplete" | "unknown":
+            land_only = False
+        case unreachable:
+            assert_never(unreachable)
+    where = " OR ".join(
+        f"(DOS_{slot} >= '{window.cutoff:%Y%m%d}' AND DOS_{slot} <= '{window.as_of:%Y%m%d}'"
+        + (f" AND VI_{slot} = 'V'" if land_only else "")
+        + ")"
+        for slot in (1, 2, 3)
+    )
     query = ArcGISQuery(
         layer_url=MIAMI_DADE_SALES_URL,
         latitude=subject.latitude,
         longitude=subject.longitude,
         radius_miles=policy.radius_miles,
         out_fields=_FIELDS,
+        where=where,
         max_records=1000,
     )
     owns_client = client is None
@@ -187,6 +203,10 @@ async def fetch_miami_dade_candidates(
         except ValidationError:
             malformed_records += 1
     notes = list(result.notes)
+    notes.append(
+        f"Parcel search requires a sale slot within {window.cutoff} through {window.as_of}"
+        + (" with its own vacant-sale flag." if land_only else ".")
+    )
     notes.append("Current LOT_SIZE is not used because at-sale lot size is unavailable.")
     if malformed_records:
         notes.append(f"Skipped {malformed_records} malformed Miami-Dade parcel records.")

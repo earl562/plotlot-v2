@@ -23,6 +23,10 @@ class DateWindow:
     as_of: date
     months: int
 
+    @property
+    def cutoff(self) -> date:
+        return _subtract_months(self.as_of, self.months)
+
 
 def _subtract_months(value: date, months: int) -> date:
     month_index = value.year * 12 + value.month - 1 - months
@@ -67,7 +71,7 @@ def assess_sale_date(value: str, precision: DatePrecision, window: DateWindow) -
         return DateAssessment(parsed.value, "future_sale_date")
     if parsed.value.end > window.as_of:
         return DateAssessment(parsed.value, "date_range_straddles_as_of")
-    cutoff = _subtract_months(window.as_of, window.months)
+    cutoff = window.cutoff
     if parsed.value.end < cutoff:
         return DateAssessment(parsed.value, "outside_date_window")
     if parsed.value.start < cutoff <= parsed.value.end:
