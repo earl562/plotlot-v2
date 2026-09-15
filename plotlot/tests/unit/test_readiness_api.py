@@ -8,7 +8,10 @@ from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
 from .test_readiness_engine import case_dict
-from .test_readiness_store import database  # noqa: F401 -- shared DB fixture
+from . import test_readiness_store as store_tests
+
+# Expose the shared fixture without shadowing an imported symbol in test arguments.
+database = store_tests.database
 
 
 def api_module():

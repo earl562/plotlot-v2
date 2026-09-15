@@ -59,3 +59,39 @@ jobs:
           name: land-feasibility-verification
           path: readiness-results/
           retention-days: 7
+  quality-diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: plotlot/uv.lock
+      - name: Install locked project dependencies
+        working-directory: plotlot
+        run: uv sync --frozen --extra dev --extra eval
+      - name: Collect lint, formatting and type-check diagnostics
+        working-directory: plotlot
+        shell: bash
+        run: |
+          mkdir -p ../readiness-quality
+          set +e
+          uv run ruff check src/ tests/ > ../readiness-quality/lint.txt 2>&1
+          lint_status=$?
+          uv run ruff format --diff src/ tests/ > ../readiness-quality/format.patch 2> ../readiness-quality/format.txt
+          format_status=$?
+          uv run mypy src/plotlot/ --no-error-summary > ../readiness-quality/mypy.txt 2>&1
+          mypy_status=$?
+          cat ../readiness-quality/lint.txt ../readiness-quality/format.txt ../readiness-quality/mypy.txt
+          printf 'lint=%s\nformat=%s\nmypy=%s\n' "$lint_status" "$format_status" "$mypy_status" > ../readiness-quality/status.txt
+          test "$lint_status" -eq 0 && test "$format_status" -eq 0 && test "$mypy_status" -eq 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: land-feasibility-quality
+          path: readiness-quality/
+          retention-days: 7
