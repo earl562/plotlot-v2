@@ -144,6 +144,15 @@ class Settings(BaseSettings):
     groq_base_url: str = "https://api.groq.com/openai/v1"
     groq_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
+    # OpenRouter — low-cost/free reliability path. When configured and preferred,
+    # PlotLot tries OpenRouter first and falls back to the primary provider.
+    openrouter_api_key: str = ""
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_model: str = "openrouter/free"
+    openrouter_preferred: bool = True
+    openrouter_http_referer: str = ""
+    openrouter_app_title: str = "PlotLot"
+
     # Jina.ai search
     jina_api_key: str = ""
 
@@ -184,6 +193,11 @@ class Settings(BaseSettings):
             "groq_api_key",
             "groq_base_url",
             "groq_model",
+            "openrouter_api_key",
+            "openrouter_base_url",
+            "openrouter_model",
+            "openrouter_http_referer",
+            "openrouter_app_title",
             "codex_auth_file",
             "openai_oauth_client_id",
             "openai_oauth_authorize_url",
