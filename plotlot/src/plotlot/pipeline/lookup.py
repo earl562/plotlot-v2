@@ -25,6 +25,7 @@ from plotlot.core.types import (
     ZoningReport,
 )
 from plotlot.domain.dimensional_standard import DistrictDimensionalStandard
+from plotlot.config import settings
 from plotlot.domain.claims import Claim, ClaimKind, ClaimOrigin
 from plotlot.observability.tracing import (
     log_dict,
@@ -198,6 +199,14 @@ async def _gather_ordinance_sections(
         return results, "indexed"
 
     if not municipality.strip() or not state.strip():
+        return results, "uncovered"
+
+    if not settings.lookup_auto_ingest:
+        logger.info(
+            "No indexed ordinance coverage for %s, %s; returning partial lookup",
+            municipality,
+            state,
+        )
         return results, "uncovered"
 
     # Guard: don't re-ingest the same place repeatedly (esp. dead sources).
@@ -571,6 +580,12 @@ async def _agentic_analysis(
 ) -> ZoningReport:
     """LLM analysis with tool access for additional searches."""
     from plotlot.retrieval.llm import call_llm
+
+    # No ordinance evidence means there is nothing reliable for the model to
+    # interpret. Return deterministic parcel/zoning facts instead of asking an
+    # LLM to fill gaps.
+    if not search_results:
+        return _build_fallback_report(address, geo, prop_record, [], search_results=[])
 
     # Build context message with all collected data
     context_msg = _build_context_message(
@@ -1393,9 +1408,17 @@ def _build_fallback_report(
         parking_requirements=extracted.get("parking_requirements", ""),
         numeric_params=numeric_params,
         property_record=prop_record,
-        summary=("; ".join(summary_bits) + ". " if summary_bits else "")
-        + "Automated analysis incomplete. Property data and ordinance sections were retrieved — "
-        "see sources below for relevant zoning regulations.",
+        summary=(
+            ("; ".join(summary_bits) + ". " if summary_bits else "")
+            + (
+                "Automated analysis incomplete. Property data and ordinance evidence were "
+                "retrieved — see sources below for relevant zoning regulations."
+                if search_results
+                else "Official property data was retrieved, but PlotLot does not yet have "
+                "indexed ordinance evidence for this district. Dimensional standards remain "
+                "unknown until ordinance coverage is added."
+            )
+        ),
         sources=deduped_sources,
         confidence="low",
         source_refs=_build_source_refs(search_results),
