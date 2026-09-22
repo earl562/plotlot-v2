@@ -103,11 +103,19 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
       {/* Header */}
       <div className="mb-8 text-center">
         <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] sm:text-3xl">
-          Quick Property Analysis
+          What can I build here?
         </h2>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Enter an address to get instant zoning analysis, comparable sales, and development potential
+          Enter an address. PlotLot resolves the parcel, finds the governing zoning, and returns source-backed development constraints.
         </p>
+      </div>
+
+      <div className="mx-auto mb-5 flex max-w-xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-[var(--text-muted)]">
+        <span>1. Resolve parcel</span>
+        <span aria-hidden="true">→</span>
+        <span>2. Verify zoning evidence</span>
+        <span aria-hidden="true">→</span>
+        <span>3. Calculate buildability</span>
       </div>
 
       {/* Search bar */}
@@ -128,7 +136,7 @@ export default function QuickLookup({ onSwitchToChat, mode = "lookup", onModeCha
           <button
             type="submit"
             disabled={!input.trim() || isProcessing}
-            aria-label="Analyze"
+            aria-label="Look up property"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] transition-all hover:opacity-80 disabled:opacity-20 sm:h-9 sm:w-9"
           >
             {isProcessing ? (
