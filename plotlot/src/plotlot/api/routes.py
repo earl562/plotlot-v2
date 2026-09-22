@@ -15,6 +15,7 @@ from fastapi.responses import StreamingResponse
 from plotlot.api.billing import check_analysis_limit
 from plotlot.api.cache import cache_report, get_cached_report
 from plotlot.api.schemas import AnalyzeRequest, ErrorResponse, ZoningReportResponse
+from plotlot.config import settings
 from plotlot.pipeline.lookup import lookup_address
 from plotlot.retrieval.geocode import geocode_address
 from plotlot.retrieval.property import lookup_property
@@ -293,8 +294,9 @@ async def analyze_stream(request: AnalyzeRequest):
             finally:
                 await session.close()
 
-            # ACP: on-demand ingestion when municipality has no indexed data
-            if not search_results:
+            # Optional development-only self-healing. Production lookup returns
+            # partial verified facts rather than blocking on an ingestion job.
+            if not search_results and settings.lookup_auto_ingest:
                 from plotlot.ingestion.acp_coordinator import IngestRequest, run_on_demand_ingestion
 
                 yield _sse_event(
@@ -344,7 +346,11 @@ async def analyze_stream(request: AnalyzeRequest):
                 "status",
                 {
                     "step": "search",
-                    "message": f"Found {len(search_results)} relevant sections",
+                    "message": (
+                        f"Found {len(search_results)} relevant sections"
+                        if search_results
+                        else "Parcel zoning found; ordinance coverage is not indexed yet"
+                    ),
                     "complete": True,
                 },
             )
@@ -355,7 +361,7 @@ async def analyze_stream(request: AnalyzeRequest):
                 "status",
                 {
                     "step": "analysis",
-                    "message": "AI analyzing zoning code...",
+                    "message": "Building source-backed lookup...",
                 },
             )
 
