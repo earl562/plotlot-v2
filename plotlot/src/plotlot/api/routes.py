@@ -273,7 +273,9 @@ async def analyze_stream(request: AnalyzeRequest):
                     "message": "Searching zoning ordinances...",
                 },
             )
-            exact_zone_code = prop_record.zoning_code if prop_record and prop_record.zoning_code else None
+            exact_zone_code = (
+                prop_record.zoning_code if prop_record and prop_record.zoning_code else None
+            )
             search_query = (
                 build_lookup_search_query(exact_zone_code)
                 if exact_zone_code
