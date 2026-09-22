@@ -24,7 +24,7 @@ from plotlot.core.types import PropertyRecord
 from plotlot.ingestion.acp_coordinator import IngestRequest, run_on_demand_ingestion
 from plotlot.pipeline.comps import find_comparables
 from plotlot.pipeline.lookup import lookup_address
-from plotlot.retrieval.search import hybrid_search
+from plotlot.retrieval.search import build_lookup_search_query, hybrid_search
 from plotlot.storage.db import get_session
 from plotlot.storage.models import OrdinanceChunk
 
@@ -52,7 +52,7 @@ mcp = fastmcp.FastMCP(
         "5. When a tool returns an 'error' field, report the error honestly; do not fabricate a "
         "successful-looking answer."
     ),
-    version="2.1.0",
+    version="2.2.0",
 )
 
 
@@ -227,6 +227,7 @@ async def search_zoning(
     municipality: str,
     query: str,
     limit: int = 10,
+    zone_code: str | None = None,
 ) -> dict:
     """Search the indexed zoning ordinance text for a municipality.
 
@@ -238,6 +239,8 @@ async def search_zoning(
         query:        Search query — can be a zone code, question, or keyword
                       (e.g. "RM-3 density", "maximum building height", "setback requirements").
         limit:        Number of results to return (1–25, default 10).
+        zone_code:    Optional exact parcel zoning district. When supplied, PlotLot
+                      pins retrieval to that district while still searching the topic.
 
     Returns:
         List of matching ordinance chunks with section titles, zone codes, and scores.
@@ -247,12 +250,20 @@ async def search_zoning(
 
     session = await get_session()
     try:
-        results = await hybrid_search(session, municipality, query, limit=limit)
+        search_query = build_lookup_search_query(zone_code) if zone_code else query
+        results = await hybrid_search(
+            session,
+            municipality,
+            search_query,
+            limit=limit,
+            zone_code_boost=zone_code,
+        )
     except Exception as exc:
         logger.error("search_zoning failed municipality=%s error=%s", municipality, exc)
         return {
             "municipality": municipality,
             "query": query,
+            "zone_code": zone_code,
             "error": str(exc),
             "results": [],
         }
@@ -262,6 +273,8 @@ async def search_zoning(
     return {
         "municipality": municipality,
         "query": query,
+        "effective_query": search_query,
+        "zone_code": zone_code,
         "result_count": len(results),
         "results": [
             {
