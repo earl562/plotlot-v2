@@ -227,7 +227,7 @@ async def _keyword_only(
         FROM ordinance_chunks
         WHERE {_MUNI_WHERE}
           AND (search_vector @@ plainto_tsquery(:query)
-               OR :zone_code = ANY(zone_codes))
+               OR :exact_zone_code = ANY(zone_codes))
         ORDER BY rank DESC
         LIMIT :limit
     """)
