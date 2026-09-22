@@ -795,11 +795,15 @@ async def _agentic_analysis(
                     tool_span.set_inputs(fn_args)
                     session = await get_session()
                     try:
+                        exact_zone_code = ordinance_code or (
+                            prop_record.zoning_code if prop_record else None
+                        )
                         extra_results = await hybrid_search(
                             session,
                             municipality=fn_args.get("municipality", municipality),
                             zone_code=fn_args.get("query", ""),
                             limit=10,
+                            zone_code_boost=exact_zone_code,
                         )
                     finally:
                         await session.close()
