@@ -43,3 +43,25 @@ class TestLLMFallback:
         assert result == openai_resp
         assert openai_mock.await_count == 1
         assert openrouter_mock.await_count == 0
+
+
+    @pytest.mark.asyncio
+    async def test_openrouter_is_first_when_configured_and_preferred(self):
+        from plotlot.retrieval import llm
+
+        messages = [{"role": "user", "content": "hi"}]
+        openrouter_resp = {"content": "from-free-router", "tool_calls": []}
+        openrouter_mock = AsyncMock(return_value=openrouter_resp)
+        openai_mock = AsyncMock(return_value={"content": "from-openai", "tool_calls": []})
+
+        with (
+            patch.object(llm.settings, "openrouter_api_key", "sk-or-test"),
+            patch.object(llm.settings, "openrouter_preferred", True),
+            patch.object(llm, "_call_openrouter", openrouter_mock),
+            patch.object(llm, "_call_openai", openai_mock),
+        ):
+            result = await llm.call_llm(messages)
+
+        assert result == openrouter_resp
+        assert openrouter_mock.await_count == 1
+        assert openai_mock.await_count == 0
