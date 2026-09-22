@@ -1,5 +1,16 @@
 # EP Engineering Lab — Agent Handoff Document
 
+## PlotLot agent workflow foundation (September 22, 2026)
+
+For work on this branch, start with [the workflow index](docs/agent-workflows/README.md)
+and [feature map](docs/agent-workflows/FEATURE_MAP.md). Repo-owned Codex skills live
+in `.agents/skills/`: `plotlot-verify-app` for actual product checks,
+`plotlot-source-review` for real estate evidence, and `plotlot-comp-review` for
+comparable sales. Zoning and underwriting skills are drafts pending joint review;
+their draft instructions do not establish production readiness. The existing
+handoff below contains dated history, so verify paths and behavior against this
+branch before using its claims or commands.
+
 > **This file is the source of truth for new agents picking up this codebase.**
 > Read it top to bottom before touching any code. It contains diagnosed bugs, session history, and exact next steps.
 
