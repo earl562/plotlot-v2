@@ -253,6 +253,30 @@ def _get_groq_model() -> str:
     return getattr(settings, "groq_model", "") or DEFAULT_GROQ_MODEL
 
 
+def _get_openrouter_token() -> str:
+    return getattr(settings, "openrouter_api_key", "")
+
+
+def _get_openrouter_model() -> str:
+    return getattr(settings, "openrouter_model", "") or "openrouter/free"
+
+
+def _get_openrouter_client() -> AsyncOpenAI:
+    headers: dict[str, str] = {}
+    referer = getattr(settings, "openrouter_http_referer", "")
+    title = getattr(settings, "openrouter_app_title", "")
+    if referer:
+        headers["HTTP-Referer"] = referer
+    if title:
+        headers["X-Title"] = title
+    return AsyncOpenAI(
+        api_key=_get_openrouter_token(),
+        base_url=getattr(settings, "openrouter_base_url", "https://openrouter.ai/api/v1"),
+        timeout=OPENAI_TIMEOUT_SECONDS,
+        default_headers=headers or None,
+    )
+
+
 def _usable_response(result: dict | None) -> bool:
     if not result:
         return False
@@ -647,23 +671,83 @@ async def _call_openrouter(
     temperature: float = 0.1,
     provider_name: str,
 ) -> dict | None:
-    """Backward-compatible fallback hook name.
+    """Call OpenRouter directly using its OpenAI-compatible API.
 
-    Earlier tests and deployments referred to the non-mainline fallback as
-    OpenRouter.  The runtime now routes that fallback through the Groq
-    OpenAI-compatible client, but keeping this seam stable lets tests and
-    integrations patch the fallback without depending on the provider rename.
+    The default model is openrouter/free so development can use the current
+    free-model router while preserving the same tool-call contract as paid models.
+    Empty or unusable responses fail closed and allow the next provider to run.
     """
+    if not _get_openrouter_token():
+        return None
 
-    return await _call_groq(
-        messages,
-        tools=tools,
-        response_format=response_format,
-        max_completion_tokens=max_completion_tokens,
-        temperature=temperature,
-        provider_name=provider_name,
-    )
+    breaker = _get_breaker(provider_name)
+    if not breaker.allow_request():
+        logger.info("Circuit breaker OPEN for %s — skipping", provider_name)
+        return None
 
+    model = _get_openrouter_model()
+    with start_span(name="llm_provider_openrouter", span_type="CHAT_MODEL") as span:
+        span.set_inputs({"provider": provider_name, "model": model, "message_count": len(messages)})
+        retries_used = 0
+        for attempt in range(MAX_RETRIES):
+            try:
+                client = _get_openrouter_client()
+                kwargs: dict = {
+                    "model": cast(Any, model),
+                    "messages": cast(Any, messages),
+                    "temperature": temperature,
+                    "max_completion_tokens": max_completion_tokens,
+                    "parallel_tool_calls": False,
+                }
+                if tools:
+                    kwargs["tools"] = tools
+                    kwargs["tool_choice"] = "auto"
+                if response_format:
+                    kwargs["response_format"] = response_format
+
+                response = await client.chat.completions.create(**kwargs)
+                message = response.choices[0].message
+                tool_calls = _message_to_tool_calls(message)
+                content = (message.content or "").strip()
+                if not tool_calls:
+                    recovered, content = _recover_text_tool_calls(content)
+                    if recovered:
+                        tool_calls = recovered
+                prompt_tokens, completion_tokens = _log_usage("openrouter", response.usage)
+                span.set_outputs({
+                    "has_content": bool(content),
+                    "has_tool_calls": bool(tool_calls),
+                    "retries": retries_used,
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "model": getattr(response, "model", model),
+                })
+                if not content and not tool_calls:
+                    breaker.record_failure()
+                    return None
+                breaker.record_success()
+                return {"content": content, "tool_calls": tool_calls}
+            except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
+                retries_used += 1
+                delay = BASE_DELAY * (2**attempt)
+                logger.warning(
+                    "%s transient error %s (attempt %d/%d), retrying in %.1fs",
+                    provider_name,
+                    type(exc).__name__,
+                    attempt + 1,
+                    MAX_RETRIES,
+                    delay,
+                )
+                await asyncio.sleep(delay)
+            except Exception as exc:
+                logger.error("%s failed: %s: %s", provider_name, type(exc).__name__, exc)
+                breaker.record_failure()
+                span.set_outputs({"error": f"{type(exc).__name__}: {exc}", "retries": retries_used})
+                return None
+
+        breaker.record_failure()
+        span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
+        return None
 
 async def _call_llm_with_fallback(
     messages: list[dict],
@@ -675,7 +759,28 @@ async def _call_llm_with_fallback(
     openai_provider_name: str,
     groq_provider_name: str,
 ) -> dict | None:
-    """Try the primary provider first; fall back to Groq when the primary response is unusable."""
+    """Run the configured reliability chain and return the first usable response.
+
+    OpenRouter is preferred when a key is configured and openrouter_preferred
+    is true. This makes the free router the default development path without
+    preventing OpenAI/NVIDIA or Groq from taking over on rate limits or outages.
+    """
+    openrouter_configured = bool(_get_openrouter_token())
+    prefer_openrouter = openrouter_configured and bool(
+        getattr(settings, "openrouter_preferred", True)
+    )
+
+    if prefer_openrouter:
+        result = await _call_openrouter(
+            messages,
+            tools=tools,
+            response_format=response_format,
+            max_completion_tokens=max_completion_tokens,
+            temperature=temperature,
+            provider_name=f"OpenRouter/{_get_openrouter_model()}",
+        )
+        if _usable_response(result):
+            return result
 
     result = await _call_openai(
         messages,
@@ -688,7 +793,19 @@ async def _call_llm_with_fallback(
     if _usable_response(result):
         return result
 
-    return await _call_openrouter(
+    if openrouter_configured and not prefer_openrouter:
+        result = await _call_openrouter(
+            messages,
+            tools=tools,
+            response_format=response_format,
+            max_completion_tokens=max_completion_tokens,
+            temperature=temperature,
+            provider_name=f"OpenRouter/{_get_openrouter_model()}",
+        )
+        if _usable_response(result):
+            return result
+
+    return await _call_groq(
         messages,
         tools=tools,
         response_format=response_format,
@@ -696,7 +813,6 @@ async def _call_llm_with_fallback(
         temperature=temperature,
         provider_name=groq_provider_name,
     )
-
 
 # ---------------------------------------------------------------------------
 # Agentic mode: call_llm() — returns tool_calls for the agent loop
