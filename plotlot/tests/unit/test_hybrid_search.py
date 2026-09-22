@@ -7,7 +7,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from plotlot.retrieval.search import _hybrid_rrf, _keyword_only, hybrid_search
+from plotlot.retrieval.search import (
+    _hybrid_rrf,
+    _keyword_only,
+    build_lookup_search_query,
+    hybrid_search,
+)
 
 
 def test_hybrid_search_accepts_zone_code_boost_param():
@@ -201,3 +206,32 @@ def test_chat_agent_prompt_does_not_hardcode_whole_area():
     # 'whole area' may appear as an example in context, but the rule itself
     # must cover ambiguous intent generically, not just this one phrase
     assert "ambiguous" in prompt.lower() or "unclear" in prompt.lower()
+
+
+def test_lookup_query_keeps_zone_code_and_complete_intents():
+    query = build_lookup_search_query("RM-3-7")
+    assert query.startswith("RM-3-7 ")
+    for term in ("permitted uses", "density", "setbacks", "height", "floor area ratio", "parking"):
+        assert term in query
+
+
+@pytest.mark.asyncio
+async def test_keyword_only_uses_exact_zone_code_separately_from_semantic_query():
+    mock_session = MagicMock()
+    mock_result = MagicMock()
+    mock_result.fetchall.return_value = []
+    mock_session.execute = AsyncMock(return_value=mock_result)
+
+    query = build_lookup_search_query("RM-3-7")
+    await _keyword_only(
+        session=mock_session,
+        municipality="San Diego",
+        zone_code=query,
+        limit=10,
+        zone_code_boost="RM-3-7",
+    )
+
+    clause, params = mock_session.execute.call_args[0][0], mock_session.execute.call_args[0][1]
+    assert ":exact_zone_code = ANY(zone_codes)" in str(clause)
+    assert params["exact_zone_code"] == "RM-3-7"
+    assert params["query"] == query

@@ -28,6 +28,20 @@ _MUNI_WHERE = (
 )
 
 
+_LOOKUP_INTENT_TERMS = (
+    "permitted uses conditional uses density minimum lot area setbacks "
+    "height lot coverage floor area ratio parking"
+)
+
+
+def build_lookup_search_query(zone_code: str | None) -> str:
+    """Build a retrieval query for the complete quick-lookup answer contract."""
+    code = (zone_code or "").strip()
+    if not code:
+        return _LOOKUP_INTENT_TERMS
+    return f"{code} {_LOOKUP_INTENT_TERMS}"
+
+
 async def hybrid_search(
     session: AsyncSession,
     municipality: str,
@@ -71,7 +85,9 @@ async def hybrid_search(
             )
         else:
             # Fallback: keyword-only when embedding unavailable
-            results = await _keyword_only(session, municipality, zone_code, limit)
+            results = await _keyword_only(
+                session, municipality, zone_code, limit, zone_code_boost=zone_code_boost
+            )
 
         # Log retrieval outputs for replay — top 5 with sections, zone_codes, scores
         top_chunks = [
@@ -131,7 +147,7 @@ async def _hybrid_rrf(
             FROM ordinance_chunks
             WHERE {_MUNI_WHERE}
               AND (search_vector @@ plainto_tsquery(:query)
-                   OR :zone_code = ANY(zone_codes))
+                   OR :exact_zone_code = ANY(zone_codes))
             ORDER BY ts_rank(search_vector, plainto_tsquery(:query)) DESC
             LIMIT :pool
         ),
@@ -166,6 +182,7 @@ async def _hybrid_rrf(
         "municipality": f"%{municipality}%",
         "municipality_raw": municipality,
         "zone_code": zone_code,
+        "exact_zone_code": zone_code_boost or zone_code,
         "query": zone_code,
         "embedding": embedding_str,
         "rrf_k": RRF_K,
@@ -200,6 +217,7 @@ async def _keyword_only(
     municipality: str,
     zone_code: str,
     limit: int,
+    zone_code_boost: str | None = None,
 ) -> list[SearchResult]:
     """Keyword-only fallback when embedding is unavailable."""
     query = text(f"""
@@ -209,7 +227,7 @@ async def _keyword_only(
         FROM ordinance_chunks
         WHERE {_MUNI_WHERE}
           AND (search_vector @@ plainto_tsquery(:query)
-               OR :zone_code = ANY(zone_codes))
+               OR :exact_zone_code = ANY(zone_codes))
         ORDER BY rank DESC
         LIMIT :limit
     """)
@@ -220,6 +238,7 @@ async def _keyword_only(
             "municipality": f"%{municipality}%",
             "municipality_raw": municipality,
             "zone_code": zone_code,
+            "exact_zone_code": zone_code_boost or zone_code,
             "query": zone_code,
             "limit": limit,
         },

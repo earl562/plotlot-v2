@@ -15,10 +15,11 @@ from fastapi.responses import StreamingResponse
 from plotlot.api.billing import check_analysis_limit
 from plotlot.api.cache import cache_report, get_cached_report
 from plotlot.api.schemas import AnalyzeRequest, ErrorResponse, ZoningReportResponse
+from plotlot.config import settings
 from plotlot.pipeline.lookup import lookup_address
 from plotlot.retrieval.geocode import geocode_address
 from plotlot.retrieval.property import lookup_property
-from plotlot.retrieval.search import hybrid_search
+from plotlot.retrieval.search import build_lookup_search_query, hybrid_search
 from plotlot.pipeline.calculator import calculate_max_units, parse_lot_dimensions
 from plotlot.pipeline.lookup import _agentic_analysis, GENERIC_ZONING_QUERY, PIPELINE_VERSION
 from plotlot.observability.tracing import start_run, log_params, log_metrics, set_tag
@@ -273,19 +274,29 @@ async def analyze_stream(request: AnalyzeRequest):
                     "message": "Searching zoning ordinances...",
                 },
             )
+            exact_zone_code = (
+                prop_record.zoning_code if prop_record and prop_record.zoning_code else None
+            )
             search_query = (
-                prop_record.zoning_code
-                if prop_record and prop_record.zoning_code
+                build_lookup_search_query(exact_zone_code)
+                if exact_zone_code
                 else GENERIC_ZONING_QUERY
             )
             session = await get_session()
             try:
-                search_results = await hybrid_search(session, municipality, search_query, limit=15)
+                search_results = await hybrid_search(
+                    session,
+                    municipality,
+                    search_query,
+                    limit=15,
+                    zone_code_boost=exact_zone_code,
+                )
             finally:
                 await session.close()
 
-            # ACP: on-demand ingestion when municipality has no indexed data
-            if not search_results:
+            # Optional development-only self-healing. Production lookup returns
+            # partial verified facts rather than blocking on an ingestion job.
+            if not search_results and settings.lookup_auto_ingest:
                 from plotlot.ingestion.acp_coordinator import IngestRequest, run_on_demand_ingestion
 
                 yield _sse_event(
@@ -309,7 +320,11 @@ async def analyze_stream(request: AnalyzeRequest):
                 session = await get_session()
                 try:
                     search_results = await hybrid_search(
-                        session, municipality, search_query, limit=15
+                        session,
+                        municipality,
+                        search_query,
+                        limit=15,
+                        zone_code_boost=exact_zone_code,
                     )
                 finally:
                     await session.close()
@@ -331,7 +346,11 @@ async def analyze_stream(request: AnalyzeRequest):
                 "status",
                 {
                     "step": "search",
-                    "message": f"Found {len(search_results)} relevant sections",
+                    "message": (
+                        f"Found {len(search_results)} relevant sections"
+                        if search_results
+                        else "Parcel zoning found; ordinance coverage is not indexed yet"
+                    ),
                     "complete": True,
                 },
             )
@@ -342,7 +361,7 @@ async def analyze_stream(request: AnalyzeRequest):
                 "status",
                 {
                     "step": "analysis",
-                    "message": "AI analyzing zoning code...",
+                    "message": "Building source-backed lookup...",
                 },
             )
 

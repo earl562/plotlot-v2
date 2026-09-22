@@ -13,7 +13,9 @@ DDIA patterns applied:
 """
 
 import asyncio
+import hashlib
 import logging
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -184,6 +186,28 @@ def validate_chunks(chunks, embeddings):
     return valid_chunks, valid_embeddings
 
 
+def deduplicate_chunks(chunks):
+    """Drop normalized duplicate ordinance chunks before embedding.
+
+    Scrapers can repeat navigation text, tables, or mirrored sections. Embedding
+    the same content more than once wastes credits and lets duplicates crowd out
+    distinct evidence during retrieval. Keep the first occurrence so provenance
+    remains deterministic.
+    """
+    unique = []
+    seen: set[str] = set()
+    for chunk in chunks:
+        normalized = re.sub(r"\s+", " ", chunk.text).strip().lower()
+        if not normalized:
+            continue
+        digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+        if digest in seen:
+            continue
+        seen.add(digest)
+        unique.append(chunk)
+    return unique
+
+
 # ---------------------------------------------------------------------------
 # Core pipeline functions
 # ---------------------------------------------------------------------------
@@ -319,7 +343,22 @@ async def ingest_municipality(key: str, state: str | None = None) -> int:
                 span.set_outputs({"chunks_stored": 0, "reason": "no_chunks"})
             return 0
 
-        # Step 3: Embed (with retry — HF API can rate-limit)
+        # Step 2.5: Remove duplicate content before spending embedding calls.
+        pre_dedupe_count = len(chunks)
+        chunks = deduplicate_chunks(chunks)
+        dropped_duplicates = pre_dedupe_count - len(chunks)
+        if dropped_duplicates:
+            logger.info(
+                "Removed %d duplicate chunks before embedding",
+                dropped_duplicates,
+            )
+        _safe_log_metrics({"ingest.chunks_deduplicated": dropped_duplicates})
+        if not chunks:
+            if span:
+                span.set_outputs({"chunks_stored": 0, "reason": "all_duplicates"})
+            return 0
+
+        # Step 3: Embed (with retry — provider can rate-limit)
         texts = [c.text for c in chunks]
         logger.info("Embedding %d chunks...", len(texts))
         embeddings = await retry_async(

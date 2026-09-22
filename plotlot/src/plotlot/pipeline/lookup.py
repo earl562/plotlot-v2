@@ -25,6 +25,7 @@ from plotlot.core.types import (
     ZoningReport,
 )
 from plotlot.domain.dimensional_standard import DistrictDimensionalStandard
+from plotlot.config import settings
 from plotlot.domain.claims import Claim, ClaimKind, ClaimOrigin
 from plotlot.observability.tracing import (
     log_dict,
@@ -39,7 +40,7 @@ from plotlot.observability.prompts import get_active_prompt, log_prompt_to_run
 from plotlot.pipeline.calculator import calculate_max_units, calculate_max_gla, parse_lot_dimensions
 from plotlot.retrieval.geocode import geocode_address
 from plotlot.retrieval.property import lookup_property
-from plotlot.retrieval.search import hybrid_search
+from plotlot.retrieval.search import build_lookup_search_query, hybrid_search
 from plotlot.retrieval.zoning_crosswalk import crosswalk_zoning_code
 from plotlot.storage.dimensional_standards import get_dimensional_standard
 from plotlot.storage.db import get_session
@@ -47,7 +48,7 @@ from plotlot.storage.db import get_session
 logger = logging.getLogger(__name__)
 
 MAX_ANALYSIS_TURNS = 6
-PIPELINE_VERSION = "v2.2"
+PIPELINE_VERSION = "v2.3"
 
 # Pipeline result cache — 30min TTL (Care Access: 86% cost reduction with caching)
 _pipeline_cache: dict[str, tuple["ZoningReport", float]] = {}
@@ -198,6 +199,14 @@ async def _gather_ordinance_sections(
         return results, "indexed"
 
     if not municipality.strip() or not state.strip():
+        return results, "uncovered"
+
+    if not settings.lookup_auto_ingest:
+        logger.info(
+            "No indexed ordinance coverage for %s, %s; returning partial lookup",
+            municipality,
+            state,
+        )
         return results, "uncovered"
 
     # Guard: don't re-ingest the same place repeatedly (esp. dead sources).
@@ -351,8 +360,8 @@ async def lookup_address(address: str) -> ZoningReport | None:
             logger.info("Zoning crosswalk: %s", crosswalk.note)
 
         if gis_zoning_code:
-            search_query: str = crosswalk.search_code
             zone_boost: str | None = crosswalk.search_code
+            search_query = build_lookup_search_query(zone_boost)
         else:
             search_query = GENERIC_ZONING_QUERY
             zone_boost = None
@@ -571,6 +580,12 @@ async def _agentic_analysis(
 ) -> ZoningReport:
     """LLM analysis with tool access for additional searches."""
     from plotlot.retrieval.llm import call_llm
+
+    # No ordinance evidence means there is nothing reliable for the model to
+    # interpret. Return deterministic parcel/zoning facts instead of asking an
+    # LLM to fill gaps.
+    if not search_results:
+        return _build_fallback_report(address, geo, prop_record, [], search_results=[])
 
     # Build context message with all collected data
     context_msg = _build_context_message(
@@ -795,11 +810,15 @@ async def _agentic_analysis(
                     tool_span.set_inputs(fn_args)
                     session = await get_session()
                     try:
+                        exact_zone_code = ordinance_code or (
+                            prop_record.zoning_code if prop_record else None
+                        )
                         extra_results = await hybrid_search(
                             session,
                             municipality=fn_args.get("municipality", municipality),
                             zone_code=fn_args.get("query", ""),
                             limit=10,
+                            zone_code_boost=exact_zone_code,
                         )
                     finally:
                         await session.close()
@@ -1389,9 +1408,17 @@ def _build_fallback_report(
         parking_requirements=extracted.get("parking_requirements", ""),
         numeric_params=numeric_params,
         property_record=prop_record,
-        summary=("; ".join(summary_bits) + ". " if summary_bits else "")
-        + "Automated analysis incomplete. Property data and ordinance sections were retrieved — "
-        "see sources below for relevant zoning regulations.",
+        summary=(
+            ("; ".join(summary_bits) + ". " if summary_bits else "")
+            + (
+                "Automated analysis incomplete. Property data and ordinance evidence were "
+                "retrieved — see sources below for relevant zoning regulations."
+                if search_results
+                else "Official property data was retrieved, but PlotLot does not yet have "
+                "indexed ordinance evidence for this district. Dimensional standards remain "
+                "unknown until ordinance coverage is added."
+            )
+        ),
         sources=deduped_sources,
         confidence="low",
         source_refs=_build_source_refs(search_results),
