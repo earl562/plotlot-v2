@@ -153,6 +153,10 @@ class Settings(BaseSettings):
     openrouter_http_referer: str = ""
     openrouter_app_title: str = "PlotLot"
 
+    # Keep user-facing lookup deterministic/fast by default. Ingestion is an
+    # explicit maintenance action unless this is intentionally enabled.
+    lookup_auto_ingest: bool = False
+
     # Jina.ai search
     jina_api_key: str = ""
 
