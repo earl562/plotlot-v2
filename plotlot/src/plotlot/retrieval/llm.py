@@ -687,7 +687,9 @@ async def _call_openrouter(
 
     model = _get_openrouter_model()
     with start_span(name="llm_provider_openrouter", span_type="CHAT_MODEL") as span:
-        span.set_inputs({"provider": provider_name, "model": model, "message_count": len(messages)})
+        span.set_inputs(
+            {"provider": provider_name, "model": model, "message_count": len(messages)}
+        )
         retries_used = 0
         for attempt in range(MAX_RETRIES):
             try:
@@ -714,14 +716,16 @@ async def _call_openrouter(
                     if recovered:
                         tool_calls = recovered
                 prompt_tokens, completion_tokens = _log_usage("openrouter", response.usage)
-                span.set_outputs({
-                    "has_content": bool(content),
-                    "has_tool_calls": bool(tool_calls),
-                    "retries": retries_used,
-                    "prompt_tokens": prompt_tokens,
-                    "completion_tokens": completion_tokens,
-                    "model": getattr(response, "model", model),
-                })
+                span.set_outputs(
+                    {
+                        "has_content": bool(content),
+                        "has_tool_calls": bool(tool_calls),
+                        "retries": retries_used,
+                        "prompt_tokens": prompt_tokens,
+                        "completion_tokens": completion_tokens,
+                        "model": getattr(response, "model", model),
+                    }
+                )
                 if not content and not tool_calls:
                     breaker.record_failure()
                     return None
@@ -748,6 +752,7 @@ async def _call_openrouter(
         breaker.record_failure()
         span.set_outputs({"error": "retry_exhausted", "retries": retries_used})
         return None
+
 
 async def _call_llm_with_fallback(
     messages: list[dict],
