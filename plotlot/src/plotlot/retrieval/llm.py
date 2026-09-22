@@ -687,9 +687,7 @@ async def _call_openrouter(
 
     model = _get_openrouter_model()
     with start_span(name="llm_provider_openrouter", span_type="CHAT_MODEL") as span:
-        span.set_inputs(
-            {"provider": provider_name, "model": model, "message_count": len(messages)}
-        )
+        span.set_inputs({"provider": provider_name, "model": model, "message_count": len(messages)})
         retries_used = 0
         for attempt in range(MAX_RETRIES):
             try:
@@ -818,6 +816,7 @@ async def _call_llm_with_fallback(
         temperature=temperature,
         provider_name=groq_provider_name,
     )
+
 
 # ---------------------------------------------------------------------------
 # Agentic mode: call_llm() — returns tool_calls for the agent loop
