@@ -44,7 +44,6 @@ class TestLLMFallback:
         assert openai_mock.await_count == 1
         assert openrouter_mock.await_count == 0
 
-
     @pytest.mark.asyncio
     async def test_openrouter_is_first_when_configured_and_preferred(self):
         from plotlot.retrieval import llm
