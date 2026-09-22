@@ -39,7 +39,7 @@ from plotlot.observability.prompts import get_active_prompt, log_prompt_to_run
 from plotlot.pipeline.calculator import calculate_max_units, calculate_max_gla, parse_lot_dimensions
 from plotlot.retrieval.geocode import geocode_address
 from plotlot.retrieval.property import lookup_property
-from plotlot.retrieval.search import hybrid_search
+from plotlot.retrieval.search import build_lookup_search_query, hybrid_search
 from plotlot.retrieval.zoning_crosswalk import crosswalk_zoning_code
 from plotlot.storage.dimensional_standards import get_dimensional_standard
 from plotlot.storage.db import get_session
@@ -47,7 +47,7 @@ from plotlot.storage.db import get_session
 logger = logging.getLogger(__name__)
 
 MAX_ANALYSIS_TURNS = 6
-PIPELINE_VERSION = "v2.2"
+PIPELINE_VERSION = "v2.3"
 
 # Pipeline result cache — 30min TTL (Care Access: 86% cost reduction with caching)
 _pipeline_cache: dict[str, tuple["ZoningReport", float]] = {}
@@ -351,8 +351,8 @@ async def lookup_address(address: str) -> ZoningReport | None:
             logger.info("Zoning crosswalk: %s", crosswalk.note)
 
         if gis_zoning_code:
-            search_query: str = crosswalk.search_code
             zone_boost: str | None = crosswalk.search_code
+            search_query = build_lookup_search_query(zone_boost)
         else:
             search_query = GENERIC_ZONING_QUERY
             zone_boost = None
